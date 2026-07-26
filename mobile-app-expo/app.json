@@ -1,16 +1,21 @@
 {
   "expo": {
     "name": "CustomsTrack AI",
-    "slug": "customstrack-ai",
-    "platforms": ["ios", "android"],
+    "slug": "customstrack-ai-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
+    "icon": "./src/assets/logo.png",
     "splash": {
-      "image": "./assets/logo-placeholder.svg",
+      "image": "./src/assets/logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F7F8FA"
+      "backgroundColor": "#FFFFFF"
     },
-    "assetBundlePatterns": ["**/*"]
+    "android": {
+      "package": "cm.douanenav.customstrack"
+    },
+    "plugins": [
+      "@react-native-community/datetimepicker",
+      "expo-font"
+    ]
   }
 }
