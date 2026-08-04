@@ -51,12 +51,12 @@ const AppHeader = ({
         <div>
 
           <strong>
-            CustomsTrack AI
+            DouaneNav
           </strong>
 
 
           <p className="muted">
-            AI Customs Verification System
+            Customs Verification System
           </p>
 
 

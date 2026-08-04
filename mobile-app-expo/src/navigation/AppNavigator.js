@@ -12,7 +12,7 @@ import {
 import LoginScreen from "../screens/LoginScreen.js";
 import DashboardScreen from "../screens/DashboardScreen.js";
 import DeclarationsScreen from "../screens/DeclarationsScreen.js";
-import DeclarationsSearchScreen from "../screens/DeclarationsSearchScreen.js";
+//import DeclarationsSearchScreen from "../screens/DeclarationsSearchScreen.js";
 import DeclarationDetailsScreen from "../screens/DeclarationDetailsScreen.js";
 import DestinationMapScreen from "../screens/DestinationMapScreen.js";
 import InspectionScreen from "../screens/InspectionScreen.js";
@@ -21,7 +21,7 @@ import MoreScreen from "../screens/MoreScreen.js";
 import AIAnalysisScreen from "../screens/AIAnalysisScreen.js";
 import SyncStatusScreen from "../screens/SyncStatusScreen.js";
 import ProfileScreen from "../screens/ProfileScreen.js";
-
+import ForgotPasswordScreen from "../screens/ForgotPasswordScreen.js";
 
 const Stack =
     createNativeStackNavigator();
@@ -51,7 +51,11 @@ export default function AppNavigator(){
 
 
             >
+                <Stack.Screen
+                    name="ForgotPassword"
 
+                    component={ForgotPasswordScreen}
+                />
 
 
                 <Stack.Screen
@@ -61,10 +65,6 @@ export default function AppNavigator(){
                     component={LoginScreen}
 
                 />
-
-
-
-
 
                 <Stack.Screen
 
@@ -86,22 +86,7 @@ export default function AppNavigator(){
 
                 />
 
-
-
-
-
-                <Stack.Screen
-
-                    name="DeclarationsSearch"
-
-                    component={DeclarationsSearchScreen}
-
-                />
-
-
-
-
-
+            
                 <Stack.Screen
 
                     name="DeclarationDetails"

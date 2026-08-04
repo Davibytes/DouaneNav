@@ -64,7 +64,7 @@ const Sidebar = () => {
     <aside className="sidebar">
 
       <h2 className="sidebar-title">
-        CustomsTrack AI
+        DouaneNav
       </h2>
 
       <div className="language-toggle">

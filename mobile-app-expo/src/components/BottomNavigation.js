@@ -1,8 +1,26 @@
+import React from "react";
+
+
 import {
     View,
     Text,
     TouchableOpacity
 } from "react-native";
+
+
+import {
+    MaterialIcons
+} from "@expo/vector-icons";
+
+
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+
+import {
+    translations
+} from "../i18n/index.js";
 
 
 import styles from "../styles/styles.js";
@@ -19,144 +37,236 @@ export default function BottomNavigation({
 }){
 
 
+    const {
+        language
+    } = useLanguage();
+
+
+
+    const t =
+        translations[language];
+
+
+
+
     const tabs = [
 
         {
+
             name:"Dashboard",
-            label:"Home",
-            icon:"⌂"
+
+            label:t.dashboard,
+
+            icon:"dashboard"
+
         },
 
-
         {
+
             name:"Declarations",
-            label:"Decl.",
-            icon:"≣"
+
+            label:t.declarations,
+
+            icon:"description"
+
         },
 
-
         {
+
             name:"Inspection",
-            label:"Inspect",
-            icon:"✓"
+
+            label:t.inspection,
+
+            icon:"fact-check"
+
         },
 
-
         {
+
             name:"DestinationMap",
-            label:"Map",
-            icon:"⌖"
+
+            label:t.map,
+
+            icon:"place"
+
         },
 
-
         {
+
             name:"More",
-            label:"More",
-            icon:"⋮"
+
+            label:t.more,
+
+            icon:"menu"
+
         }
 
     ];
 
 
 
+
+
     return (
 
         <View
+
             style={
                 styles.bottomNavigation
             }
+
         >
 
+
+
             {
+
                 tabs.map((tab)=>(
+
 
                     <TouchableOpacity
 
-                        key={tab.name}
+
+                        key={
+                            tab.name
+                        }
+
 
                         style={
                             styles.bottomNavigationItem
                         }
 
 
+                        activeOpacity={0.8}
+
+
                         onPress={()=>{
+
 
                             if(tab.name !== active){
 
+
                                 navigation.navigate(
+
                                     tab.name
+
                                 );
+
 
                             }
 
+
                         }}
+
 
                     >
 
 
+
+
+                        <MaterialIcons
+
+
+                            name={
+                                tab.icon
+                            }
+
+
+                            size={26}
+
+
+                            color={
+
+                                active === tab.name
+
+                                ?
+
+                                colors.green
+
+                                :
+
+                                colors.muted
+
+                            }
+
+
+                        />
+
+
+
+
+
+
+
                         <Text
+
 
                             style={[
 
-                                styles.bottomNavigationIcon,
-
-                                {
-
-                                    color:
-
-                                    active === tab.name
-
-                                    ? colors.green
-
-                                    : colors.muted
-
-                                }
-
-                            ]}
-
-                        >
-
-                            {tab.icon}
-
-                        </Text>
-
-
-
-
-                        <Text
-
-                            style={[
 
                                 styles.bottomNavigationText,
 
+
                                 {
+
 
                                     color:
 
+
                                     active === tab.name
 
-                                    ? colors.green
 
-                                    : colors.muted
+                                    ?
+
+
+                                    colors.green
+
+
+                                    :
+
+
+                                    colors.muted,
+
+
+
+                                    marginTop:4
+
 
                                 }
 
+
                             ]}
+
+
 
                         >
 
-                            {tab.label}
+
+                            {
+                                tab.label
+                            }
+
+
 
                         </Text>
+
+
+
+
 
 
                     </TouchableOpacity>
 
+
+
                 ))
+
             }
 
 
+
         </View>
+
 
     );
 

@@ -1,160 +1,130 @@
-import { createToken, verifyToken } from "../../domain/auth/jwt.js";
-import { verifyPassword } from "../../domain/auth/password.js";
+import { createToken, verifyToken } from '../../domain/auth/jwt.js';
+
+import { verifyPassword } from '../../domain/auth/password.js';
 
 
-const createError = (
-    message,
-    statusCode
+
+const unauthorized = (
+    message = 'Invalid email or password.'
 ) => {
 
-    const error = new Error(message);
+    const error =
+        new Error(message);
 
-    error.statusCode = statusCode;
+    error.statusCode = 401;
 
     return error;
 
 };
 
-
-
 export const createAuthService = (
     repository,
-    secret = "development-secret"
+    secret = 'development-secret'
 ) => ({
 
-
     async login(
-        credentials,
+        {
+            email,
+            password
+        },
         ipAddress
     ){
 
-        const {
-            email,
-            password
-        } = credentials;
 
+        if(!email || !password){
 
+            const error =
+                new Error(
+                    'Email and password are required.'
+                );
 
-        console.log(
-            "AUTH SERVICE LOGIN:",
-            {
-                email
-            }
-        );
+            error.statusCode = 422;
 
-
-
-        if(
-            !email ||
-            !password
-        ){
-
-            throw createError(
-                "Email and password are required.",
-                422
-            );
+            throw error;
 
         }
-
-
 
         const user =
             await repository.findUserByEmail(
-                email
-                    .trim()
-                    .toLowerCase()
+                email.trim().toLowerCase()
             );
 
-
-
-        if(!user){
-
-            throw createError(
-                "Invalid email or password.",
-                401
-            );
-
-        }
-
-
-
-        const passwordValid =
-            verifyPassword(
+        if(
+            !user ||
+            !verifyPassword(
                 password,
                 user.passwordHash
-            );
+            )
+        ){
 
-
-
-        if(!passwordValid){
 
             await repository.recordAudit({
 
-                action:"login.failed",
+                action:
+                    'login.failed',
 
                 ipAddress,
 
-                targetEntity:"Users"
+                targetEntity:
+                    'Users'
 
             });
 
 
-            throw createError(
-                "Invalid email or password.",
-                401
-            );
+
+            throw unauthorized();
+
 
         }
 
+        if(user.status !== 'active'){
 
 
-        if(
-            user.status !== "active"
-        ){
-
-            throw createError(
-                "User account is inactive.",
-                401
+            throw unauthorized(
+                'This user account is deactivated.'
             );
 
+
         }
-
-
 
         const role =
             await repository.findRoleById(
                 user.roleId
             );
 
-
-
         const token =
             createToken(
+
                 {
                     sub:user.id,
-                    email:user.email,
-                    role:role.name
+
+                    role:role.name,
+
+                    email:user.email
+
                 },
+
                 secret
+
             );
-
-
 
         await repository.recordAudit({
 
-            userId:user.id,
+            userId:
+                user.id,
 
-            action:"login",
+            action:
+                'login',
 
-            targetEntity:"Users",
+            targetEntity:
+                'Users',
 
-            targetId:user.id,
+            targetId:
+                user.id,
 
             ipAddress
 
         });
-
-
 
         return {
 
@@ -162,7 +132,6 @@ export const createAuthService = (
 
             expiresIn:
                 8 * 60 * 60,
-
 
             user:
                 repository.publicUser(
@@ -172,35 +141,32 @@ export const createAuthService = (
 
         };
 
+
     },
-
-
-
 
     async authenticate(
         authorization
     ){
 
+
         if(
             !authorization ||
             !authorization.startsWith(
-                "Bearer "
+                'Bearer '
             )
         ){
 
-            throw createError(
-                "Bearer token required.",
-                401
+            throw unauthorized(
+                'A bearer token is required.'
             );
 
         }
 
-
-
         let claims;
 
 
-        try {
+        try{
+
 
             claims =
                 verifyToken(
@@ -208,46 +174,54 @@ export const createAuthService = (
                     secret
                 );
 
-        }
 
+        }
         catch(error){
 
-            throw createError(
-                error.message,
-                401
+
+            throw unauthorized(
+                error.message
             );
+
 
         }
 
+        if(
+            await repository.isTokenRevoked(
+                claims.jti
+            )
+        ){
 
+
+            throw unauthorized(
+                'This session has been signed out.'
+            );
+
+
+        }
 
         const user =
             await repository.findUserById(
                 claims.sub
             );
 
-
-
         if(
             !user ||
-            user.status !== "active"
+            user.status !== 'active'
         ){
 
-            throw createError(
-                "User unavailable.",
-                401
+
+            throw unauthorized(
+                'This user account is unavailable.'
             );
 
+
         }
-
-
 
         const role =
             await repository.findRoleById(
                 user.roleId
             );
-
-
 
         return {
 
@@ -261,15 +235,14 @@ export const createAuthService = (
 
         };
 
+
     },
-
-
-
 
     async logout(
         authorization,
         ipAddress
     ){
+
 
         const {
             claims,
@@ -279,30 +252,32 @@ export const createAuthService = (
                 authorization
             );
 
-
-
         await repository.revokeToken(
             claims.jti,
             claims.exp
         );
 
-
-
         await repository.recordAudit({
 
-            userId:user.id,
+            userId:
+                user.id,
 
-            action:"logout",
+            action:
+                'logout',
 
-            targetEntity:"Users",
+            targetEntity:
+                'Users',
 
-            targetId:user.id,
+            targetId:
+                user.id,
 
             ipAddress
 
         });
 
+
     }
+
 
 
 });

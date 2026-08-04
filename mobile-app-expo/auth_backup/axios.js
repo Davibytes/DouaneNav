@@ -8,7 +8,7 @@ let authToken = null;
 const api = axios.create({
 
     baseURL:
-        "http://192.168.1.169:5000/api",
+        "http://192.168.137.1:5000/api",
 
     timeout:15000,
 
@@ -19,10 +19,7 @@ const api = axios.create({
 });
 
 
-
-export const setAuthToken = (
-    token
-)=>{
+export const setAuthToken = (token)=>{
 
     authToken = token;
 
@@ -32,7 +29,7 @@ export const setAuthToken = (
 
 api.interceptors.request.use(
 
-    async(config)=>{
+    async(request)=>{
 
 
         const token =
@@ -44,28 +41,22 @@ api.interceptors.request.use(
 
         if(token){
 
-            config.headers.Authorization =
+            request.headers.Authorization =
                 `Bearer ${token}`;
 
         }
 
 
         console.log(
-            "REQUEST:",
-            config.method,
-            config.baseURL + config.url
+            "API REQUEST:",
+            request.baseURL + request.url
         );
 
 
-        console.log(
-            "BODY:",
-            config.data
-        );
-
-
-        return config;
+        return request;
 
     },
+
 
     error=>{
 
@@ -83,7 +74,7 @@ api.interceptors.response.use(
 
 
         console.log(
-            "RESPONSE:",
+            "API RESPONSE:",
             response.status
         );
 
@@ -97,14 +88,8 @@ api.interceptors.response.use(
 
 
         console.log(
-            "RESPONSE ERROR:",
-            error.response?.status
-        );
-
-
-        console.log(
-            "ERROR DATA:",
-            error.response?.data
+            "API ERROR:",
+            error.message
         );
 
 

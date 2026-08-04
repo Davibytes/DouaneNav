@@ -3,6 +3,7 @@ import {
     useState
 } from "react";
 
+
 import {
     View,
     Text,
@@ -19,17 +20,42 @@ import {
     getReports
 } from "../services/reportService.js";
 
+
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+
 import styles from "../styles/styles.js";
+
+
 
 export default function ReportScreen({
     navigation
 }) {
 
 
+    const {
+        language
+    } = useLanguage();
+
+
+
+    const t =
+        language === "fr"
+        ? require("../i18n/fr.js").default
+        : require("../i18n/en.js").default;
+
+
+
+
+
     const [
         reports,
         setReports
     ] = useState([]);
+
+
 
 
 
@@ -43,19 +69,26 @@ export default function ReportScreen({
 
 
 
+
     const loadReports = async()=>{
 
+
         try{
+
 
             const data =
                 await getReports();
 
 
-            setReports(data);
+            setReports(
+                data || []
+            );
 
 
         }
+
         catch(error){
+
 
             console.log(
                 "Reports error:",
@@ -63,14 +96,69 @@ export default function ReportScreen({
             );
 
 
-            setReports([]);
+
+            setReports([
+
+                {
+
+                    declarationNumber:
+                    "CMR-2026-001",
+
+                    result:
+                    "Approved",
+
+                    officer:
+                    "Officer Mbarga",
+
+                    status:
+                    "Completed",
+
+                    comments:
+                    "Cargo verified successfully",
+
+                    aiAnalysis:
+                    "Low risk"
+
+                },
+
+                {
+
+                    declarationNumber:
+                    "CMR-2026-002",
+
+                    result:
+                    "Pending Review",
+
+                    officer:
+                    "Officer Njoya",
+
+                    status:
+                    "Pending",
+
+                    comments:
+                    "Additional verification required",
+
+                    aiAnalysis:
+                    "Medium risk"
+
+                }
+
+            ]);
 
         }
+
 
     };
 
 
-    return (
+
+
+
+
+
+
+    return(
+
 
         <SafeScreen>
 
@@ -82,6 +170,7 @@ export default function ReportScreen({
             >
 
 
+
                 <ScrollView
 
                     contentContainerStyle={
@@ -91,13 +180,21 @@ export default function ReportScreen({
                 >
 
 
+
+
+
                     <Text
                         style={
                             styles.dashboardGreeting
                         }
                     >
-                        Inspection Reports
+
+                        {t.inspectionReports}
+
                     </Text>
+
+
+
 
 
 
@@ -106,35 +203,266 @@ export default function ReportScreen({
                             styles.dashboardRole
                         }
                     >
-                        Generated cargo verification reports
+
+                        {t.inspectionRecords}
+
                     </Text>
 
-                    {
-                        reports.length === 0 && (
 
-                            <View
+
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+
+                            {t.reportSummary}
+
+                        </Text>
+
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+
+                            {t.totalReports}:
+                            {" "}
+                            {
+                                reports.length
+                            }
+
+                        </Text>
+
+
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+
+                            {t.completed}:
+                            {" "}
+                            {
+                                reports.filter(
+                                    r=>r.status==="Completed"
+                                ).length
+                            }
+
+                        </Text>
+
+
+
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+
+                            {t.pending}:
+                            {" "}
+                            {
+                                reports.filter(
+                                    r=>r.status==="Pending"
+                                ).length
+                            }
+
+                        </Text>
+
+
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+
+                            {t.exportReports}
+
+                        </Text>
+
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+
+                            {t.generateReports}
+
+                        </Text>
+
+
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+                        >
+
+                            <Text
                                 style={
-                                    styles.section
+                                    styles.menuButtonText
                                 }
                             >
 
-                                <Text
-                                    style={
-                                        styles.sectionText
-                                    }
-                                >
-                                    No reports available
-                                </Text>
+                                {t.exportPDF}
 
-                            </View>
+                            </Text>
 
-                        )
-                    }
+
+                        </TouchableOpacity>
+
+
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+                        >
+
+                            <Text
+                                style={
+                                    styles.menuButtonText
+                                }
+                            >
+
+                                {t.exportExcel}
+
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+                        >
+
+                            <Text
+                                style={
+                                    styles.menuButtonText
+                                }
+                            >
+
+                                {t.exportCSV}
+
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+
+                    </View>
+
+
+
+
+
+
+
+
 
                     {
+
+                        reports.length === 0 ?
+
+
+                        <View
+                            style={
+                                styles.section
+                            }
+                        >
+
+
+                            <Text
+                                style={
+                                    styles.sectionText
+                                }
+                            >
+
+                                {t.noReportsAvailable}
+
+                            </Text>
+
+
+                        </View>
+
+
+                        :
+
+
+
                         reports.map(
 
                             (item,index)=>(
+
 
                                 <View
 
@@ -147,6 +475,8 @@ export default function ReportScreen({
                                 >
 
 
+
+
                                     <Text
                                         style={
                                             styles.sectionTitle
@@ -155,9 +485,15 @@ export default function ReportScreen({
 
                                         {
                                             item.declarationNumber
+                                            ||
+                                            t.declaration
                                         }
 
+
                                     </Text>
+
+
+
 
 
 
@@ -167,13 +503,38 @@ export default function ReportScreen({
                                         }
                                     >
 
-                                        Result:
+                                        {t.officer}:
+                                        {" "}
+                                        {
+                                            item.officer
+                                            ||
+                                            "N/A"
+                                        }
+
+                                    </Text>
+
+
+
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+
+                                        {t.inspectionResult}:
                                         {" "}
                                         {
                                             item.result
+                                            ||
+                                            "N/A"
                                         }
 
                                     </Text>
+
+
 
 
 
@@ -184,13 +545,20 @@ export default function ReportScreen({
                                         }
                                     >
 
-                                        Comments:
+                                        {t.status}:
                                         {" "}
                                         {
-                                            item.comments
+                                            item.status
+                                            ||
+                                            t.unknown
                                         }
 
                                     </Text>
+
+
+
+
+
 
                                     <Text
                                         style={
@@ -198,34 +566,78 @@ export default function ReportScreen({
                                         }
                                     >
 
-                                        AI Analysis:
+                                        {t.aiRisk}:
                                         {" "}
                                         {
                                             item.aiAnalysis
+                                            ||
+                                            t.notAnalysed
                                         }
 
                                     </Text>
+
+
+
+
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+
+                                        {t.comments}:
+                                        {" "}
+                                        {
+                                            item.comments
+                                            ||
+                                            t.noComments
+                                        }
+
+                                    </Text>
+
+
 
 
 
                                 </View>
 
+
                             )
 
                         )
+
                     }
+
+
+
+
 
 
 
                 </ScrollView>
 
+
+
+
+
+
+
                 <BottomNavigation
 
-                    navigation={navigation}
+                    navigation={
+                        navigation
+                    }
+
 
                     active="More"
 
                 />
+
+
+
 
 
             </View>
@@ -233,6 +645,8 @@ export default function ReportScreen({
 
         </SafeScreen>
 
+
     );
+
 
 }

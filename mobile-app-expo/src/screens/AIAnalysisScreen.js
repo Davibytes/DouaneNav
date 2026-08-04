@@ -7,16 +7,23 @@ import {
     View,
     Text,
     TouchableOpacity,
-    ScrollView
+    ScrollView,
+    ActivityIndicator
 } from "react-native";
 
 
 import SafeScreen from "../components/SafeScreen.js";
 import BottomNavigation from "../components/BottomNavigation.js";
 
+
 import {
     runAIAnalysis
 } from "../services/aiService.js";
+
+
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
 
 
 import styles from "../styles/styles.js";
@@ -26,11 +33,27 @@ import styles from "../styles/styles.js";
 export default function AIAnalysisScreen({
     route,
     navigation
-}){
+}) {
+
+
+    const {
+        language
+    } = useLanguage();
+
+
+
+    const t =
+        language === "fr"
+        ? require("../i18n/fr.js").default
+        : require("../i18n/en.js").default;
+
+
+
 
 
     const declaration =
         route?.params?.declaration;
+
 
 
     const [
@@ -63,32 +86,31 @@ export default function AIAnalysisScreen({
                 await runAIAnalysis({
 
                     declarationNumber:
-                        declaration?.declarationNumber
-                        ||
-                        "UNKNOWN",
+                        declaration?.declarationNumber ||
+                        "CMR-2026-001",
 
-
-                    documents:[]
+                    documents: []
 
                 });
 
 
 
-            setAnalysis(
-                result
-            );
+            setAnalysis(result);
 
 
         }
+
         catch(error){
 
 
             console.log(
+                "AI Analysis Error:",
                 error.message
             );
 
 
         }
+
         finally{
 
 
@@ -104,7 +126,10 @@ export default function AIAnalysisScreen({
 
 
 
+
+
     return (
+
 
         <SafeScreen>
 
@@ -116,6 +141,7 @@ export default function AIAnalysisScreen({
             >
 
 
+
                 <ScrollView
 
                     contentContainerStyle={
@@ -125,13 +151,22 @@ export default function AIAnalysisScreen({
                 >
 
 
+
+
+
+
                     <Text
                         style={
                             styles.dashboardGreeting
                         }
                     >
-                        AI Cargo Analysis
+
+                        {t.aiAnalysis}
+
                     </Text>
+
+
+
 
 
 
@@ -140,8 +175,15 @@ export default function AIAnalysisScreen({
                             styles.dashboardRole
                         }
                     >
-                        AI decision support module
+
+                        {t.aiSubtitle}
+
                     </Text>
+
+
+
+
+
 
 
 
@@ -152,13 +194,20 @@ export default function AIAnalysisScreen({
                         }
                     >
 
+
                         <Text
                             style={
                                 styles.sectionTitle
                             }
                         >
-                            Declaration
+
+                            {t.declarationInformation}
+
                         </Text>
+
+
+
+
 
 
                         <Text
@@ -166,15 +215,427 @@ export default function AIAnalysisScreen({
                                 styles.sectionText
                             }
                         >
+
+                            {t.declarationNumber}:
+                            {" "}
                             {
-                                declaration?.declarationNumber
-                                ||
-                                "No declaration selected"
+                                declaration?.declarationNumber ||
+                                "CMR-2026-001"
                             }
+
                         </Text>
 
 
+
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+
+                            {t.analysisType}:
+                            {" "}
+                            {t.customsRiskAssessment}
+
+                        </Text>
+
+
+
+
                     </View>
+
+
+
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+
+                            {t.aiModuleStatus}
+
+                        </Text>
+
+
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+
+                            {t.mockAIModule}
+
+                        </Text>
+
+
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+
+                            {t.aiDescription}
+
+                        </Text>
+
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    {
+
+                        analysis && (
+
+
+                            <>
+
+
+                                <View
+                                    style={
+                                        styles.section
+                                    }
+                                >
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionTitle
+                                        }
+                                    >
+
+                                        {t.cargoRiskScore}
+
+                                    </Text>
+
+
+
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+
+                                        {t.riskLevel}:
+                                        {" "}
+                                        {
+                                            analysis.riskLevel ||
+                                            t.medium
+                                        }
+
+                                    </Text>
+
+
+
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+
+                                        {t.riskScore}:
+                                        {" "}
+                                        {
+                                            analysis.riskScore ||
+                                            0
+                                        }
+                                        /100
+
+                                    </Text>
+
+
+
+                                </View>
+
+
+
+
+
+
+
+
+
+                                <View
+                                    style={
+                                        styles.section
+                                    }
+                                >
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionTitle
+                                        }
+                                    >
+
+                                        {t.inspectionPriority}
+
+                                    </Text>
+
+
+
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+
+                                        {t.recommendedPriority}:
+                                        {" "}
+                                        {
+                                            analysis.priority ||
+                                            t.normalInspection
+                                        }
+
+                                    </Text>
+
+
+
+                                </View>
+
+
+
+
+
+
+
+
+
+                                <View
+                                    style={
+                                        styles.section
+                                    }
+                                >
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionTitle
+                                        }
+                                    >
+
+                                        {t.riskIndicators}
+
+                                    </Text>
+
+
+
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+                                        • {t.consistencyCheck}
+                                    </Text>
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+                                        • {t.destinationVerification}
+                                    </Text>
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+                                        • {t.cargoAnalysis}
+                                    </Text>
+
+
+
+                                </View>
+
+
+
+
+
+
+
+
+
+                                <View
+                                    style={
+                                        styles.section
+                                    }
+                                >
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionTitle
+                                        }
+                                    >
+
+                                        {t.aiRecommendation}
+
+                                    </Text>
+
+
+
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+
+                                        {
+                                            analysis.analysis ||
+                                            t.reviewDeclaration
+                                        }
+
+                                    </Text>
+
+
+
+
+                                </View>
+
+
+
+
+
+                            </>
+
+                        )
+
+                    }
+
+
+
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+
+                            {t.futureAIDevelopment}
+
+                        </Text>
+
+
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+
+                            {t.plannedCapabilities}
+
+                        </Text>
+
+
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            • {t.documentOCR}
+                        </Text>
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            • {t.invoiceVerification}
+                        </Text>
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            • {t.machineLearningRisk}
+                        </Text>
+
+
+
+                    </View>
+
+
+
+
 
 
 
@@ -186,99 +647,47 @@ export default function AIAnalysisScreen({
                             styles.menuButton
                         }
 
+
                         onPress={
                             startAnalysis
                         }
 
+
+                        disabled={
+                            loading
+                        }
+
                     >
 
-                        <Text
-                            style={
-                                styles.menuButtonText
-                            }
-                        >
 
-                            {
-                                loading
-                                ?
-                                "Analyzing..."
-                                :
-                                "Run AI Analysis"
-                            }
+                        {
 
-                        </Text>
+                            loading
+
+                            ?
+
+                            <ActivityIndicator
+                                color="white"
+                            />
+
+                            :
+
+                            <Text
+                                style={
+                                    styles.menuButtonText
+                                }
+                            >
+
+                                {t.runAIAnalysis}
+
+                            </Text>
+
+                        }
 
 
                     </TouchableOpacity>
 
 
-
-
-
-                    {
-                        analysis && (
-
-                            <View
-                                style={
-                                    styles.section
-                                }
-                            >
-
-
-                                <Text
-                                    style={
-                                        styles.sectionTitle
-                                    }
-                                >
-                                    Result
-                                </Text>
-
-
-
-                                <Text
-                                    style={
-                                        styles.sectionText
-                                    }
-                                >
-                                    Risk Level:
-                                    {" "}
-                                    {
-                                        analysis.riskLevel
-                                    }
-                                </Text>
-
-
-
-                                <Text
-                                    style={
-                                        styles.sectionText
-                                    }
-                                >
-                                    Score:
-                                    {" "}
-                                    {
-                                        analysis.riskScore
-                                    }
-                                </Text>
-
-
-
-                                <Text
-                                    style={
-                                        styles.sectionText
-                                    }
-                                >
-                                    {
-                                        analysis.analysis
-                                    }
-                                </Text>
-
-
-
-                            </View>
-
-                        )
-                    }
 
 
 
@@ -288,19 +697,29 @@ export default function AIAnalysisScreen({
 
 
 
+
+
                 <BottomNavigation
 
-                    navigation={navigation}
+                    navigation={
+                        navigation
+                    }
+
 
                     active="More"
 
                 />
 
 
+
+
+
             </View>
 
 
+
         </SafeScreen>
+
 
     );
 

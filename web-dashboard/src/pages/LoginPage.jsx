@@ -90,7 +90,7 @@ export default function LoginPage() {
 
 
         <h1>
-          CustomsTrack AI
+          DouaneNav
         </h1>
 
 

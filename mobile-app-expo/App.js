@@ -11,150 +11,250 @@ import {
     ActivityIndicator
 } from "react-native";
 
+import {
+    LanguageProvider
+} from "./src/context/LanguageContext.js";
 import LoginScreen from "./src/screens/LoginScreen.js";
 import DashboardScreen from "./src/screens/DashboardScreen.js";
 import DeclarationsScreen from "./src/screens/DeclarationsScreen.js";
 import DeclarationDetailsScreen from "./src/screens/DeclarationDetailsScreen.js";
 import DestinationMapScreen from "./src/screens/DestinationMapScreen.js";
 import InspectionScreen from "./src/screens/InspectionScreen.js";
-
+import MoreScreen from "./src/screens/MoreScreen.js";
+import ReportScreen from "./src/screens/ReportScreen.js";
+import AIAnalysisScreen from "./src/screens/AIAnalysisScreen.js";
+import SyncStatusScreen from "./src/screens/SyncStatusScreen.js";
+import ProfileScreen from "./src/screens/ProfileScreen.js";
+import ForgotPasswordScreen from "./src/screens/ForgotPasswordScreen.js";
 import {
     AuthProvider,
     useAuth
 } from "./src/context/AuthContext.js";
 
+
 import colors from "./src/styles/colors.js";
 
-const Stack = createNativeStackNavigator();
+
+const Stack =
+    createNativeStackNavigator();
+
+
 
 function AppNavigator(){
+
 
     const {
         user,
         authChecking
     } = useAuth();
 
+
+
     if(authChecking){
 
         return (
+
             <View
+
                 style={{
+
                     flex:1,
+
                     justifyContent:"center",
+
                     alignItems:"center",
-                    backgroundColor:colors.background
+
+                    backgroundColor:
+                    colors.background
+
                 }}
+
             >
+
                 <ActivityIndicator
+
                     size="large"
+
                     color={colors.primary}
+
                 />
+
             </View>
+
         );
 
     }
 
+
+
     return (
 
         <Stack.Navigator
+
             screenOptions={{
+
                 headerShown:false
+
             }}
+
         >
 
-            {/*
-            ==========================
-            AUTHENTICATION FLOW
-            Restore this block later.
-            ==========================
 
-            {
-                user ? (
+        {
+            user ? (
 
-                    <>
-                        <Stack.Screen
-                            name="Dashboard"
-                            component={DashboardScreen}
-                        />
+                <>
 
-                        <Stack.Screen
-                            name="Declarations"
-                            component={DeclarationsScreen}
-                        />
 
-                        <Stack.Screen
-                            name="DeclarationDetails"
-                            component={DeclarationDetailsScreen}
-                        />
+                <Stack.Screen
 
-                        <Stack.Screen
-                            name="DestinationMap"
-                            component={DestinationMapScreen}
-                        />
+                    name="Dashboard"
 
-                        <Stack.Screen
-                            name="Inspection"
-                            component={InspectionScreen}
-                        />
-                    </>
+                    component={DashboardScreen}
 
-                ) : (
+                />
 
-                    <Stack.Screen
-                        name="Login"
-                        component={LoginScreen}
-                    />
 
-                )
-            }
-            */}
+                <Stack.Screen
 
-            {/* DEMO MODE FOR SCREENSHOTS */}
+                    name="Declarations"
 
-            <Stack.Screen
-                name="Dashboard"
-                component={DashboardScreen}
-            />
+                    component={DeclarationsScreen}
 
-            <Stack.Screen
-                name="Declarations"
-                component={DeclarationsScreen}
-            />
+                />
 
-            <Stack.Screen
-                name="DeclarationDetails"
-                component={DeclarationDetailsScreen}
-            />
+                <Stack.Screen
 
-            <Stack.Screen
-                name="DestinationMap"
-                component={DestinationMapScreen}
-            />
+                    name="DeclarationDetails"
 
-            <Stack.Screen
-                name="Inspection"
-                component={InspectionScreen}
-            />
+                    component={DeclarationDetailsScreen}
+
+                />
+
+
+                <Stack.Screen
+
+                    name="DestinationMap"
+
+                    component={DestinationMapScreen}
+
+                />
+
+
+                <Stack.Screen
+
+                    name="Inspection"
+
+                    component={InspectionScreen}
+
+                />
+
+
+                <Stack.Screen
+
+                    name="Reports"
+
+                    component={ReportScreen}
+
+                />
+
+
+                <Stack.Screen
+
+                    name="More"
+
+                    component={MoreScreen}
+
+                />
+
+
+                <Stack.Screen
+
+                    name="AIAnalysis"
+
+                    component={AIAnalysisScreen}
+
+                />
+
+
+                <Stack.Screen
+
+                    name="SyncStatus"
+
+                    component={SyncStatusScreen}
+
+                />
+
+
+                <Stack.Screen
+
+                    name="Profile"
+
+                    component={ProfileScreen}
+
+                />
+
+                <Stack.Screen
+                    name="ForgotPassword"
+
+                    component={ForgotPasswordScreen}
+                />
+
+                </>
+
+
+            ) : (
+
+
+                <Stack.Screen
+
+                    name="Login"
+
+                    component={LoginScreen}
+
+                />
+
+
+            )
+
+        }
+
+
 
         </Stack.Navigator>
 
+
     );
+
 
 }
 
+
+
+
 export default function App(){
+
 
     return (
 
-        <AuthProvider>
+       <AuthProvider>
 
-            <NavigationContainer>
+    <LanguageProvider>
 
-                <AppNavigator />
 
-            </NavigationContainer>
+        <NavigationContainer>
 
-        </AuthProvider>
+
+            <AppNavigator />
+
+
+        </NavigationContainer>
+
+
+    </LanguageProvider>
+
+
+</AuthProvider>
 
     );
 

@@ -5,10 +5,23 @@ import {
     TouchableOpacity
 } from "react-native";
 
+
 import SafeScreen from "../components/SafeScreen.js";
 import BottomNavigation from "../components/BottomNavigation.js";
 
+
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+
+import {
+    translations
+} from "../i18n/index.js";
+
+
 import styles from "../styles/styles.js";
+
 
 
 export default function DeclarationDetailsScreen({
@@ -16,8 +29,20 @@ export default function DeclarationDetailsScreen({
     navigation
 }) {
 
+
+    const {
+        language
+    } = useLanguage();
+
+
+    const t =
+        translations[language];
+
+
+
     const declaration =
         route?.params?.declaration || {};
+
 
 
 
@@ -25,25 +50,32 @@ export default function DeclarationDetailsScreen({
 
         <SafeScreen>
 
+
             <View
                 style={{
                     flex:1
                 }}
             >
 
+
                 <ScrollView
+
                     contentContainerStyle={
                         styles.dashboardContainer
                     }
+
                 >
+
+
 
                     <Text
                         style={
                             styles.dashboardGreeting
                         }
                     >
-                        Declaration Details
+                        {t.declarationDetails}
                     </Text>
+
 
 
                     <Text
@@ -51,170 +83,280 @@ export default function DeclarationDetailsScreen({
                             styles.dashboardRole
                         }
                     >
-                        Cargo verification information
+                        {t.cargoVerificationInformation}
                     </Text>
 
 
 
-                    <View style={styles.section}>
 
-                        <Text style={styles.sectionTitle}>
-                            Declaration Number
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            {t.declarationInformation}
                         </Text>
 
-                        <Text style={styles.sectionText}>
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.declarationNumber}:{" "}
                             {
-                                declaration.declarationNumber
-                                ||
-                                "N/A"
+                                declaration.declarationNumber ||
+                                t.notAvailable
                             }
                         </Text>
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.status}:{" "}
+                            {
+                                declaration.status ||
+                                t.pendingVerification
+                            }
+                        </Text>
+
 
                     </View>
 
 
 
-                    <View style={styles.section}>
 
-                        <Text style={styles.sectionTitle}>
-                            Importer Information
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            {t.importerInformation}
                         </Text>
 
 
-                        <Text style={styles.sectionText}>
-                            Name:
-                            {" "}
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.company}:{" "}
                             {
-                                declaration.importer?.name
-                                ||
-                                "N/A"
+                                declaration.importer?.name ||
+                                t.notAvailable
                             }
                         </Text>
 
 
-                        <Text style={styles.sectionText}>
-                            Country:
-                            {" "}
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.country}:{" "}
                             {
-                                declaration.importer?.country
-                                ||
-                                "N/A"
+                                declaration.importer?.country ||
+                                t.notAvailable
                             }
                         </Text>
+
 
                     </View>
 
 
 
-                    <View style={styles.section}>
 
-                        <Text style={styles.sectionTitle}>
-                            Cargo Information
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            {t.cargoInformation}
                         </Text>
 
 
-                        <Text style={styles.sectionText}>
-                            Goods:
-                            {" "}
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.description}:{" "}
                             {
-                                declaration.goods?.description
-                                ||
-                                "N/A"
+                                declaration.goods?.description ||
+                                t.notAvailable
                             }
                         </Text>
 
 
-                        <Text style={styles.sectionText}>
-                            Category:
-                            {" "}
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.category}:{" "}
                             {
-                                declaration.goods?.category
-                                ||
-                                "N/A"
+                                declaration.goods?.category ||
+                                t.notAvailable
                             }
                         </Text>
 
 
-                        <Text style={styles.sectionText}>
-                            Quantity:
-                            {" "}
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.quantity}:{" "}
                             {
-                                declaration.goods?.quantity
-                                ||
-                                "N/A"
+                                declaration.goods?.quantity ||
+                                t.notAvailable
                             }
                         </Text>
+
 
                     </View>
 
 
 
-                    <View style={styles.section}>
 
-                        <Text style={styles.sectionTitle}>
-                            Transport Information
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            {t.transportInformation}
                         </Text>
 
 
-                        <Text style={styles.sectionText}>
-                            Truck:
-                            {" "}
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.truckPlate}:{" "}
                             {
-                                declaration.transport?.truckPlate
-                                ||
-                                "N/A"
+                                declaration.transport?.truckPlate ||
+                                t.notAvailable
                             }
                         </Text>
 
 
-                        <Text style={styles.sectionText}>
-                            Driver:
-                            {" "}
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.driver}:{" "}
                             {
-                                declaration.transport?.driver
-                                ||
-                                "N/A"
+                                declaration.transport?.driver ||
+                                t.notAvailable
                             }
                         </Text>
+
 
                     </View>
 
 
 
-                    <View style={styles.section}>
 
-                        <Text style={styles.sectionTitle}>
-                            Destination
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            {t.destinationVerification}
                         </Text>
 
 
-                        <Text style={styles.sectionText}>
-                            Location:
-                            {" "}
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.destination}:{" "}
                             {
-                                declaration.destination?.area
-                                ||
-                                "N/A"
+                                declaration.destination?.area ||
+                                t.notAvailable
                             }
                             ,
                             {" "}
                             {
-                                declaration.destination?.city
-                                ||
-                                "N/A"
+                                declaration.destination?.city ||
+                                t.notAvailable
                             }
                         </Text>
 
 
-                        <Text style={styles.sectionText}>
-                            Address:
-                            {" "}
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.address}:{" "}
                             {
-                                declaration.destination?.address
-                                ||
-                                "N/A"
+                                declaration.destination?.address ||
+                                t.notAvailable
                             }
                         </Text>
+
+
+
 
 
 
@@ -223,6 +365,7 @@ export default function DeclarationDetailsScreen({
                             style={
                                 styles.menuButton
                             }
+
 
                             onPress={()=>{
 
@@ -237,104 +380,200 @@ export default function DeclarationDetailsScreen({
 
                         >
 
-                            <Text style={styles.menuButtonText}>
-                                View Destination Map
+                            <Text
+                                style={
+                                    styles.menuButtonText
+                                }
+                            >
+                                {t.verifyDestinationMap}
                             </Text>
+
 
                         </TouchableOpacity>
 
+
                     </View>
 
 
 
-                    <View style={styles.section}>
 
-                        <Text style={styles.sectionTitle}>
-                            Current Status
+
+
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            {t.customsStatus}
                         </Text>
 
 
-                        <Text style={styles.sectionText}>
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.inspectionStatus}:{" "}
                             {
-                                declaration.status
-                                ||
-                                "Unknown"
+                                declaration.inspectionStatus ||
+                                t.awaitingInspection
                             }
                         </Text>
 
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.riskLevel}:{" "}
+                            {
+                                declaration.riskLevel ||
+                                t.notAssessed
+                            }
+                        </Text>
+
+
                     </View>
 
 
 
 
-                    <TouchableOpacity
 
+
+
+
+
+
+
+
+                    <View
                         style={
-                            styles.menuButton
+                            styles.section
                         }
-
-                        onPress={()=>{
-
-                            navigation.navigate(
-                                "AIAnalysis",
-                                {
-                                    declaration
-                                }
-                            );
-
-                        }}
-
                     >
 
-                        <Text style={styles.menuButtonText}>
-                            Run AI Analysis
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            {t.officerActions}
                         </Text>
 
-                    </TouchableOpacity>
 
 
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
 
 
-                    <TouchableOpacity
+                            onPress={()=>{
 
-                        style={
-                            styles.menuButton
-                        }
+                                navigation.navigate(
+                                    "AIAnalysis",
+                                    {
+                                        declaration
+                                    }
+                                );
 
-                        onPress={()=>{
+                            }}
 
-                            navigation.navigate(
-                                "Inspection",
-                                {
-                                    declaration
+                        >
+
+                            <Text
+                                style={
+                                    styles.menuButtonText
                                 }
-                            );
+                            >
+                                {t.runAIAnalysis}
+                            </Text>
 
-                        }}
 
-                    >
+                        </TouchableOpacity>
 
-                        <Text style={styles.menuButtonText}>
-                            Start Inspection
-                        </Text>
 
-                    </TouchableOpacity>
+
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+
+                            onPress={()=>{
+
+                                navigation.navigate(
+                                    "Inspection",
+                                    {
+                                        declaration
+                                    }
+                                );
+
+                            }}
+
+                        >
+
+                            <Text
+                                style={
+                                    styles.menuButtonText
+                                }
+                            >
+                                {t.startInspection}
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+                    </View>
+
+
+
 
 
                 </ScrollView>
 
 
 
+
+
+
+
                 <BottomNavigation
 
-                    navigation={navigation}
+                    navigation={
+                        navigation
+                    }
+
 
                     active="Declarations"
 
                 />
 
 
+
             </View>
+
 
 
         </SafeScreen>

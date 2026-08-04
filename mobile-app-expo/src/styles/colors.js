@@ -1,12 +1,12 @@
 const colors = {
 
-    green:"#007A5E",
+    green:"#2E7D32",
 
-    greenDark:"#005C46",
+    greenDark:"#1B5E20",
 
-    yellow:"#FCD116",
+    gold:"#B8860B",
 
-    red:"#CE1126",
+    red:"#B3261E",
 
     background:"#F5F7F6",
 

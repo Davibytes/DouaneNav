@@ -1,5 +1,4 @@
 import {
-    useEffect,
     useState
 } from "react";
 
@@ -26,6 +25,10 @@ import {
 } from "../context/AuthContext.js";
 
 import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+import {
     getDashboard
 } from "../services/dashboardService.js";
 
@@ -40,6 +43,12 @@ export default function DashboardScreen({
     const {
         user
     } = useAuth();
+
+
+    const {
+        t
+    } = useLanguage();
+
 
 
 
@@ -67,31 +76,23 @@ export default function DashboardScreen({
 
     const loadDashboard = async()=>{
 
-
         try{
-
 
             const data =
                 await getDashboard();
-
-
 
             setDashboard(
                 data
             );
 
-
         }
 
-
         catch(error){
-
 
             console.log(
                 "Dashboard error:",
                 error.message
             );
-
 
 
             setDashboard({
@@ -115,6 +116,7 @@ export default function DashboardScreen({
 
                 destinationStats:[],
 
+
                 inspectionStatistics:{
 
                     total:0,
@@ -130,9 +132,7 @@ export default function DashboardScreen({
 
         }
 
-
     };
-
 
 
 
@@ -162,25 +162,33 @@ export default function DashboardScreen({
 
 
                     <Text
+
                         style={
                             styles.dashboardGreeting
                         }
+
                     >
-                        Good Morning
+
+                        {t.welcome}
+
                     </Text>
 
 
 
                     <Text
+
                         style={
                             styles.dashboardRole
                         }
+
                     >
+
                         {
                             user?.name
                             ||
-                            "Customs Officer"
+                            t.customsOfficer
                         }
+
                     </Text>
 
 
@@ -190,26 +198,34 @@ export default function DashboardScreen({
 
 
                     <View
+
                         style={
                             styles.section
                         }
+
                     >
 
 
                         <Text
+
                             style={
                                 styles.sectionTitle
                             }
+
                         >
-                            ACTIVE ALERTS
+
+                            {t.activeAlerts}
+
                         </Text>
 
 
 
                         <Text
+
                             style={
                                 styles.sectionText
                             }
+
                         >
 
                             {
@@ -221,7 +237,7 @@ export default function DashboardScreen({
 
                                 :
 
-                                "No active alerts."
+                                t.noActiveAlerts
 
                             }
 
@@ -237,31 +253,40 @@ export default function DashboardScreen({
 
 
 
+
                     <View
+
                         style={
                             styles.section
                         }
+
                     >
 
 
                         <Text
+
                             style={
                                 styles.sectionTitle
                             }
+
                         >
-                            TODAY'S OPERATIONS
+
+                            {t.todaysOperations}
+
                         </Text>
 
 
 
 
                         <Text
+
                             style={
                                 styles.operationItem
                             }
+
                         >
 
-                            Today's Declarations:
+                            {t.todaysDeclarations}:
                             {" "}
                             {
                                 dashboard?.counts?.todayDeclarations
@@ -275,12 +300,14 @@ export default function DashboardScreen({
 
 
                         <Text
+
                             style={
                                 styles.operationItem
                             }
+
                         >
 
-                            Pending Inspections:
+                            {t.pendingInspections}:
                             {" "}
                             {
                                 dashboard?.counts?.pendingInspections
@@ -294,12 +321,14 @@ export default function DashboardScreen({
 
 
                         <Text
+
                             style={
                                 styles.operationItem
                             }
+
                         >
 
-                            Completed Inspections:
+                            {t.completedInspections}:
                             {" "}
                             {
                                 dashboard?.counts?.completedInspections
@@ -313,12 +342,14 @@ export default function DashboardScreen({
 
 
                         <Text
+
                             style={
                                 styles.operationItem
                             }
+
                         >
 
-                            Pending Synchronizations:
+                            {t.pendingSynchronizations}:
                             {" "}
                             {
                                 dashboard?.counts?.pendingSynchronizations
@@ -339,28 +370,38 @@ export default function DashboardScreen({
 
 
 
+
                     <View
+
                         style={
                             styles.section
                         }
+
                     >
 
+
                         <Text
+
                             style={
                                 styles.sectionTitle
                             }
+
                         >
-                            RECENT INSPECTIONS
+
+                            {t.recentInspections}
+
                         </Text>
 
 
 
                         {
+
                             dashboard?.recentInspections?.length
 
                             ?
 
                             dashboard.recentInspections.map(
+
                                 (item,index)=>(
 
                                     <View
@@ -376,29 +417,37 @@ export default function DashboardScreen({
                                     >
 
                                         <Text
+
                                             style={
                                                 styles.listTitle
                                             }
+
                                         >
+
                                             {
                                                 item.declarationNumber
                                                 ||
-                                                "Unknown"
+                                                t.unknown
                                             }
+
                                         </Text>
 
 
 
                                         <Text
+
                                             style={
                                                 styles.listSubtitle
                                             }
+
                                         >
+
                                             {
                                                 item.status
                                                 ||
-                                                "Pending"
+                                                t.pending
                                             }
+
                                         </Text>
 
 
@@ -411,11 +460,15 @@ export default function DashboardScreen({
                             :
 
                             <Text
+
                                 style={
                                     styles.sectionText
                                 }
+
                             >
-                                No recent inspections.
+
+                                {t.noRecentInspections}
+
                             </Text>
 
                         }
@@ -433,24 +486,31 @@ export default function DashboardScreen({
 
 
                     <View
+
                         style={
                             styles.section
                         }
+
                     >
 
 
                         <Text
+
                             style={
                                 styles.sectionTitle
                             }
+
                         >
-                            COMMON DESTINATIONS
+
+                            {t.commonDestinations}
+
                         </Text>
 
 
 
 
                         {
+
                             dashboard?.destinationStats?.map(
 
                                 (item,index)=>(
@@ -477,7 +537,8 @@ export default function DashboardScreen({
                                             item.total
                                         }
 
-                                        declarations
+                                        {" "}
+                                        {t.declarationsCount}
 
                                     </Text>
 
@@ -499,30 +560,38 @@ export default function DashboardScreen({
 
 
                     <View
+
                         style={
                             styles.section
                         }
+
                     >
 
 
                         <Text
+
                             style={
                                 styles.sectionTitle
                             }
+
                         >
-                            INSPECTION STATISTICS
+
+                            {t.inspectionStatistics}
+
                         </Text>
 
 
 
 
                         <Text
+
                             style={
                                 styles.operationItem
                             }
+
                         >
 
-                            Total:
+                            {t.total}:
                             {" "}
                             {
                                 dashboard?.inspectionStatistics?.total
@@ -535,12 +604,14 @@ export default function DashboardScreen({
 
 
                         <Text
+
                             style={
                                 styles.operationItem
                             }
+
                         >
 
-                            Completed:
+                            {t.completed}:
                             {" "}
                             {
                                 dashboard?.inspectionStatistics?.completed
@@ -553,12 +624,14 @@ export default function DashboardScreen({
 
 
                         <Text
+
                             style={
                                 styles.operationItem
                             }
+
                         >
 
-                            Pending:
+                            {t.pending}:
                             {" "}
                             {
                                 dashboard?.inspectionStatistics?.pending
@@ -581,18 +654,24 @@ export default function DashboardScreen({
 
 
                     <View
+
                         style={
                             styles.section
                         }
+
                     >
 
 
                         <Text
+
                             style={
                                 styles.sectionTitle
                             }
+
                         >
-                            QUICK ACTIONS
+
+                            {t.quickActions}
+
                         </Text>
 
 
@@ -616,17 +695,22 @@ export default function DashboardScreen({
                         >
 
                             <Text
+
                                 style={
                                     styles.menuButtonText
                                 }
+
                             >
 
-                                Search Declarations
+                                {t.searchDeclarations}
 
                             </Text>
 
 
                         </TouchableOpacity>
+
+
+
 
 
 
@@ -650,12 +734,14 @@ export default function DashboardScreen({
                         >
 
                             <Text
+
                                 style={
                                     styles.menuButtonText
                                 }
+
                             >
 
-                                More Modules
+                                {t.moreModules}
 
                             </Text>
 

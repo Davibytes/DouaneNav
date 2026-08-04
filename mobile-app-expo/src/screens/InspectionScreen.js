@@ -8,8 +8,11 @@ import {
     Text,
     ScrollView,
     TouchableOpacity,
-    TextInput
+    TextInput,
+    Alert
 } from "react-native";
+
+import * as ImagePicker from "expo-image-picker";
 
 import SafeScreen from "../components/SafeScreen.js";
 import BottomNavigation from "../components/BottomNavigation.js";
@@ -19,18 +22,30 @@ import {
     createInspection
 } from "../services/inspectionService.js";
 
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+import {
+    translations
+} from "../i18n/index.js";
+
 import styles from "../styles/styles.js";
 import colors from "../styles/colors.js";
 
 
 export default function InspectionScreen({
-    route,
     navigation
 }) {
 
 
-    const declaration =
-        route?.params?.declaration || {};
+    const {
+        language
+    } = useLanguage();
+
+
+    const t =
+        translations[language];
 
 
 
@@ -38,6 +53,20 @@ export default function InspectionScreen({
         inspections,
         setInspections
     ] = useState([]);
+
+
+
+    const [
+        declarationNumber,
+        setDeclarationNumber
+    ] = useState("");
+
+
+
+    const [
+        truckPlate,
+        setTruckPlate
+    ] = useState("");
 
 
 
@@ -55,6 +84,12 @@ export default function InspectionScreen({
 
 
 
+    const [
+        photos,
+        setPhotos
+    ] = useState([]);
+
+
 
 
     useEffect(()=>{
@@ -62,7 +97,6 @@ export default function InspectionScreen({
         loadInspections();
 
     },[]);
-
 
 
 
@@ -78,23 +112,25 @@ export default function InspectionScreen({
             setInspections(
 
                 Array.isArray(data)
+
                 ?
+
                 data
+
                 :
+
                 []
 
             );
-
 
         }
 
         catch(error){
 
             console.log(
-                "Inspection error:",
+                "Inspection loading error:",
                 error.message
             );
-
 
             setInspections([]);
 
@@ -106,18 +142,95 @@ export default function InspectionScreen({
 
 
 
+    const addPhoto = async(type)=>{
+
+
+        let result;
+
+
+
+        if(type==="camera"){
+
+
+            const permission =
+                await ImagePicker.requestCameraPermissionsAsync();
+
+
+
+            if(!permission.granted){
+
+                Alert.alert(
+                    "Permission required",
+                    "Camera permission is required."
+                );
+
+                return;
+
+            }
+
+
+
+            result =
+                await ImagePicker.launchCameraAsync({
+
+                    quality:0.7
+
+                });
+
+
+        }
+
+        else{
+
+
+            result =
+                await ImagePicker.launchImageLibraryAsync({
+
+                    quality:0.7
+
+                });
+
+
+        }
+
+
+
+
+        if(!result.canceled){
+
+
+            setPhotos([
+
+                ...photos,
+
+                result.assets[0].uri
+
+            ]);
+
+        }
+
+
+    };
+
+
+
+
 
 
     const saveInspection = async()=>{
 
 
-        if(
-            !declaration.declarationNumber
-        ){
+        if(!declarationNumber){
 
-            console.log(
-                "No declaration selected"
+
+            Alert.alert(
+
+                "Missing information",
+
+                "Declaration number is required."
+
             );
+
 
             return;
 
@@ -125,32 +238,33 @@ export default function InspectionScreen({
 
 
 
+
+
         const inspection = {
 
-            declarationNumber:
-                declaration.declarationNumber,
+
+            declarationNumber,
+
+
+            truckPlate,
+
+
+            comments:comment,
 
 
             status,
 
 
-            comments:
-                comment,
+            photos,
 
 
-            location:
+            location:"Customs Inspection Point"
 
-                declaration.destination?.address
-
-                ||
-
-                declaration.destination?.city
-
-                ||
-
-                "Unknown location"
 
         };
+
+
+
 
 
 
@@ -163,16 +277,27 @@ export default function InspectionScreen({
 
 
 
-            setComment("");
+            Alert.alert(
 
-            setStatus(
-                "Pending"
+                "Success",
+
+                "Inspection report submitted successfully."
+
             );
 
 
 
-            await loadInspections();
+            setDeclarationNumber("");
 
+            setTruckPlate("");
+
+            setComment("");
+
+            setPhotos([]);
+
+
+
+            loadInspections();
 
 
         }
@@ -181,9 +306,12 @@ export default function InspectionScreen({
         catch(error){
 
 
-            console.log(
-                "Save inspection error:",
-                error.message
+            Alert.alert(
+
+                "Error",
+
+                "Inspection submission failed."
+
             );
 
 
@@ -197,8 +325,8 @@ export default function InspectionScreen({
 
 
 
+    return(
 
-    return (
 
         <SafeScreen>
 
@@ -208,6 +336,7 @@ export default function InspectionScreen({
                     flex:1
                 }}
             >
+
 
 
                 <ScrollView
@@ -221,207 +350,31 @@ export default function InspectionScreen({
 
 
                     <Text
+
                         style={
                             styles.dashboardGreeting
                         }
+
                     >
-                        Inspection Module
+
+                        {t.inspectionModule}
+
                     </Text>
+
 
 
 
                     <Text
+
                         style={
                             styles.dashboardRole
                         }
+
                     >
-                        Create and manage cargo inspections
+
+                        {t.inspectionSubtitle}
+
                     </Text>
-
-
-
-
-
-                    {
-                        declaration.declarationNumber && (
-
-                            <View
-                                style={
-                                    styles.section
-                                }
-                            >
-
-                                <Text
-                                    style={
-                                        styles.sectionTitle
-                                    }
-                                >
-                                    Selected Declaration
-                                </Text>
-
-
-                                <Text
-                                    style={
-                                        styles.sectionText
-                                    }
-                                >
-                                    Declaration:
-                                    {" "}
-                                    {
-                                        declaration.declarationNumber
-                                    }
-                                </Text>
-
-
-                                <Text
-                                    style={
-                                        styles.sectionText
-                                    }
-                                >
-                                    Destination:
-                                    {" "}
-                                    {
-                                        declaration.destination?.address
-                                        ||
-                                        declaration.destination?.city
-                                        ||
-                                        "N/A"
-                                    }
-                                </Text>
-
-
-                            </View>
-
-                        )
-                    }
-
-
-
-
-
-
-
-                    {
-                        declaration.declarationNumber && (
-
-                            <View
-                                style={
-                                    styles.section
-                                }
-                            >
-
-
-                                <Text
-                                    style={
-                                        styles.sectionTitle
-                                    }
-                                >
-                                    New Inspection
-                                </Text>
-
-
-
-                                <TouchableOpacity
-
-                                    style={
-                                        styles.menuButton
-                                    }
-
-
-                                    onPress={()=>{
-
-                                        setStatus(
-                                            "Completed"
-                                        );
-
-                                    }}
-
-                                >
-
-                                    <Text
-                                        style={
-                                            styles.menuButtonText
-                                        }
-                                    >
-                                        Mark Completed
-                                    </Text>
-
-
-                                </TouchableOpacity>
-
-
-
-
-                                <TextInput
-
-                                    style={[
-                                        styles.input,
-                                        {
-                                            height:120,
-                                            textAlignVertical:"top"
-                                        }
-                                    ]}
-
-
-                                    placeholder=
-                                    "Add inspection comments"
-
-
-                                    placeholderTextColor={
-                                        colors.muted
-                                    }
-
-
-                                    multiline
-
-
-                                    value={
-                                        comment
-                                    }
-
-
-                                    onChangeText={
-                                        setComment
-                                    }
-
-
-                                />
-
-
-
-
-
-                                <TouchableOpacity
-
-                                    style={
-                                        styles.menuButton
-                                    }
-
-
-                                    onPress={
-                                        saveInspection
-                                    }
-
-                                >
-
-                                    <Text
-                                        style={
-                                            styles.menuButtonText
-                                        }
-                                    >
-                                        Save Inspection
-                                    </Text>
-
-
-                                </TouchableOpacity>
-
-
-
-                            </View>
-
-                        )
-                    }
-
 
 
 
@@ -434,44 +387,476 @@ export default function InspectionScreen({
                         }
                     >
 
+
                         <Text
                             style={
                                 styles.sectionTitle
                             }
                         >
-                            Inspection History
+
+                            {t.inspectionDetails}
+
+                        </Text>
+
+
+
+
+                        <TextInput
+
+                            style={
+                                styles.input
+                            }
+
+                            placeholder={
+                                t.declarationNumber
+                            }
+
+                            placeholderTextColor={
+                                colors.muted
+                            }
+
+                            value={
+                                declarationNumber
+                            }
+
+                            onChangeText={
+                                setDeclarationNumber
+                            }
+
+                        />
+
+
+
+
+
+                        <TextInput
+
+                            style={
+                                styles.input
+                            }
+
+                            placeholder={
+                                t.truck
+                            }
+
+                            placeholderTextColor={
+                                colors.muted
+                            }
+
+                            value={
+                                truckPlate
+                            }
+
+                            onChangeText={
+                                setTruckPlate
+                            }
+
+                        />
+
+
+
+                    </View>
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.inspectionStatus}
+
                         </Text>
 
 
 
 
                         {
-                            inspections.length === 0 && (
+                            [
 
-                                <Text
-                                    style={
-                                        styles.sectionText
-                                    }
+                                "Pending",
+
+                                "In Progress",
+
+                                "Completed"
+
+                            ].map(item=>(
+
+
+                                <TouchableOpacity
+
+                                    key={item}
+
+                                    style={[
+
+                                        styles.menuButton,
+
+                                        {
+
+                                            backgroundColor:
+
+                                            status===item
+
+                                            ?
+
+                                            colors.greenDark
+
+                                            :
+
+                                            colors.green
+
+                                        }
+
+                                    ]}
+
+
+                                    onPress={()=>{
+
+                                        setStatus(item);
+
+                                    }}
+
                                 >
-                                    No inspections found.
-                                </Text>
 
-                            )
+
+                                    <Text
+
+                                        style={
+                                            styles.menuButtonText
+                                        }
+
+                                    >
+
+                                        {
+                                            item==="Pending"
+
+                                            ?
+
+                                            t.pending
+
+                                            :
+
+                                            item==="In Progress"
+
+                                            ?
+
+                                            t.inProgress
+
+                                            :
+
+                                            t.completed
+                                        }
+
+                                    </Text>
+
+
+                                </TouchableOpacity>
+
+
+                            ))
+
                         }
+
+
+                    </View>
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.officerNotes}
+
+                        </Text>
+
+
+
+
+                        <TextInput
+
+                            style={[
+
+                                styles.input,
+
+                                {
+
+                                    height:120,
+
+                                    textAlignVertical:"top"
+
+                                }
+
+                            ]}
+
+
+                            multiline
+
+
+                            placeholder={
+                                t.inspectionComments
+                            }
+
+
+                            placeholderTextColor={
+                                colors.muted
+                            }
+
+
+                            value={
+                                comment
+                            }
+
+
+                            onChangeText={
+                                setComment
+                            }
+
+
+                        />
+
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.attachments}
+
+                        </Text>
+
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+                            onPress={()=>addPhoto("camera")}
+
+                        >
+
+                            <Text
+
+                                style={
+                                    styles.menuButtonText
+                                }
+
+                            >
+
+                                {t.captureEvidencePhoto}
+
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+                            onPress={()=>addPhoto("gallery")}
+
+                        >
+
+                            <Text
+
+                                style={
+                                    styles.menuButtonText
+                                }
+
+                            >
+
+                                {t.selectPhoto}
+
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.sectionText
+                            }
+
+                        >
+
+                            {t.attachedPhotos}: {photos.length}
+
+                        </Text>
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <TouchableOpacity
+
+                        style={
+                            styles.menuButton
+                        }
+
+                        onPress={
+                            saveInspection
+                        }
+
+                    >
+
+                        <Text
+
+                            style={
+                                styles.menuButtonText
+                            }
+
+                        >
+
+                            {t.submitInspectionReport}
+
+                        </Text>
+
+
+                    </TouchableOpacity>
+
+
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.inspectionHistory}
+
+                        </Text>
 
 
 
 
 
                         {
+
+                            inspections.length===0
+
+                            ?
+
+                            <Text
+
+                                style={
+                                    styles.sectionText
+                                }
+
+                            >
+
+                                {t.noInspectionsAvailable}
+
+                            </Text>
+
+
+                            :
+
+
                             inspections.map(
+
                                 (item,index)=>(
+
 
                                     <View
 
                                         key={
-                                            item._id ||
-                                            index
+                                            item._id || index
                                         }
 
                                         style={
@@ -480,71 +865,48 @@ export default function InspectionScreen({
 
                                     >
 
+
                                         <Text
+
                                             style={
                                                 styles.listTitle
                                             }
+
                                         >
+
                                             {
                                                 item.declarationNumber
                                                 ||
-                                                "Unknown"
+                                                t.unknown
                                             }
+
                                         </Text>
+
 
 
 
                                         <Text
+
                                             style={
                                                 styles.listSubtitle
                                             }
+
                                         >
-                                            Status:
-                                            {" "}
-                                            {
-                                                item.status
-                                                ||
-                                                "Pending"
-                                            }
+
+                                            {t.status}: {item.status}
+
                                         </Text>
 
-
-
-                                        <Text
-                                            style={
-                                                styles.listSubtitle
-                                            }
-                                        >
-                                            Location:
-                                            {" "}
-                                            {
-                                                item.location
-                                                ||
-                                                "N/A"
-                                            }
-                                        </Text>
-
-
-
-                                        <Text
-                                            style={
-                                                styles.listSubtitle
-                                            }
-                                        >
-                                            Comments:
-                                            {" "}
-                                            {
-                                                item.comments
-                                                ||
-                                                "None"
-                                            }
-                                        </Text>
 
 
                                     </View>
 
+
                                 )
+
                             )
+
+
                         }
 
 
@@ -552,7 +914,11 @@ export default function InspectionScreen({
 
 
 
+
+
+
                 </ScrollView>
+
 
 
 
@@ -569,11 +935,14 @@ export default function InspectionScreen({
                 />
 
 
+
             </View>
 
 
         </SafeScreen>
 
+
     );
+
 
 }

@@ -3,29 +3,56 @@ import {
     useState
 } from "react";
 
+
 import {
     View,
     Text,
     TextInput,
     ScrollView,
-    TouchableOpacity
+    TouchableOpacity,
+    ActivityIndicator
 } from "react-native";
+
 
 import SafeScreen from "../components/SafeScreen.js";
 import BottomNavigation from "../components/BottomNavigation.js";
 
+
 import {
-    getDeclarations,
-    searchDeclarations
+    getDeclarations
 } from "../services/declarationService.js";
+
+
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+
+import {
+    translations
+} from "../i18n/index.js";
+
 
 import styles from "../styles/styles.js";
 import colors from "../styles/colors.js";
 
 
+
 export default function DeclarationsScreen({
     navigation
-}) {
+}){
+
+
+    const {
+        language
+    } = useLanguage();
+
+
+
+    const t =
+        translations[language];
+
+
 
 
     const [
@@ -34,10 +61,28 @@ export default function DeclarationsScreen({
     ] = useState([]);
 
 
+
+    const [
+        filteredDeclarations,
+        setFilteredDeclarations
+    ] = useState([]);
+
+
+
     const [
         search,
         setSearch
     ] = useState("");
+
+
+
+    const [
+        loading,
+        setLoading
+    ] = useState(true);
+
+
+
 
 
 
@@ -49,138 +94,165 @@ export default function DeclarationsScreen({
 
 
 
+
+
+
     const loadDeclarations = async()=>{
 
+
         try{
+
+
+            setLoading(true);
+
+
 
             const data =
                 await getDeclarations();
 
 
-            setDeclarations(
+
+            const list =
+
                 Array.isArray(data)
+
                 ?
+
                 data
+
                 :
-                []
-            );
+
+                data?.declarations || [];
+
+
+
+
+            setDeclarations(list);
+
+            setFilteredDeclarations(list);
+
 
 
         }
 
         catch(error){
 
+
             console.log(
-                "Declarations error:",
+                "Declaration error:",
                 error.message
             );
 
 
             setDeclarations([]);
 
+            setFilteredDeclarations([]);
+
+
         }
+
+
+        finally{
+
+
+            setLoading(false);
+
+
+        }
+
 
     };
 
 
 
 
-    const handleSearch = async(value)=>{
+
+
+
+
+    const handleSearch = (value)=>{
 
 
         setSearch(value);
 
 
 
-        if(value.length < 2){
+        const text =
+            value
+            .toLowerCase()
+            .trim();
 
-            loadDeclarations();
+
+
+
+        if(!text){
+
+
+            setFilteredDeclarations(
+                declarations
+            );
+
 
             return;
 
+
         }
 
 
 
-        try{
 
-            const result =
-                await searchDeclarations(
-                    value
+
+
+        const results =
+
+            declarations.filter(item=>{
+
+
+                return(
+
+                    item.declarationNumber
+                    ?.toLowerCase()
+                    .includes(text)
+
+
+                    ||
+
+                    item.importer?.name
+                    ?.toLowerCase()
+                    .includes(text)
+
+
+
+                    ||
+
+                    item.destination?.city
+                    ?.toLowerCase()
+                    .includes(text)
+
+
+
+                    ||
+
+                    item.transport?.truckPlate
+                    ?.toLowerCase()
+                    .includes(text)
+
+
+                    ||
+
+                    item.status
+                    ?.toLowerCase()
+                    .includes(text)
+
                 );
 
 
-            setDeclarations(
-                Array.isArray(result)
-                ?
-                result
-                :
-                []
-            );
-
-
-        }
-
-
-        catch(error){
-
-
-            const text =
-                value.toLowerCase();
+            });
 
 
 
-            const filtered =
-                declarations.filter(
-                    item=>{
+        setFilteredDeclarations(results);
 
-
-                        return (
-
-                            item.declarationNumber
-                            ?.toLowerCase()
-                            .includes(text)
-
-
-                            ||
-
-                            item.transport?.truckPlate
-                            ?.toLowerCase()
-                            .includes(text)
-
-
-                            ||
-
-                            item.importer?.name
-                            ?.toLowerCase()
-                            .includes(text)
-
-
-                            ||
-
-                            item.destination?.city
-                            ?.toLowerCase()
-                            .includes(text)
-
-
-                            ||
-
-                            item.destination?.area
-                            ?.toLowerCase()
-                            .includes(text)
-
-                        );
-
-                    }
-                );
-
-
-            setDeclarations(
-                filtered
-            );
-
-
-        }
 
     };
 
@@ -188,7 +260,12 @@ export default function DeclarationsScreen({
 
 
 
-    return (
+
+
+
+
+    return(
+
 
         <SafeScreen>
 
@@ -200,56 +277,95 @@ export default function DeclarationsScreen({
             >
 
 
+
                 <ScrollView
 
-                    contentContainerStyle={
-                        styles.dashboardContainer
-                    }
+
+                    contentContainerStyle={{
+
+                        ...styles.dashboardContainer,
+
+                        paddingBottom:130
+
+                    }}
+
+
+                    showsVerticalScrollIndicator={false}
+
 
                 >
 
 
+
+
+
                     <Text
+
                         style={
                             styles.dashboardGreeting
                         }
+
                     >
-                        Declaration Management
+
+                        {t.declarations}
+
                     </Text>
+
+
 
 
 
                     <Text
+
                         style={
                             styles.dashboardRole
                         }
+
                     >
-                        Search and verify cargo declarations
+
+                        Customs declaration records
+
                     </Text>
+
+
+
+
 
 
 
 
                     <TextInput
 
+
                         style={
                             styles.input
                         }
 
-                        placeholder=
-                        "Search declaration, truck, importer..."
+
+
+                        placeholder={
+                            t.searchDeclarations ||
+                            "Search declarations"
+                        }
+
+
 
                         placeholderTextColor={
                             colors.muted
                         }
 
+
+
                         value={
                             search
                         }
 
+
+
                         onChangeText={
                             handleSearch
                         }
+
 
                     />
 
@@ -257,163 +373,399 @@ export default function DeclarationsScreen({
 
 
 
+
+
+
+
                     {
-                        declarations.length === 0 && (
 
-                            <View
-                                style={
-                                    styles.section
-                                }
-                            >
+                        loading &&
 
-                                <Text
-                                    style={
-                                        styles.sectionText
-                                    }
-                                >
-                                    No declarations available
-                                </Text>
 
-                            </View>
+                        <ActivityIndicator
 
-                        )
+
+                            size="large"
+
+
+                            color={
+                                colors.green
+                            }
+
+
+                        />
+
                     }
 
 
 
 
 
+
+
+
+
                     {
-                        declarations.map(
+
+
+                        !loading &&
+
+                        filteredDeclarations.length===0 &&
+
+
+                        <View
+
+                            style={
+                                styles.section
+                            }
+
+                        >
+
+
+                            <Text
+
+                                style={
+                                    styles.sectionTitle
+                                }
+
+                            >
+
+                                No Records
+
+                            </Text>
+
+
+
+                            <Text
+
+                                style={
+                                    styles.sectionText
+                                }
+
+                            >
+
+                                No declarations available
+
+                            </Text>
+
+
+
+                        </View>
+
+
+                    }
+
+
+
+
+
+
+
+
+
+                    {
+
+                        filteredDeclarations.map(
+
                             (item,index)=>(
 
+
                                 <TouchableOpacity
+
 
                                     key={
                                         item._id || index
                                     }
 
-                                    style={
-                                        styles.section
+
+                                    activeOpacity={
+                                        0.85
                                     }
+
+
+
+                                    style={{
+
+                                        backgroundColor:
+                                        colors.surface,
+
+                                        borderRadius:14,
+
+                                        padding:18,
+
+                                        marginBottom:15,
+
+                                        elevation:3
+
+                                    }}
+
 
 
                                     onPress={()=>{
 
+
                                         navigation.navigate(
+
                                             "DeclarationDetails",
+
                                             {
+
                                                 declaration:item
+
                                             }
+
                                         );
 
+
                                     }}
+
 
                                 >
 
 
+
+
+
                                     <Text
-                                        style={
-                                            styles.sectionTitle
-                                        }
+
+                                        style={{
+
+                                            fontSize:18,
+
+                                            fontWeight:"800",
+
+                                            color:colors.greenDark,
+
+                                            marginBottom:12
+
+                                        }}
+
                                     >
 
                                         {
+
                                             item.declarationNumber
+
                                             ||
-                                            "Unknown"
+
+                                            "Declaration"
+
                                         }
+
 
                                     </Text>
 
 
 
+
+
+
+
+
+
                                     <Text
+
                                         style={
                                             styles.sectionText
                                         }
+
                                     >
 
                                         Importer:
+
                                         {" "}
+
                                         {
+
                                             item.importer?.name
+
                                             ||
-                                            "N/A"
+
+                                            "Not available"
+
                                         }
+
 
                                     </Text>
 
 
 
+
+
+
+
+
+
                                     <Text
+
                                         style={
                                             styles.sectionText
                                         }
+
                                     >
 
-                                        Truck:
+                                        Truck Plate:
+
                                         {" "}
+
                                         {
+
                                             item.transport?.truckPlate
+
                                             ||
-                                            "N/A"
+
+                                            "Not available"
+
                                         }
+
 
                                     </Text>
 
 
 
+
+
+
+
+
+
                                     <Text
+
                                         style={
                                             styles.sectionText
                                         }
+
                                     >
 
                                         Destination:
+
                                         {" "}
+
                                         {
-                                            item.destination?.area
-                                            ||
-                                            ""
-                                        }
-                                        ,
-                                        {" "}
-                                        {
+
                                             item.destination?.city
+
                                             ||
-                                            "N/A"
+
+                                            "Unknown"
+
                                         }
 
+
                                     </Text>
+
+
+
+
+
+
 
 
 
                                     <Text
+
                                         style={
                                             styles.sectionText
                                         }
+
                                     >
 
                                         Status:
+
                                         {" "}
+
                                         {
+
                                             item.status
+
                                             ||
+
                                             "Pending"
+
                                         }
 
+
                                     </Text>
+
+
+
+
+
+
+
+
+                                    <View
+
+                                        style={{
+
+                                            marginTop:12,
+
+                                            backgroundColor:
+                                            colors.green,
+
+                                            paddingHorizontal:14,
+
+                                            paddingVertical:6,
+
+                                            borderRadius:20,
+
+                                            alignSelf:"flex-start"
+
+                                        }}
+
+
+                                    >
+
+
+
+                                        <Text
+
+                                            style={{
+
+                                                color:
+                                                colors.white,
+
+                                                fontWeight:"700",
+
+                                                fontSize:12
+
+                                            }}
+
+                                        >
+
+                                            View Details
+
+                                        </Text>
+
+
+                                    </View>
+
+
+
+
 
 
                                 </TouchableOpacity>
 
+
                             )
+
                         )
+
+
                     }
 
 
+
+
+
+
                 </ScrollView>
+
+
+
+
+
 
 
 
@@ -424,9 +776,14 @@ export default function DeclarationsScreen({
                         navigation
                     }
 
+
                     active="Declarations"
 
+
                 />
+
+
+
 
 
             </View>
@@ -434,6 +791,8 @@ export default function DeclarationsScreen({
 
         </SafeScreen>
 
+
     );
+
 
 }

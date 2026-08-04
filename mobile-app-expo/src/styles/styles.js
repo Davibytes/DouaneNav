@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
         borderColor:colors.border,
         borderRadius:8,
         paddingHorizontal:14,
-        paddingVertical:12,
+        paddingVertical:13,
         fontSize:15,
         color:colors.text,
         marginBottom:15
@@ -112,17 +112,21 @@ const styles = StyleSheet.create({
 
 
     mutedText:{
-        color:colors.muted
+        color:colors.muted,
+        fontSize:14
     },
 
 
     logoutButton:{
-        marginTop:20,
-        paddingVertical:14,
+        marginTop:25,
+        marginBottom:20,
+        paddingVertical:16,
         borderWidth:1,
         borderColor:colors.green,
-        borderRadius:8,
-        alignItems:"center"
+        borderRadius:10,
+        alignItems:"center",
+        justifyContent:"center",
+        backgroundColor:colors.surface
     },
 
 
@@ -176,7 +180,7 @@ const styles = StyleSheet.create({
 
     dashboardContainer:{
         padding:20,
-        paddingBottom:100
+        paddingBottom:130
     },
 
 
@@ -217,14 +221,16 @@ const styles = StyleSheet.create({
     sectionText:{
         fontSize:15,
         color:colors.text,
-        lineHeight:22
+        lineHeight:23,
+        marginBottom:5
     },
 
 
     operationItem:{
         fontSize:15,
         color:colors.text,
-        marginBottom:10
+        marginBottom:10,
+        lineHeight:22
     },
 
 
@@ -254,7 +260,8 @@ const styles = StyleSheet.create({
         paddingVertical:15,
         borderRadius:10,
         marginBottom:12,
-        alignItems:"center"
+        alignItems:"center",
+        justifyContent:"center"
     },
 
 
@@ -274,13 +281,15 @@ const styles = StyleSheet.create({
         backgroundColor:colors.surface,
         borderTopWidth:1,
         borderTopColor:colors.border,
-        paddingVertical:10,
-        paddingBottom:18
+        paddingTop:10,
+        paddingBottom:25,
+        height:80
     },
 
 
     bottomNavigationItem:{
         alignItems:"center",
+        justifyContent:"center",
         flex:1
     },
 
@@ -294,7 +303,60 @@ const styles = StyleSheet.create({
 
     bottomNavigationText:{
         fontSize:12,
-        fontWeight:"600"
+        fontWeight:"600",
+        marginTop:3
+    },
+
+
+    // PROFILE
+
+    profileContainer:{
+        paddingBottom:150
+    },
+
+
+    profileAvatar:{
+        alignItems:"center",
+        marginBottom:25
+    },
+
+
+    profileName:{
+        fontSize:22,
+        fontWeight:"700",
+        color:colors.text,
+        marginTop:10
+    },
+
+
+    permissionItem:{
+        flexDirection:"row",
+        alignItems:"center",
+        marginBottom:10
+    },
+
+
+    permissionText:{
+        marginLeft:8,
+        color:colors.text,
+        fontSize:14
+    },
+
+
+    // MAP
+
+    mapContainer:{
+        flex:1
+    },
+
+
+    mapInfo:{
+        padding:20
+    },
+
+
+    map:{
+        flex:1
     }
 
 });

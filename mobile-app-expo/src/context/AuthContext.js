@@ -9,7 +9,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
     login as loginRequest,
-    getCurrentUser
+    getCurrentUser,
+    logout as logoutRequest
 } from "../services/authService.js";
 
 import {
@@ -18,50 +19,69 @@ import {
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({
+    children
+}) => {
 
-    const [user, setUser] = useState(null);
+    const [
+        user,
+        setUser
+    ] = useState(null);
 
-    const [loading, setLoading] = useState(false);
+    const [
+        loading,
+        setLoading
+    ] = useState(false);
 
-    const [authChecking, setAuthChecking] = useState(true);
+    const [
+        authChecking,
+        setAuthChecking
+    ] = useState(true);
 
-
+    // Restore previous session when the app starts
     useEffect(() => {
-        restoreSession();
-    }, []);
 
+        restoreSession();
+
+    }, []);
 
     const restoreSession = async () => {
 
         try {
 
             const token =
-                await AsyncStorage.getItem("token");
+                await AsyncStorage.getItem(
+                    "token"
+                );
 
+            if (token) {
 
-            if(token){
+                setAuthToken(
+                    token
+                );
 
-                setAuthToken(token);
-
-
-                const data =
+                const response =
                     await getCurrentUser();
 
-
                 setUser(
-                    data.user
+                    response.user
                 );
 
             }
 
         }
-        catch(error){
+        catch (error) {
 
-            await logout();
+            await AsyncStorage.removeItem(
+                "token"
+            );
+
+            setAuthToken(null);
+
+            setUser(null);
 
         }
-        finally{
+        finally {
 
             setAuthChecking(false);
 
@@ -69,14 +89,12 @@ export const AuthProvider = ({ children }) => {
 
     };
 
-
     const login = async (
         email,
         password
     ) => {
 
         setLoading(true);
-
 
         try {
 
@@ -86,27 +104,23 @@ export const AuthProvider = ({ children }) => {
                     password
                 );
 
-
             await AsyncStorage.setItem(
                 "token",
                 data.token
             );
 
-
             setAuthToken(
                 data.token
             );
-
 
             setUser(
                 data.user
             );
 
-
             return data;
 
         }
-        finally{
+        finally {
 
             setLoading(false);
 
@@ -114,13 +128,25 @@ export const AuthProvider = ({ children }) => {
 
     };
 
-
     const logout = async () => {
+
+        try {
+
+            await logoutRequest();
+
+        }
+        catch (error) {
+
+            console.log(
+                "Logout error:",
+                error.message
+            );
+
+        }
 
         await AsyncStorage.removeItem(
             "token"
         );
-
 
         setAuthToken(null);
 
@@ -128,26 +154,26 @@ export const AuthProvider = ({ children }) => {
 
     };
 
-
     return (
 
         <AuthContext.Provider
-            // value={{
-            //     user,
-            //     loading,
-            //     authChecking,
-            //     login,
-            //     logout
-            // }}
 
             value={{
-    user,
-    loading,
-    authChecking,
-    login,
-    logout,
-    setUser
-}}
+
+                user,
+
+                loading,
+
+                authChecking,
+
+                login,
+
+                logout,
+
+                setUser
+
+            }}
+
         >
 
             {children}
@@ -157,7 +183,6 @@ export const AuthProvider = ({ children }) => {
     );
 
 };
-
 
 export const useAuth = () => {
 

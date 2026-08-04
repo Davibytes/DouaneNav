@@ -92,7 +92,7 @@ const startServer = async () => {
 
 
                 console.log(
-                    `Network: http://192.168.137.1:${port}`
+                    `Network: http://192.168.1.169:${port}`
                 );
 
 

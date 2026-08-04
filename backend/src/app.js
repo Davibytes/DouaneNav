@@ -49,31 +49,27 @@ const json = (
     );
 
 };
-
-
-const readBody = async (
-    req
-) => {
+const readBody = async (req) => {
 
     let value = "";
 
-    for await(
-        const chunk of req
-    ){
+    for await (const chunk of req) {
 
-        value += chunk;
+        console.log(
+            "RAW CHUNK:",
+            chunk.toString()
+        );
 
-        if(
-            value.length > 100000
-        ){
-
-            throw new Error(
-                "Request body is too large."
-            );
-
-        }
+        value += chunk.toString();
 
     }
+
+
+    console.log(
+        "RAW BODY:",
+        value
+    );
+
 
     if(!value){
 
@@ -81,9 +77,44 @@ const readBody = async (
 
     }
 
+
     return JSON.parse(value);
 
 };
+
+// const readBody = async (
+//     req
+// ) => {
+
+//     let value = "";
+
+//     for await(
+//         const chunk of req
+//     ){
+
+//         value += chunk;
+
+//         if(
+//             value.length > 100000
+//         ){
+
+//             throw new Error(
+//                 "Request body is too large."
+//             );
+
+//         }
+
+//     }
+
+//     if(!value){
+
+//         return {};
+
+//     }
+
+//     return JSON.parse(value);
+
+// };
 
 
 

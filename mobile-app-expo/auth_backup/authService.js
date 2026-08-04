@@ -6,7 +6,14 @@ export const login = async (
     password
 ) => {
 
- console.log("LOGIN REQUEST:", email, password);
+    console.log(
+    "LOGIN PAYLOAD:",
+    {
+        email,
+        password
+    }
+);
+     console.log("AUTHSERVICE: BEFORE REQUEST");
     const response =
         await api.post(
             "/auth/login",
@@ -16,7 +23,7 @@ export const login = async (
             }
         );
 
-
+ console.log("AUTHSERVICE: AFTER REQUEST");
     return response.data;
 
 };
@@ -24,12 +31,12 @@ export const login = async (
 
 
 
-export const getCurrentUser = async () => {
 
+export const logout = async () => {
 
     const response =
-        await api.get(
-            "/auth/me"
+        await api.post(
+            "/auth/logout"
         );
 
 
@@ -40,12 +47,12 @@ export const getCurrentUser = async () => {
 
 
 
-export const logout = async () => {
 
+export const getCurrentUser = async () => {
 
     const response =
-        await api.post(
-            "/auth/logout"
+        await api.get(
+            "/auth/me"
         );
 
 

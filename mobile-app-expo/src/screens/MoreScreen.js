@@ -6,10 +6,27 @@ import {
 } from "react-native";
 
 
+import {
+    Ionicons
+} from "@expo/vector-icons";
+
+
 import SafeScreen from "../components/SafeScreen.js";
 import BottomNavigation from "../components/BottomNavigation.js";
 
+
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+
+import {
+    translations
+} from "../i18n/index.js";
+
+
 import styles from "../styles/styles.js";
+import colors from "../styles/colors.js";
 
 
 
@@ -18,32 +35,54 @@ export default function MoreScreen({
 }){
 
 
-    const menu = [
+    const {
+        language
+    } = useLanguage();
+
+
+    const t =
+        translations[language];
+
+
+
+    const modules = [
+
 
         {
-            title:"Inspection Reports",
-            screen:"Reports"
+            title:t.inspectionReports,
+            description:t.inspectionReportsDescription,
+            screen:"Reports",
+            icon:"document-text"
         },
 
 
         {
-            title:"AI Analysis",
-            screen:"AIAnalysis"
+            title:t.aiAnalysis,
+            description:t.aiAnalysisDescription,
+            screen:"AIAnalysis",
+            icon:"analytics"
         },
 
 
         {
-            title:"Synchronization Status",
-            screen:"SyncStatus"
+            title:t.syncStatus,
+            description:t.syncStatusDescription,
+            screen:"SyncStatus",
+            icon:"sync"
         },
 
 
         {
-            title:"Profile",
-            screen:"Profile"
+            title:t.profile,
+            description:t.profileDescription,
+            screen:"Profile",
+            icon:"person"
         }
 
+
     ];
+
+
 
 
 
@@ -59,6 +98,7 @@ export default function MoreScreen({
             >
 
 
+
                 <ScrollView
 
                     contentContainerStyle={
@@ -68,70 +108,235 @@ export default function MoreScreen({
                 >
 
 
+
                     <Text
+
                         style={
                             styles.dashboardGreeting
                         }
+
                     >
-                        More
+
+                        {t.more}
+
                     </Text>
+
+
+
 
 
                     <Text
+
                         style={
                             styles.dashboardRole
                         }
+
                     >
-                        Additional system options
+
+                        {t.additionalModules}
+
                     </Text>
 
 
 
 
 
-                    {
-                        menu.map(
-                            (item,index)=>(
 
 
-                                <TouchableOpacity
 
-                                    key={index}
+                    <View
 
-                                    style={
-                                        styles.section
-                                    }
+                        style={{
+
+                            flexDirection:"row",
+
+                            flexWrap:"wrap",
+
+                            justifyContent:"space-between"
+
+                        }}
+
+                    >
 
 
-                                    onPress={()=>{
 
-                                        navigation.navigate(
-                                            item.screen
-                                        );
 
-                                    }}
+                        {
+                            modules.map(
 
-                                >
+                                (item,index)=>(
 
-                                    <Text
-                                        style={
-                                            styles.sectionTitle
-                                        }
+
+
+                                    <TouchableOpacity
+
+
+                                        key={index}
+
+
+
+                                        style={{
+
+                                            backgroundColor:
+                                                colors.surface,
+
+
+                                            width:"48%",
+
+
+                                            minHeight:150,
+
+
+                                            borderRadius:14,
+
+
+                                            padding:18,
+
+
+                                            marginBottom:15,
+
+
+                                            elevation:3,
+
+
+                                            borderLeftWidth:4,
+
+
+                                            borderLeftColor:
+                                                colors.green
+
+                                        }}
+
+
+
+                                        onPress={()=>{
+
+
+                                            navigation.navigate(
+                                                item.screen
+                                            );
+
+
+                                        }}
+
+
+
                                     >
 
-                                        {
-                                            item.title
-                                        }
-
-                                    </Text>
 
 
-                                </TouchableOpacity>
 
+                                        <Ionicons
+
+                                            name={
+                                                item.icon
+                                            }
+
+
+                                            size={32}
+
+
+                                            color={
+                                                colors.green
+                                            }
+
+
+                                            style={{
+
+                                                marginBottom:15
+
+                                            }}
+
+
+                                        />
+
+
+
+
+
+
+                                        <Text
+
+                                            style={{
+
+                                                fontSize:16,
+
+
+                                                fontWeight:"700",
+
+
+                                                color:
+                                                    colors.text,
+
+
+                                                marginBottom:8
+
+
+                                            }}
+
+
+                                        >
+
+                                            {
+                                                item.title
+                                            }
+
+                                        </Text>
+
+
+
+
+
+
+
+                                        <Text
+
+                                            style={{
+
+                                                fontSize:13,
+
+
+                                                color:
+                                                    colors.muted,
+
+
+                                                lineHeight:18
+
+
+                                            }}
+
+
+                                        >
+
+                                            {
+                                                item.description
+                                            }
+
+                                        </Text>
+
+
+
+
+
+                                    </TouchableOpacity>
+
+
+
+                                )
 
                             )
-                        )
-                    }
+
+                        }
+
+
+
+
+
+                    </View>
+
+
+
+
 
 
 
@@ -141,20 +346,33 @@ export default function MoreScreen({
 
 
 
+
+
                 <BottomNavigation
 
-                    navigation={navigation}
+                    navigation={
+                        navigation
+                    }
+
 
                     active="More"
 
+
                 />
+
+
+
+
 
 
             </View>
 
 
+
         </SafeScreen>
 
+
     );
+
 
 }
