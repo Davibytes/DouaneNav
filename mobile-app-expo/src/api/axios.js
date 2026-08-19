@@ -7,8 +7,7 @@ let authToken = null;
 
 const api = axios.create({
 
-    baseURL:
-        "http://192.168.1.169:5000/api",
+    baseURL: "http://192.168.1.169:5000/api",
 
     timeout:15000,
 
@@ -18,7 +17,7 @@ const api = axios.create({
 
 });
 
-
+console.log("Using API:", "http://192.168.1.169:5000/api");
 
 export const setAuthToken = (
     token

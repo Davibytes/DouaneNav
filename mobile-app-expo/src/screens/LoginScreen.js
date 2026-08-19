@@ -77,17 +77,13 @@ export default function LoginScreen({
 
             await login(
 
-                email.trim(),
-
-                password
+                email.trim(), password
 
             );
 
             Alert.alert(
 
-                "Success",
-
-                "Login successful"
+                "Success", "Login successful"
 
             );
 

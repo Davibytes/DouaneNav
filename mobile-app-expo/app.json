@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "CustomsTrack AI",
+    "name": "DouaneNav",
     "slug": "customstrack-ai-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,11 +11,16 @@
       "backgroundColor": "#FFFFFF"
     },
     "android": {
-      "package": "cm.douanenav.customstrack"
+      "package": "cm.douanenav.douanenav"
     },
     "plugins": [
       "@react-native-community/datetimepicker",
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b2eddd07-0833-408a-bc22-b0a276adbac9"
+      }
+    }
   }
 }
