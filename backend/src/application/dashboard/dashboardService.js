@@ -34,39 +34,25 @@ export const createDashboardService = (repository) => ({
 
 
         const allInspections =
-            data.inspections;
-
-
-        const ownInspections =
-            user.role === "Customs Officer"
-
-                ? allInspections.filter(
-                    (item) =>
-                        item.officerId === user.id
-                )
-
-                : allInspections;
+            data.inspections || [];
 
 
         const visibleRecent =
-            (
-                user.role === "Customs Officer"
-                    ? ownInspections
-                    : allInspections
-            )
-            .sort(
-                (a, b) =>
-                    new Date(b.createdAt) -
-                    new Date(a.createdAt)
-            )
-            .slice(0, 5);
+            [...allInspections]
+                .sort(
+                    (a, b) =>
+                        new Date(b.createdAt) -
+                        new Date(a.createdAt)
+                )
+                .slice(0, 5);
 
 
         const counts = {
 
             todayDeclarations:
-                data.declarations.filter(
+                (data.declarations || []).filter(
                     (item) =>
+                        item.createdAt &&
                         item.createdAt
                             .toISOString()
                             .startsWith(today)
@@ -74,7 +60,7 @@ export const createDashboardService = (repository) => ({
 
 
             pendingInspections:
-                data.inspections.filter(
+                allInspections.filter(
                     (item) =>
                         item.status === "Pending" ||
                         item.status === "In Progress"
@@ -82,7 +68,7 @@ export const createDashboardService = (repository) => ({
 
 
             completedInspections:
-                ownInspections.filter(
+                allInspections.filter(
                     (item) =>
                         item.status === "Completed" ||
                         item.status === "submitted" ||
@@ -91,7 +77,7 @@ export const createDashboardService = (repository) => ({
 
 
             pendingSynchronizations:
-                data.synchronizationLogs.filter(
+                (data.synchronizationLogs || []).filter(
                     (item) =>
                         item.status === "pending" ||
                         item.status === "processing"
@@ -99,7 +85,7 @@ export const createDashboardService = (repository) => ({
 
 
             activeAlerts:
-                data.alerts.filter(
+                (data.alerts || []).filter(
                     (item) =>
                         item.status === "active"
                 ).length
@@ -129,7 +115,7 @@ export const createDashboardService = (repository) => ({
 
 
             alerts:
-                data.alerts
+                (data.alerts || [])
                     .filter(
                         (item) =>
                             item.status === "active"
@@ -142,7 +128,7 @@ export const createDashboardService = (repository) => ({
 
 
             synchronization:
-                data.synchronizationLogs
+                (data.synchronizationLogs || [])
                     .sort(
                         (a, b) =>
                             new Date(
