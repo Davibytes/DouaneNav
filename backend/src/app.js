@@ -267,9 +267,9 @@ export const createApp = async () => {
         );
 
         res.setHeader(
-            "Access-Control-Allow-Headers",
-            "Authorization, Content-Type"
-        );
+    "Access-Control-Allow-Headers",
+    "Authorization, Content-Type, X-Client-Platform"
+);
 
         res.setHeader(
             "Access-Control-Allow-Methods",
