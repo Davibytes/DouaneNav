@@ -7,8 +7,8 @@ import {
     View,
     Text,
     TouchableOpacity,
-    ScrollView,
-    ActivityIndicator
+    ActivityIndicator,
+    ScrollView
 } from "react-native";
 
 
@@ -29,31 +29,18 @@ import {
 import styles from "../styles/styles.js";
 
 
-
 export default function AIAnalysisScreen({
     route,
     navigation
 }) {
 
-
     const {
-        language
+        t
     } = useLanguage();
 
 
-
-    const t =
-        language === "fr"
-        ? require("../i18n/fr.js").default
-        : require("../i18n/en.js").default;
-
-
-
-
-
     const declaration =
-        route?.params?.declaration;
-
+        route?.params?.declaration || {};
 
 
     const [
@@ -62,85 +49,66 @@ export default function AIAnalysisScreen({
     ] = useState(null);
 
 
-
     const [
         loading,
         setLoading
     ] = useState(false);
 
 
+    const startAnalysis =
+        async () => {
+
+            try {
+
+                setLoading(true);
 
 
+                const result =
+                    await runAIAnalysis({
 
-    const startAnalysis = async()=>{
+                        declarationNumber:
+                            declaration?.declarationNumber
+                            ||
+                            "CMR-2026-001",
 
+                        documents: []
 
-        try{
-
-
-            setLoading(true);
-
-
-
-            const result =
-                await runAIAnalysis({
-
-                    declarationNumber:
-                        declaration?.declarationNumber ||
-                        "CMR-2026-001",
-
-                    documents: []
-
-                });
+                    });
 
 
+                setAnalysis(
+                    result
+                );
 
-            setAnalysis(result);
+            }
 
+            catch (error) {
 
-        }
+                console.log(
+                    "AI Analysis Error:",
+                    error.message
+                );
 
-        catch(error){
+            }
 
+            finally {
 
-            console.log(
-                "AI Analysis Error:",
-                error.message
-            );
+                setLoading(false);
 
+            }
 
-        }
-
-        finally{
-
-
-            setLoading(false);
-
-
-        }
-
-
-    };
-
-
-
-
-
+        };
 
 
     return (
 
-
         <SafeScreen>
-
 
             <View
                 style={{
-                    flex:1
+                    flex: 1
                 }}
             >
-
-
 
                 <ScrollView
 
@@ -150,24 +118,13 @@ export default function AIAnalysisScreen({
 
                 >
 
-
-
-
-
-
                     <Text
                         style={
                             styles.dashboardGreeting
                         }
                     >
-
                         {t.aiAnalysis}
-
                     </Text>
-
-
-
-
 
 
                     <Text
@@ -175,39 +132,23 @@ export default function AIAnalysisScreen({
                             styles.dashboardRole
                         }
                     >
-
                         {t.aiSubtitle}
-
                     </Text>
 
 
-
-
-
-
-
-
-
                     <View
                         style={
                             styles.section
                         }
                     >
 
-
                         <Text
                             style={
                                 styles.sectionTitle
                             }
                         >
-
                             {t.declarationInformation}
-
                         </Text>
-
-
-
-
 
 
                         <Text
@@ -215,20 +156,13 @@ export default function AIAnalysisScreen({
                                 styles.sectionText
                             }
                         >
-
-                            {t.declarationNumber}:
-                            {" "}
+                            {t.declarationNumber}:{" "}
                             {
-                                declaration?.declarationNumber ||
+                                declaration?.declarationNumber
+                                ||
                                 "CMR-2026-001"
                             }
-
                         </Text>
-
-
-
-
-
 
 
                         <Text
@@ -236,24 +170,11 @@ export default function AIAnalysisScreen({
                                 styles.sectionText
                             }
                         >
-
-                            {t.analysisType}:
-                            {" "}
+                            {t.analysisType}:{" "}
                             {t.customsRiskAssessment}
-
                         </Text>
 
-
-
-
                     </View>
-
-
-
-
-
-
-
 
 
                     <View
@@ -262,20 +183,13 @@ export default function AIAnalysisScreen({
                         }
                     >
 
-
                         <Text
                             style={
                                 styles.sectionTitle
                             }
                         >
-
                             {t.aiModuleStatus}
-
                         </Text>
-
-
-
-
 
 
                         <Text
@@ -283,14 +197,8 @@ export default function AIAnalysisScreen({
                                 styles.sectionText
                             }
                         >
-
                             {t.mockAIModule}
-
                         </Text>
-
-
-
-
 
 
                         <Text
@@ -298,51 +206,30 @@ export default function AIAnalysisScreen({
                                 styles.sectionText
                             }
                         >
-
                             {t.aiDescription}
-
                         </Text>
-
-
 
                     </View>
-
-
-
-
-
-
-
 
 
                     {
-
                         analysis && (
-
 
                             <>
 
-
                                 <View
                                     style={
                                         styles.section
                                     }
                                 >
 
-
                                     <Text
                                         style={
                                             styles.sectionTitle
                                         }
                                     >
-
                                         {t.cargoRiskScore}
-
                                     </Text>
-
-
-
-
 
 
                                     <Text
@@ -350,19 +237,13 @@ export default function AIAnalysisScreen({
                                             styles.sectionText
                                         }
                                     >
-
-                                        {t.riskLevel}:
-                                        {" "}
+                                        {t.riskLevel}:{" "}
                                         {
-                                            analysis.riskLevel ||
+                                            analysis.riskLevel
+                                            ||
                                             t.medium
                                         }
-
                                     </Text>
-
-
-
-
 
 
                                     <Text
@@ -370,27 +251,16 @@ export default function AIAnalysisScreen({
                                             styles.sectionText
                                         }
                                     >
-
-                                        {t.riskScore}:
-                                        {" "}
+                                        {t.riskScore}:{" "}
                                         {
-                                            analysis.riskScore ||
+                                            analysis.riskScore
+                                            ??
                                             0
                                         }
                                         /100
-
                                     </Text>
 
-
-
                                 </View>
-
-
-
-
-
-
-
 
 
                                 <View
@@ -399,20 +269,13 @@ export default function AIAnalysisScreen({
                                     }
                                 >
 
-
                                     <Text
                                         style={
                                             styles.sectionTitle
                                         }
                                     >
-
                                         {t.inspectionPriority}
-
                                     </Text>
-
-
-
-
 
 
                                     <Text
@@ -420,26 +283,15 @@ export default function AIAnalysisScreen({
                                             styles.sectionText
                                         }
                                     >
-
-                                        {t.recommendedPriority}:
-                                        {" "}
+                                        {t.recommendedPriority}:{" "}
                                         {
-                                            analysis.priority ||
+                                            analysis.priority
+                                            ||
                                             t.normalInspection
                                         }
-
                                     </Text>
 
-
-
                                 </View>
-
-
-
-
-
-
-
 
 
                                 <View
@@ -448,20 +300,13 @@ export default function AIAnalysisScreen({
                                     }
                                 >
 
-
                                     <Text
                                         style={
                                             styles.sectionTitle
                                         }
                                     >
-
                                         {t.riskIndicators}
-
                                     </Text>
-
-
-
-
 
 
                                     <Text
@@ -469,9 +314,9 @@ export default function AIAnalysisScreen({
                                             styles.sectionText
                                         }
                                     >
-                                        • {t.consistencyCheck}
+                                        •{" "}
+                                        {t.consistencyCheck}
                                     </Text>
-
 
 
                                     <Text
@@ -479,9 +324,9 @@ export default function AIAnalysisScreen({
                                             styles.sectionText
                                         }
                                     >
-                                        • {t.destinationVerification}
+                                        •{" "}
+                                        {t.destinationVerification}
                                     </Text>
-
 
 
                                     <Text
@@ -489,19 +334,11 @@ export default function AIAnalysisScreen({
                                             styles.sectionText
                                         }
                                     >
-                                        • {t.cargoAnalysis}
+                                        •{" "}
+                                        {t.cargoAnalysis}
                                     </Text>
-
-
 
                                 </View>
-
-
-
-
-
-
-
 
 
                                 <View
@@ -510,20 +347,13 @@ export default function AIAnalysisScreen({
                                     }
                                 >
 
-
                                     <Text
                                         style={
                                             styles.sectionTitle
                                         }
                                     >
-
                                         {t.aiRecommendation}
-
                                     </Text>
-
-
-
-
 
 
                                     <Text
@@ -531,35 +361,19 @@ export default function AIAnalysisScreen({
                                             styles.sectionText
                                         }
                                     >
-
                                         {
-                                            analysis.analysis ||
+                                            analysis.analysis
+                                            ||
                                             t.reviewDeclaration
                                         }
-
                                     </Text>
 
-
-
-
                                 </View>
-
-
-
-
 
                             </>
 
                         )
-
                     }
-
-
-
-
-
-
-
 
 
                     <View
@@ -568,20 +382,13 @@ export default function AIAnalysisScreen({
                         }
                     >
 
-
                         <Text
                             style={
                                 styles.sectionTitle
                             }
                         >
-
                             {t.futureAIDevelopment}
-
                         </Text>
-
-
-
-
 
 
                         <Text
@@ -589,14 +396,8 @@ export default function AIAnalysisScreen({
                                 styles.sectionText
                             }
                         >
-
                             {t.plannedCapabilities}
-
                         </Text>
-
-
-
-
 
 
                         <Text
@@ -608,8 +409,6 @@ export default function AIAnalysisScreen({
                         </Text>
 
 
-
-
                         <Text
                             style={
                                 styles.sectionText
@@ -617,8 +416,6 @@ export default function AIAnalysisScreen({
                         >
                             • {t.invoiceVerification}
                         </Text>
-
-
 
 
                         <Text
@@ -629,16 +426,7 @@ export default function AIAnalysisScreen({
                             • {t.machineLearningRisk}
                         </Text>
 
-
-
                     </View>
-
-
-
-
-
-
-
 
 
                     <TouchableOpacity
@@ -647,11 +435,9 @@ export default function AIAnalysisScreen({
                             styles.menuButton
                         }
 
-
                         onPress={
                             startAnalysis
                         }
-
 
                         disabled={
                             loading
@@ -659,44 +445,29 @@ export default function AIAnalysisScreen({
 
                     >
 
-
                         {
-
                             loading
 
-                            ?
+                                ?
 
-                            <ActivityIndicator
-                                color="white"
-                            />
+                                <ActivityIndicator
+                                    color="white"
+                                />
 
-                            :
+                                :
 
-                            <Text
-                                style={
-                                    styles.menuButtonText
-                                }
-                            >
-
-                                {t.runAIAnalysis}
-
-                            </Text>
-
+                                <Text
+                                    style={
+                                        styles.menuButtonText
+                                    }
+                                >
+                                    {t.runAIAnalysis}
+                                </Text>
                         }
-
 
                     </TouchableOpacity>
 
-
-
-
-
                 </ScrollView>
-
-
-
-
-
 
 
                 <BottomNavigation
@@ -705,21 +476,13 @@ export default function AIAnalysisScreen({
                         navigation
                     }
 
-
                     active="More"
 
                 />
 
-
-
-
-
             </View>
 
-
-
         </SafeScreen>
-
 
     );
 

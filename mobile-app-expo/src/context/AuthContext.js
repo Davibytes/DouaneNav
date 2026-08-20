@@ -10,6 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
     login as loginRequest,
     getCurrentUser,
+    changePassword as changePasswordRequest,
     logout as logoutRequest
 } from "../services/authService.js";
 
@@ -17,7 +18,10 @@ import {
     setAuthToken
 } from "../api/axios.js";
 
-const AuthContext = createContext();
+
+const AuthContext =
+    createContext();
+
 
 export const AuthProvider = ({
     children
@@ -28,66 +32,76 @@ export const AuthProvider = ({
         setUser
     ] = useState(null);
 
+
     const [
         loading,
         setLoading
     ] = useState(false);
+
 
     const [
         authChecking,
         setAuthChecking
     ] = useState(true);
 
-    // Restore previous session when the app starts
+
     useEffect(() => {
 
         restoreSession();
 
     }, []);
 
-    const restoreSession = async () => {
 
-        try {
+    const restoreSession =
+        async () => {
 
-            const token =
-                await AsyncStorage.getItem(
+            try {
+
+                const token =
+                    await AsyncStorage.getItem(
+                        "token"
+                    );
+
+
+                if (token) {
+
+                    setAuthToken(
+                        token
+                    );
+
+
+                    const response =
+                        await getCurrentUser();
+
+
+                    setUser(
+                        response.user
+                    );
+
+                }
+
+            }
+            catch (error) {
+
+                await AsyncStorage.removeItem(
                     "token"
                 );
 
-            if (token) {
+                setAuthToken(null);
 
-                setAuthToken(
-                    token
-                );
+                setUser(null);
 
-                const response =
-                    await getCurrentUser();
+            }
+            finally {
 
-                setUser(
-                    response.user
+                setAuthChecking(
+                    false
                 );
 
             }
 
-        }
-        catch (error) {
+        };
 
-            await AsyncStorage.removeItem(
-                "token"
-            );
-
-            setAuthToken(null);
-
-            setUser(null);
-
-        }
-        finally {
-
-            setAuthChecking(false);
-
-        }
-
-    };
 
     const login = async (
         email,
@@ -95,6 +109,7 @@ export const AuthProvider = ({
     ) => {
 
         setLoading(true);
+
 
         try {
 
@@ -104,18 +119,22 @@ export const AuthProvider = ({
                     password
                 );
 
+
             await AsyncStorage.setItem(
                 "token",
                 data.token
             );
 
+
             setAuthToken(
                 data.token
             );
 
+
             setUser(
                 data.user
             );
+
 
             return data;
 
@@ -127,6 +146,43 @@ export const AuthProvider = ({
         }
 
     };
+
+
+    const changePassword =
+        async (
+            newPassword
+        ) => {
+
+            setLoading(true);
+
+
+            try {
+
+                await changePasswordRequest(
+                    newPassword
+                );
+
+
+                const response =
+                    await getCurrentUser();
+
+
+                setUser(
+                    response.user
+                );
+
+
+                return response.user;
+
+            }
+            finally {
+
+                setLoading(false);
+
+            }
+
+        };
+
 
     const logout = async () => {
 
@@ -144,9 +200,11 @@ export const AuthProvider = ({
 
         }
 
+
         await AsyncStorage.removeItem(
             "token"
         );
+
 
         setAuthToken(null);
 
@@ -154,35 +212,27 @@ export const AuthProvider = ({
 
     };
 
+
     return (
 
         <AuthContext.Provider
-
             value={{
-
                 user,
-
                 loading,
-
                 authChecking,
-
                 login,
-
+                changePassword,
                 logout,
-
                 setUser
-
             }}
-
         >
-
             {children}
-
         </AuthContext.Provider>
 
     );
 
 };
+
 
 export const useAuth = () => {
 

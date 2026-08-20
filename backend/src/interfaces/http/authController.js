@@ -20,6 +20,7 @@ const reply = (
         }
     );
 
+
     res.end(
         JSON.stringify(payload)
     );
@@ -35,7 +36,7 @@ export const createAuthController = (
         req,
         res,
         credentials
-    ){
+    ) {
 
         const platform =
             req.headers["x-client-platform"] === "mobile"
@@ -63,7 +64,7 @@ export const createAuthController = (
     async logout(
         req,
         res
-    ){
+    ) {
 
         await service.logout(
             req.headers.authorization,
@@ -83,7 +84,7 @@ export const createAuthController = (
     async me(
         req,
         res
-    ){
+    ) {
 
         const {
             user
@@ -99,6 +100,28 @@ export const createAuthController = (
             {
                 user
             }
+        );
+
+    },
+
+
+    async changePassword(
+        req,
+        res,
+        body
+    ) {
+
+        const result =
+            await service.changePassword(
+                req.headers.authorization,
+                body.newPassword
+            );
+
+
+        return reply(
+            res,
+            200,
+            result
         );
 
     }

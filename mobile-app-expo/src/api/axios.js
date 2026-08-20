@@ -1,38 +1,55 @@
 import axios from "axios";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 let authToken = null;
 
 
+const API_BASE_URL =
+    "https://douanenav-backend.onrender.com/api";
+
+
 const api = axios.create({
 
-    baseURL: "https://douanenav-backend.onrender.com/api",
+    baseURL:
+        API_BASE_URL,
 
-    timeout:15000,
+    timeout:
+        15000,
 
-    headers:{
-        "Content-Type":"application/json"
+    headers: {
+
+        "Content-Type":
+            "application/json",
+
+        "X-Client-Platform":
+            "mobile"
+
     }
 
 });
 
-console.log("Using API:", "https://douanenav-backend.onrender.com/api");
+
+console.log(
+    "Using API:",
+    API_BASE_URL
+);
+
 
 export const setAuthToken = (
     token
-)=>{
+) => {
 
-    authToken = token;
+    authToken =
+        token;
 
 };
 
 
-
 api.interceptors.request.use(
 
-    async(config)=>{
-
+    async (config) => {
 
         const token =
             authToken ||
@@ -41,7 +58,7 @@ api.interceptors.request.use(
             );
 
 
-        if(token){
+        if (token) {
 
             config.headers.Authorization =
                 `Bearer ${token}`;
@@ -49,10 +66,16 @@ api.interceptors.request.use(
         }
 
 
+        config.headers[
+            "X-Client-Platform"
+        ] =
+            "mobile";
+
+
         console.log(
             "REQUEST:",
             config.method,
-            config.baseURL + config.url
+            `${config.baseURL}${config.url}`
         );
 
 
@@ -66,20 +89,21 @@ api.interceptors.request.use(
 
     },
 
-    error=>{
 
-        return Promise.reject(error);
+    error => {
+
+        return Promise.reject(
+            error
+        );
 
     }
 
 );
 
 
-
 api.interceptors.response.use(
 
-    response=>{
-
+    response => {
 
         console.log(
             "RESPONSE:",
@@ -92,8 +116,7 @@ api.interceptors.response.use(
     },
 
 
-    error=>{
-
+    error => {
 
         console.log(
             "RESPONSE ERROR:",
@@ -107,12 +130,13 @@ api.interceptors.response.use(
         );
 
 
-        return Promise.reject(error);
+        return Promise.reject(
+            error
+        );
 
     }
 
 );
-
 
 
 export default api;

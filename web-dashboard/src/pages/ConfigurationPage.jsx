@@ -1,18 +1,40 @@
+import {
+    useLanguage
+} from "../context/LanguageContext.jsx";
+
+import en from "../i18n/en.js";
+import fr from "../i18n/fr.js";
+
+
 const ConfigurationPage = () => {
 
-  return (
-    <div className="card">
+    const {
+        language
+    } = useLanguage();
 
-      <h2>
-        Configuration
-      </h2>
 
-      <p className="muted">
-        System configuration module.
-      </p>
+    const t =
+        language === "FR"
+            ? fr
+            : en;
 
-    </div>
-  );
+
+    return (
+
+        <div className="card">
+
+            <h2>
+                {t.configurationTitle}
+            </h2>
+
+
+            <p className="muted">
+                {t.systemConfiguration}
+            </p>
+
+        </div>
+
+    );
 
 };
 

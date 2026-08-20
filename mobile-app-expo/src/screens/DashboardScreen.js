@@ -1,6 +1,8 @@
 import {
-    useState
+    useState,
+    useCallback
 } from "react";
+
 
 import {
     View,
@@ -9,28 +11,30 @@ import {
     TouchableOpacity
 } from "react-native";
 
+
 import {
     useFocusEffect
 } from "@react-navigation/native";
 
-import {
-    useCallback
-} from "react";
 
 import SafeScreen from "../components/SafeScreen.js";
 import BottomNavigation from "../components/BottomNavigation.js";
+
 
 import {
     useAuth
 } from "../context/AuthContext.js";
 
+
 import {
     useLanguage
 } from "../context/LanguageContext.js";
 
+
 import {
     getDashboard
 } from "../services/dashboardService.js";
+
 
 import styles from "../styles/styles.js";
 
@@ -38,7 +42,6 @@ import styles from "../styles/styles.js";
 export default function DashboardScreen({
     navigation
 }) {
-
 
     const {
         user
@@ -50,106 +53,92 @@ export default function DashboardScreen({
     } = useLanguage();
 
 
-
-
     const [
         dashboard,
         setDashboard
     ] = useState(null);
 
 
-
-
     useFocusEffect(
 
-        useCallback(()=>{
+        useCallback(() => {
 
             loadDashboard();
 
-        },[])
+        }, [])
 
     );
 
 
+    const loadDashboard =
+        async () => {
+
+            try {
+
+                const data =
+                    await getDashboard();
 
 
+                setDashboard(
+                    data
+                );
 
-    const loadDashboard = async()=>{
+            }
 
-        try{
+            catch (error) {
 
-            const data =
-                await getDashboard();
-
-            setDashboard(
-                data
-            );
-
-        }
-
-        catch(error){
-
-            console.log(
-                "Dashboard error:",
-                error.message
-            );
+                console.log(
+                    "Dashboard error:",
+                    error.message
+                );
 
 
-            setDashboard({
+                setDashboard({
 
-                counts:{
+                    counts: {
 
-                    todayDeclarations:0,
+                        todayDeclarations: 0,
 
-                    pendingInspections:0,
+                        pendingInspections: 0,
 
-                    completedInspections:0,
+                        completedInspections: 0,
 
-                    pendingSynchronizations:0
+                        pendingSynchronizations: 0
 
-                },
+                    },
 
+                    alerts: [],
 
-                alerts:[],
+                    recentInspections: [],
 
-                recentInspections:[],
+                    destinationStats: [],
 
-                destinationStats:[],
+                    inspectionStatistics: {
 
+                        total: 0,
 
-                inspectionStatistics:{
+                        completed: 0,
 
-                    total:0,
+                        pending: 0
 
-                    completed:0,
+                    }
 
-                    pending:0
+                });
 
-                }
+            }
 
-            });
-
-
-        }
-
-    };
-
-
-
-
+        };
 
 
     return (
 
         <SafeScreen>
 
-
             <View
                 style={{
-                    flex:1
+                    flex: 1
                 }}
             >
-
 
                 <ScrollView
 
@@ -159,133 +148,78 @@ export default function DashboardScreen({
 
                 >
 
-
-
                     <Text
-
                         style={
                             styles.dashboardGreeting
                         }
-
                     >
-
                         {t.welcome}
-
                     </Text>
 
 
-
                     <Text
-
                         style={
                             styles.dashboardRole
                         }
-
                     >
-
                         {
                             user?.name
                             ||
                             t.customsOfficer
                         }
-
                     </Text>
 
 
-
-
-
-
-
                     <View
-
                         style={
                             styles.section
                         }
-
                     >
 
-
                         <Text
-
                             style={
                                 styles.sectionTitle
                             }
-
                         >
-
                             {t.activeAlerts}
-
                         </Text>
-
 
 
                         <Text
-
                             style={
                                 styles.sectionText
                             }
-
                         >
-
                             {
                                 dashboard?.alerts?.length
-
-                                ?
-
-                                dashboard.alerts[0].message
-
-                                :
-
-                                t.noActiveAlerts
-
+                                    ? dashboard.alerts[0].message
+                                    : t.noActiveAlerts
                             }
-
                         </Text>
-
 
                     </View>
 
 
-
-
-
-
-
-
-
                     <View
-
                         style={
                             styles.section
                         }
-
                     >
 
-
                         <Text
-
                             style={
                                 styles.sectionTitle
                             }
-
                         >
-
                             {t.todaysOperations}
-
                         </Text>
 
 
-
-
                         <Text
-
                             style={
                                 styles.operationItem
                             }
-
                         >
-
                             {t.todaysDeclarations}:
                             {" "}
                             {
@@ -293,20 +227,14 @@ export default function DashboardScreen({
                                 ??
                                 0
                             }
-
                         </Text>
 
 
-
-
                         <Text
-
                             style={
                                 styles.operationItem
                             }
-
                         >
-
                             {t.pendingInspections}:
                             {" "}
                             {
@@ -314,20 +242,14 @@ export default function DashboardScreen({
                                 ??
                                 0
                             }
-
                         </Text>
 
 
-
-
                         <Text
-
                             style={
                                 styles.operationItem
                             }
-
                         >
-
                             {t.completedInspections}:
                             {" "}
                             {
@@ -335,20 +257,14 @@ export default function DashboardScreen({
                                 ??
                                 0
                             }
-
                         </Text>
 
 
-
-
                         <Text
-
                             style={
                                 styles.operationItem
                             }
-
                         >
-
                             {t.pendingSynchronizations}:
                             {" "}
                             {
@@ -356,241 +272,163 @@ export default function DashboardScreen({
                                 ??
                                 0
                             }
-
                         </Text>
-
-
 
                     </View>
 
 
-
-
-
-
-
-
-
                     <View
-
                         style={
                             styles.section
                         }
-
                     >
 
-
                         <Text
-
                             style={
                                 styles.sectionTitle
                             }
-
                         >
-
                             {t.recentInspections}
-
                         </Text>
 
 
-
                         {
-
                             dashboard?.recentInspections?.length
 
-                            ?
+                                ?
 
-                            dashboard.recentInspections.map(
+                                dashboard.recentInspections.map(
+                                    (
+                                        item,
+                                        index
+                                    ) => (
 
-                                (item,index)=>(
+                                        <View
 
-                                    <View
-
-                                        key={
-                                            item._id || index
-                                        }
-
-                                        style={
-                                            styles.listItem
-                                        }
-
-                                    >
-
-                                        <Text
+                                            key={
+                                                item._id ||
+                                                index
+                                            }
 
                                             style={
-                                                styles.listTitle
+                                                styles.listItem
                                             }
 
                                         >
 
-                                            {
-                                                item.declarationNumber
-                                                ||
-                                                t.unknown
-                                            }
-
-                                        </Text>
-
-
-
-                                        <Text
-
-                                            style={
-                                                styles.listSubtitle
-                                            }
-
-                                        >
-
-                                            {
-                                                item.status
-                                                ||
-                                                t.pending
-                                            }
-
-                                        </Text>
+                                            <Text
+                                                style={
+                                                    styles.listTitle
+                                                }
+                                            >
+                                                {
+                                                    item.declarationNumber
+                                                    ||
+                                                    t.unknown
+                                                }
+                                            </Text>
 
 
-                                    </View>
+                                            <Text
+                                                style={
+                                                    styles.listSubtitle
+                                                }
+                                            >
+                                                {
+                                                    item.status
+                                                    ||
+                                                    t.pending
+                                                }
+                                            </Text>
 
+                                        </View>
+
+                                    )
                                 )
 
-                            )
+                                :
 
-                            :
-
-                            <Text
-
-                                style={
-                                    styles.sectionText
-                                }
-
-                            >
-
-                                {t.noRecentInspections}
-
-                            </Text>
-
+                                <Text
+                                    style={
+                                        styles.sectionText
+                                    }
+                                >
+                                    {t.noRecentInspections}
+                                </Text>
                         }
-
-
 
                     </View>
 
 
-
-
-
-
-
-
-
                     <View
-
                         style={
                             styles.section
                         }
-
                     >
 
-
                         <Text
-
                             style={
                                 styles.sectionTitle
                             }
-
                         >
-
                             {t.commonDestinations}
-
                         </Text>
 
 
-
-
                         {
-
                             dashboard?.destinationStats?.map(
-
-                                (item,index)=>(
+                                (
+                                    item,
+                                    index
+                                ) => (
 
                                     <Text
-
                                         key={
                                             index
                                         }
-
                                         style={
                                             styles.operationItem
                                         }
-
                                     >
-
                                         {
                                             item.city
                                         }
-
                                         :
                                         {" "}
                                         {
                                             item.total
                                         }
-
                                         {" "}
                                         {t.declarationsCount}
-
                                     </Text>
 
                                 )
-
                             )
-
                         }
-
 
                     </View>
 
 
-
-
-
-
-
-
-
                     <View
-
                         style={
                             styles.section
                         }
-
                     >
 
-
                         <Text
-
                             style={
                                 styles.sectionTitle
                             }
-
                         >
-
                             {t.inspectionStatistics}
-
                         </Text>
 
 
-
-
                         <Text
-
                             style={
                                 styles.operationItem
                             }
-
                         >
-
                             {t.total}:
                             {" "}
                             {
@@ -598,19 +436,14 @@ export default function DashboardScreen({
                                 ??
                                 0
                             }
-
                         </Text>
 
 
-
                         <Text
-
                             style={
                                 styles.operationItem
                             }
-
                         >
-
                             {t.completed}:
                             {" "}
                             {
@@ -618,19 +451,14 @@ export default function DashboardScreen({
                                 ??
                                 0
                             }
-
                         </Text>
 
 
-
                         <Text
-
                             style={
                                 styles.operationItem
                             }
-
                         >
-
                             {t.pending}:
                             {" "}
                             {
@@ -638,43 +466,24 @@ export default function DashboardScreen({
                                 ??
                                 0
                             }
-
                         </Text>
-
-
 
                     </View>
 
 
-
-
-
-
-
-
-
                     <View
-
                         style={
                             styles.section
                         }
-
                     >
 
-
                         <Text
-
                             style={
                                 styles.sectionTitle
                             }
-
                         >
-
                             {t.quickActions}
-
                         </Text>
-
-
 
 
                         <TouchableOpacity
@@ -683,8 +492,7 @@ export default function DashboardScreen({
                                 styles.menuButton
                             }
 
-
-                            onPress={()=>{
+                            onPress={() => {
 
                                 navigation.navigate(
                                     "Declarations"
@@ -695,25 +503,14 @@ export default function DashboardScreen({
                         >
 
                             <Text
-
                                 style={
                                     styles.menuButtonText
                                 }
-
                             >
-
                                 {t.searchDeclarations}
-
                             </Text>
 
-
                         </TouchableOpacity>
-
-
-
-
-
-
 
 
                         <TouchableOpacity
@@ -722,8 +519,7 @@ export default function DashboardScreen({
                                 styles.menuButton
                             }
 
-
-                            onPress={()=>{
+                            onPress={() => {
 
                                 navigation.navigate(
                                     "More"
@@ -734,31 +530,18 @@ export default function DashboardScreen({
                         >
 
                             <Text
-
                                 style={
                                     styles.menuButtonText
                                 }
-
                             >
-
                                 {t.moreModules}
-
                             </Text>
-
 
                         </TouchableOpacity>
 
-
-
                     </View>
 
-
-
-
                 </ScrollView>
-
-
-
 
 
                 <BottomNavigation
@@ -771,10 +554,7 @@ export default function DashboardScreen({
 
                 />
 
-
-
             </View>
-
 
         </SafeScreen>
 

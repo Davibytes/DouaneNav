@@ -4,13 +4,30 @@ import {
 } from "react";
 
 
+import {
+    useLanguage
+} from "../context/LanguageContext.jsx";
+
+
+import en from "../i18n/en.js";
+import fr from "../i18n/fr.js";
+
 
 const API_URL =
-     "https://douanenav-backend.onrender.com/api";
+    "https://douanenav-backend.onrender.com/api";
 
 
+const AuditLogsPage = () => {
 
-const AuditLogsPage = ()=>{
+    const {
+        language
+    } = useLanguage();
+
+
+    const t =
+        language === "FR"
+            ? fr
+            : en;
 
 
     const [
@@ -19,12 +36,10 @@ const AuditLogsPage = ()=>{
     ] = useState([]);
 
 
-
     const [
         loading,
         setLoading
     ] = useState(true);
-
 
 
     const token =
@@ -33,61 +48,58 @@ const AuditLogsPage = ()=>{
         );
 
 
-
-
-
-
-    useEffect(()=>{
+    useEffect(() => {
 
         loadLogs();
 
-    },[]);
+    }, []);
 
 
+    const loadLogs = async () => {
 
+        try {
 
-
-
-    const loadLogs = async()=>{
-
-
-        try{
+            setLoading(true);
 
 
             const response =
                 await fetch(
-
                     `${API_URL}/audit-logs`,
-
                     {
-
-                        headers:{
+                        headers: {
 
                             Authorization:
-                            `Bearer ${token}`
+                                `Bearer ${token}`
 
                         }
 
                     }
-
                 );
-
 
 
             const data =
                 await response.json();
 
 
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "Failed to load audit logs."
+                );
+
+            }
+
 
             setLogs(
-                data
+                Array.isArray(data)
+                    ? data
+                    : []
             );
-
 
         }
 
-        catch(error){
-
+        catch (error) {
 
             console.log(
                 "Audit logs error:",
@@ -99,111 +111,96 @@ const AuditLogsPage = ()=>{
 
         }
 
-
-        finally{
-
+        finally {
 
             setLoading(false);
 
-
         }
-
 
     };
 
 
-
-
-
-
-
     return (
-
 
         <div>
 
-
             <div className="card">
 
-
                 <h2>
-                    Audit Logs
+                    {t.auditLogsTitle}
                 </h2>
 
 
                 <p className="muted">
-                    System activity tracking.
+                    {t.auditActivity}
                 </p>
-
 
             </div>
 
 
-
-
-
-
             <div className="card">
 
-
                 {
-                    loading ?
+                    loading
 
+                    ?
 
                     <p>
-                        Loading audit logs...
+                        {t.loading}
                     </p>
-
 
                     :
 
-
-
-                    <table className="inspection-table">
-
+                    <table
+                        className="inspection-table"
+                    >
 
                         <thead>
 
-
                             <tr>
 
-
                                 <th>
-                                    Action
+                                    {
+                                        language === "FR"
+                                            ? "Action"
+                                            : "Action"
+                                    }
                                 </th>
 
 
                                 <th>
-                                    User
+                                    {
+                                        language === "FR"
+                                            ? "Utilisateur"
+                                            : "User"
+                                    }
                                 </th>
 
 
                                 <th>
-                                    Date
+                                    {t.date}
                                 </th>
-
 
                             </tr>
-
 
                         </thead>
 
 
-
-
-
                         <tbody>
-
 
                             {
                                 logs.length === 0 && (
 
                                     <tr>
 
-                                        <td colSpan="3">
-
-                                            No audit logs found.
-
+                                        <td
+                                            colSpan="3"
+                                        >
+                                            {
+                                                language === "FR"
+                                                    ? "Aucun journal d'audit trouvé."
+                                                    : "No audit logs found."
+                                            }
                                         </td>
 
                                     </tr>
@@ -212,96 +209,81 @@ const AuditLogsPage = ()=>{
                             }
 
 
-
-
-
-
                             {
                                 logs.map(
-
-                                    (log,index)=>(
-
+                                    (
+                                        log,
+                                        index
+                                    ) => (
 
                                         <tr
-
                                             key={
                                                 log._id ||
+                                                log.id ||
                                                 index
                                             }
-
                                         >
 
-
                                             <td>
-
                                                 {
-                                                    log.action
+                                                    log.action ||
+                                                    t.notAvailable
                                                 }
-
                                             </td>
 
 
-
-
                                             <td>
-
                                                 {
                                                     log.user ||
                                                     log.userEmail ||
-                                                    "System"
+                                                    (
+                                                        language === "FR"
+                                                            ? "Système"
+                                                            : "System"
+                                                    )
                                                 }
-
                                             </td>
-
-
 
 
                                             <td>
 
                                                 {
-                                                    new Date(
-                                                        log.createdAt ||
-                                                        log.date
-                                                    )
-                                                    .toLocaleString()
+                                                    log.createdAt ||
+                                                    log.date
+
+                                                        ?
+
+                                                        new Date(
+                                                            log.createdAt ||
+                                                            log.date
+                                                        ).toLocaleString()
+
+                                                        :
+
+                                                        t.notAvailable
                                                 }
 
                                             </td>
 
-
-
-
                                         </tr>
 
-
                                     )
-
                                 )
                             }
 
-
-
                         </tbody>
-
-
 
                     </table>
 
-
                 }
-
 
             </div>
 
-
         </div>
-
 
     );
 
-
 };
-
 
 
 export default AuditLogsPage;

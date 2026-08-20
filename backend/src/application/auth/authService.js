@@ -1,6 +1,16 @@
-import { createToken, verifyToken } from "../../domain/auth/jwt.js";
-import { verifyPassword } from "../../domain/auth/password.js";
-import { ROLES } from "../../domain/auth/roles.js";
+import {
+    createToken,
+    verifyToken
+} from "../../domain/auth/jwt.js";
+
+import {
+    hashPassword,
+    verifyPassword
+} from "../../domain/auth/password.js";
+
+import {
+    ROLES
+} from "../../domain/auth/roles.js";
 
 
 const createError = (
@@ -21,14 +31,16 @@ const createError = (
 
 const allowedLoginRoles = {
 
-    web: new Set([
-        ROLES.ADMINISTRATOR,
-        ROLES.SUPERVISOR
-    ]),
+    web:
+        new Set([
+            ROLES.ADMINISTRATOR,
+            ROLES.SUPERVISOR
+        ]),
 
-    mobile: new Set([
-        ROLES.CUSTOMS_OFFICER
-    ])
+    mobile:
+        new Set([
+            ROLES.CUSTOMS_OFFICER
+        ])
 
 };
 
@@ -42,7 +54,7 @@ export const createAuthService = (
         credentials,
         ipAddress,
         platform = "web"
-    ){
+    ) {
 
         const {
             email,
@@ -50,10 +62,10 @@ export const createAuthService = (
         } = credentials;
 
 
-        if(
+        if (
             !email ||
             !password
-        ){
+        ) {
 
             throw createError(
                 "Email and password are required.",
@@ -71,7 +83,7 @@ export const createAuthService = (
             );
 
 
-        if(!user){
+        if (!user) {
 
             throw createError(
                 "Invalid email or password.",
@@ -88,17 +100,20 @@ export const createAuthService = (
             );
 
 
-        if(!passwordValid){
+        if (!passwordValid) {
 
             await repository.recordAudit({
 
-                action:"login.failed",
+                action:
+                    "login.failed",
 
                 ipAddress,
 
-                targetEntity:"Users"
+                targetEntity:
+                    "Users"
 
             });
+
 
             throw createError(
                 "Invalid email or password.",
@@ -108,9 +123,9 @@ export const createAuthService = (
         }
 
 
-        if(
+        if (
             user.status !== "active"
-        ){
+        ) {
 
             throw createError(
                 "User account is inactive.",
@@ -126,7 +141,7 @@ export const createAuthService = (
             );
 
 
-        if(!role){
+        if (!role) {
 
             throw createError(
                 "User role unavailable.",
@@ -144,15 +159,22 @@ export const createAuthService = (
             ];
 
 
-        if(
-            !platformRoles.has(role.name)
-        ){
+        if (
+            !platformRoles.has(
+                role.name
+            )
+        ) {
 
             throw createError(
+
                 platform === "mobile"
+
                     ? "This account is not authorized to use the mobile application."
+
                     : "This account is not authorized to use the web dashboard.",
+
                 403
+
             );
 
         }
@@ -161,9 +183,14 @@ export const createAuthService = (
         const token =
             createToken(
                 {
-                    sub:user.id,
-                    email:user.email,
-                    role:role.name
+                    sub:
+                        user.id,
+
+                    email:
+                        user.email,
+
+                    role:
+                        role.name
                 },
                 secret
             );
@@ -171,13 +198,17 @@ export const createAuthService = (
 
         await repository.recordAudit({
 
-            userId:user.id,
+            userId:
+                user.id,
 
-            action:"login",
+            action:
+                "login",
 
-            targetEntity:"Users",
+            targetEntity:
+                "Users",
 
-            targetId:user.id,
+            targetId:
+                user.id,
 
             ipAddress
 
@@ -204,14 +235,14 @@ export const createAuthService = (
 
     async authenticate(
         authorization
-    ){
+    ) {
 
-        if(
+        if (
             !authorization ||
             !authorization.startsWith(
                 "Bearer "
             )
-        ){
+        ) {
 
             throw createError(
                 "Bearer token required.",
@@ -233,8 +264,7 @@ export const createAuthService = (
                 );
 
         }
-
-        catch(error){
+        catch (error) {
 
             throw createError(
                 error.message,
@@ -250,10 +280,10 @@ export const createAuthService = (
             );
 
 
-        if(
+        if (
             !user ||
             user.status !== "active"
-        ){
+        ) {
 
             throw createError(
                 "User unavailable.",
@@ -267,6 +297,16 @@ export const createAuthService = (
             await repository.findRoleById(
                 user.roleId
             );
+
+
+        if (!role) {
+
+            throw createError(
+                "User role unavailable.",
+                401
+            );
+
+        }
 
 
         return {
@@ -284,10 +324,55 @@ export const createAuthService = (
     },
 
 
+    async changePassword(
+        authorization,
+        newPassword
+    ) {
+
+        const {
+            user
+        } =
+            await this.authenticate(
+                authorization
+            );
+
+
+        if (
+            !newPassword ||
+            newPassword.length < 8
+        ) {
+
+            throw createError(
+                "Password must contain at least 8 characters.",
+                422
+            );
+
+        }
+
+
+        await repository.changePassword(
+            user.id,
+            newPassword
+        );
+
+
+        return {
+
+            success:
+                true,
+
+            message:
+                "Password changed successfully."
+
+        };
+
+    },
+
+
     async logout(
         authorization,
         ipAddress
-    ){
+    ) {
 
         const {
             claims,
@@ -306,13 +391,17 @@ export const createAuthService = (
 
         await repository.recordAudit({
 
-            userId:user.id,
+            userId:
+                user.id,
 
-            action:"logout",
+            action:
+                "logout",
 
-            targetEntity:"Users",
+            targetEntity:
+                "Users",
 
-            targetId:user.id,
+            targetId:
+                user.id,
 
             ipAddress
 

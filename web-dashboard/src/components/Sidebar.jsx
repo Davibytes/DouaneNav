@@ -1,152 +1,240 @@
-import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
+import {
+    NavLink,
+    useNavigate
+} from "react-router-dom";
+
+import {
+    useAuth
+} from "../context/AuthContext.jsx";
+
+import {
+    useLanguage
+} from "../context/LanguageContext.jsx";
+
+import en from "../i18n/en.js";
+import fr from "../i18n/fr.js";
+
 
 const Sidebar = () => {
 
-  const { logout } = useAuth();
+    const {
+        logout
+    } = useAuth();
 
-  const navigate = useNavigate();
 
-  const menus = [
+    const navigate =
+        useNavigate();
 
-    {
-      name: "Dashboard",
-      path: "/dashboard"
-    },
 
-    {
-      name: "Declarations",
-      path: "/declarations"
-    },
+    const {
+        language,
+        changeLanguage
+    } = useLanguage();
 
-    {
-      name: "Reports",
-      path: "/reports"
-    },
 
-    {
-      name: "Inspection Monitoring",
-      path: "/inspections"
-    },
+    const t =
+        language === "FR"
+            ? fr
+            : en;
 
-    {
-      name: "Synchronization",
-      path: "/synchronization"
-    },
 
-    {
-      name: "Users",
-      path: "/users"
-    },
-
-    {
-      name: "Configuration",
-      path: "/configuration"
-    },
-
-    {
-      name: "Audit Logs",
-      path: "/audit-logs"
-    }
-
-  ];
-
-  const handleLogout = async () => {
-
-    await logout();
-
-    navigate("/login");
-
-  };
-
-  return (
-
-    <aside className="sidebar">
-
-      <h2 className="sidebar-title">
-        DouaneNav
-      </h2>
-
-      <div className="language-toggle">
-
-        <button>
-          FR
-        </button>
-
-        <button>
-          EN
-        </button>
-
-      </div>
-
-      <nav>
+    const menus = [
 
         {
-          menus.map((menu) => (
+            name: "dashboard",
+            path: "/dashboard"
+        },
 
-            <NavLink
+        {
+            name: "declarations",
+            path: "/declarations"
+        },
 
-              key={menu.path}
+        {
+            name: "reports",
+            path: "/reports"
+        },
 
-              to={menu.path}
+        {
+            name: "inspectionMonitoring",
+            path: "/inspections"
+        },
 
-              className={({ isActive }) =>
+        {
+            name: "synchronization",
+            path: "/synchronization"
+        },
 
-                isActive
+        {
+            name: "users",
+            path: "/users"
+        },
 
-                  ?
+        {
+            name: "configuration",
+            path: "/configuration"
+        },
 
-                  "sidebar-link active"
-
-                  :
-
-                  "sidebar-link"
-
-              }
-
-            >
-
-              {menu.name}
-
-            </NavLink>
-
-          ))
+        {
+            name: "auditLogs",
+            path: "/audit-logs"
         }
 
-      </nav>
+    ];
 
-      <div className="sidebar-bottom">
 
-        <button
+    const handleLogout =
+        async () => {
 
-          className="settings-link"
+            await logout();
 
-          onClick={() => navigate("/settings")}
+            navigate(
+                "/login"
+            );
 
+        };
+
+
+    return (
+
+        <aside
+            className="sidebar"
         >
 
-          <i className="fa-solid fa-gear"></i>
+            <h2
+                className="sidebar-title"
+            >
+                {t.appName}
+            </h2>
 
-        </button>
 
-        <button
+            <div
+                className="language-toggle"
+            >
 
-          className="logout-button"
+                <button
+                    onClick={() =>
+                        changeLanguage("FR")
+                    }
 
-          onClick={handleLogout}
+                    className={
+                        language === "FR"
+                            ? "active"
+                            : ""
+                    }
+                >
+                    FR
+                </button>
 
-        >
 
-          Logout
+                <button
+                    onClick={() =>
+                        changeLanguage("EN")
+                    }
 
-        </button>
+                    className={
+                        language === "EN"
+                            ? "active"
+                            : ""
+                    }
+                >
+                    EN
+                </button>
 
-      </div>
+            </div>
 
-    </aside>
 
-  );
+            <nav>
+
+                {
+                    menus.map(
+                        menu => (
+
+                            <NavLink
+
+                                key={
+                                    menu.path
+                                }
+
+                                to={
+                                    menu.path
+                                }
+
+                                className={({
+                                    isActive
+                                }) =>
+
+                                    isActive
+                                        ? "sidebar-link active"
+                                        : "sidebar-link"
+
+                                }
+
+                            >
+
+                                {
+                                    t[
+                                        menu.name
+                                    ]
+                                }
+
+                            </NavLink>
+
+                        )
+                    )
+                }
+
+            </nav>
+
+
+            <div
+                className="sidebar-bottom"
+            >
+
+                <button
+
+                    className="settings-link"
+
+                    onClick={() =>
+                        navigate(
+                            "/settings"
+                        )
+                    }
+
+                    title={
+                        t.settings
+                    }
+
+                >
+
+                    <i
+                        className="fa-solid fa-gear"
+                    />
+
+                </button>
+
+
+                <button
+
+                    className="logout-button"
+
+                    onClick={
+                        handleLogout
+                    }
+
+                >
+
+                    {t.logout}
+
+                </button>
+
+            </div>
+
+        </aside>
+
+    );
 
 };
+
 
 export default Sidebar;

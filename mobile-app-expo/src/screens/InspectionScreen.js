@@ -30,10 +30,6 @@ import {
     useLanguage
 } from "../context/LanguageContext.js";
 
-import {
-    translations
-} from "../i18n/index.js";
-
 import styles from "../styles/styles.js";
 import colors from "../styles/colors.js";
 
@@ -44,11 +40,8 @@ export default function InspectionScreen({
 }) {
 
     const {
-        language
+        t
     } = useLanguage();
-
-    const t =
-        translations[language];
 
 
     const declaration =
@@ -109,6 +102,7 @@ export default function InspectionScreen({
             const data =
                 await getInspections();
 
+
             setInspections(
                 Array.isArray(data)
                     ? data
@@ -116,6 +110,7 @@ export default function InspectionScreen({
             );
 
         }
+
         catch (error) {
 
             console.log(
@@ -138,14 +133,15 @@ export default function InspectionScreen({
         if (type === "camera") {
 
             const permission =
-                await ImagePicker.requestCameraPermissionsAsync();
+                await ImagePicker
+                    .requestCameraPermissionsAsync();
 
 
             if (!permission.granted) {
 
                 Alert.alert(
-                    "Permission required",
-                    "Camera permission is required."
+                    t.permissionRequired,
+                    t.cameraPermissionRequired
                 );
 
                 return;
@@ -155,7 +151,11 @@ export default function InspectionScreen({
 
             result =
                 await ImagePicker.launchCameraAsync({
-                    quality: 0.7
+
+                    quality: 0.7,
+
+                    base64: true
+
                 });
 
         }
@@ -163,7 +163,11 @@ export default function InspectionScreen({
 
             result =
                 await ImagePicker.launchImageLibraryAsync({
-                    quality: 0.7
+
+                    quality: 0.7,
+
+                    base64: true
+
                 });
 
         }
@@ -171,10 +175,20 @@ export default function InspectionScreen({
 
         if (!result.canceled) {
 
+            const asset =
+                result.assets[0];
+
+
+            const photo =
+                asset.base64
+                    ? `data:image/jpeg;base64,${asset.base64}`
+                    : asset.uri;
+
+
             setPhotos(
                 currentPhotos => [
                     ...currentPhotos,
-                    result.assets[0].uri
+                    photo
                 ]
             );
 
@@ -188,8 +202,8 @@ export default function InspectionScreen({
         if (!declarationNumber) {
 
             Alert.alert(
-                "Missing information",
-                "Declaration number is required."
+                t.missingInformation,
+                t.declarationNumberRequired
             );
 
             return;
@@ -203,15 +217,17 @@ export default function InspectionScreen({
 
             truckPlate,
 
-            comments: comment,
+            comments:
+                comment,
 
             status,
 
             photos,
 
             location:
-                declaration?.destination?.address ||
-                "Customs Inspection Point"
+                declaration?.destination?.address
+                ||
+                t.customsInspectionPoint
 
         };
 
@@ -224,13 +240,17 @@ export default function InspectionScreen({
                 );
 
 
-            if (status === "Completed") {
+            if (
+                status === "Completed"
+            ) {
 
                 await createReport({
 
                     inspectionId:
-                        savedInspection?.id ||
-                        savedInspection?._id ||
+                        savedInspection?.id
+                        ||
+                        savedInspection?._id
+                        ||
                         null,
 
                     declarationNumber,
@@ -238,23 +258,29 @@ export default function InspectionScreen({
                     truckPlate,
 
                     officer:
-                        savedInspection?.officer ||
-                        "Unknown",
+                        savedInspection?.officer
+                        ||
+                        t.unknown,
 
                     result:
+                        t.completed,
+
+                    status:
                         "Completed",
 
-                    status: "Completed",
-
-                    comments: comment,
+                    comments:
+                        comment,
 
                     photos,
 
                     location:
-                        declaration?.destination?.address ||
-                        "Customs Inspection Point",
+                        declaration
+                            ?.destination
+                            ?.address
+                        ||
+                        t.customsInspectionPoint,
 
-                    declaration: declaration
+                    declaration
 
                 });
 
@@ -262,31 +288,43 @@ export default function InspectionScreen({
 
 
             Alert.alert(
-                "Success",
+
+                t.success,
+
                 status === "Completed"
-                    ? "Inspection and report submitted successfully."
-                    : "Inspection saved successfully."
+                    ? t.inspectionReportSubmitted
+                    : t.inspectionSaved
+
             );
 
 
             setDeclarationNumber(
-                declaration?.declarationNumber || ""
+                declaration?.declarationNumber
+                ||
+                ""
             );
 
+
             setTruckPlate(
-                declaration?.transport?.truckPlate || ""
+                declaration?.transport?.truckPlate
+                ||
+                ""
             );
+
 
             setComment("");
 
             setPhotos([]);
 
-            setStatus("Pending");
+            setStatus(
+                "Pending"
+            );
 
 
             await loadInspections();
 
         }
+
         catch (error) {
 
             console.log(
@@ -294,9 +332,10 @@ export default function InspectionScreen({
                 error.message
             );
 
+
             Alert.alert(
-                "Error",
-                "Inspection submission failed."
+                t.error,
+                t.inspectionSubmissionFailed
             );
 
         }
@@ -356,40 +395,52 @@ export default function InspectionScreen({
 
 
                         <TextInput
+
                             style={
                                 styles.input
                             }
+
                             placeholder={
-                                t.declarationNumber
+                                t.declarationNumberPlaceholder
                             }
+
                             placeholderTextColor={
                                 colors.muted
                             }
+
                             value={
                                 declarationNumber
                             }
+
                             onChangeText={
                                 setDeclarationNumber
                             }
+
                         />
 
 
                         <TextInput
+
                             style={
                                 styles.input
                             }
+
                             placeholder={
-                                t.truck
+                                t.truckPlatePlaceholder
                             }
+
                             placeholderTextColor={
                                 colors.muted
                             }
+
                             value={
                                 truckPlate
                             }
+
                             onChangeText={
                                 setTruckPlate
                             }
+
                         />
 
                     </View>
@@ -415,41 +466,55 @@ export default function InspectionScreen({
                                 "Pending",
                                 "In Progress",
                                 "Completed"
-                            ].map(item => (
+                            ].map(
+                                item => (
 
-                                <TouchableOpacity
-                                    key={item}
-                                    style={[
-                                        styles.menuButton,
-                                        {
-                                            backgroundColor:
-                                                status === item
-                                                    ? colors.greenDark
-                                                    : colors.green
-                                        }
-                                    ]}
-                                    onPress={() => {
-                                        setStatus(item);
-                                    }}
-                                >
+                                    <TouchableOpacity
 
-                                    <Text
-                                        style={
-                                            styles.menuButtonText
+                                        key={
+                                            item
                                         }
+
+                                        style={[
+                                            styles.menuButton,
+
+                                            {
+                                                backgroundColor:
+                                                    status === item
+                                                        ? colors.greenDark
+                                                        : colors.green
+                                            }
+
+                                        ]}
+
+                                        onPress={() =>
+                                            setStatus(
+                                                item
+                                            )
+                                        }
+
                                     >
-                                        {
-                                            item === "Pending"
-                                                ? t.pending
-                                                : item === "In Progress"
-                                                    ? t.inProgress
-                                                    : t.completed
-                                        }
-                                    </Text>
 
-                                </TouchableOpacity>
+                                        <Text
+                                            style={
+                                                styles.menuButtonText
+                                            }
+                                        >
 
-                            ))
+                                            {
+                                                item === "Pending"
+                                                    ? t.pending
+                                                    : item === "In Progress"
+                                                        ? t.inProgress
+                                                        : t.completed
+                                            }
+
+                                        </Text>
+
+                                    </TouchableOpacity>
+
+                                )
+                            )
                         }
 
                     </View>
@@ -471,26 +536,34 @@ export default function InspectionScreen({
 
 
                         <TextInput
+
                             style={[
                                 styles.input,
                                 {
                                     height: 120,
-                                    textAlignVertical: "top"
+                                    textAlignVertical:
+                                        "top"
                                 }
                             ]}
+
                             multiline
+
                             placeholder={
                                 t.inspectionComments
                             }
+
                             placeholderTextColor={
                                 colors.muted
                             }
+
                             value={
                                 comment
                             }
+
                             onChangeText={
                                 setComment
                             }
+
                         />
 
                     </View>
@@ -516,7 +589,9 @@ export default function InspectionScreen({
                                 styles.menuButton
                             }
                             onPress={() =>
-                                addPhoto("camera")
+                                addPhoto(
+                                    "camera"
+                                )
                             }
                         >
 
@@ -536,7 +611,9 @@ export default function InspectionScreen({
                                 styles.menuButton
                             }
                             onPress={() =>
-                                addPhoto("gallery")
+                                addPhoto(
+                                    "gallery"
+                                )
                             }
                         >
 
@@ -556,7 +633,8 @@ export default function InspectionScreen({
                                 styles.sectionText
                             }
                         >
-                            {t.attachedPhotos}: {photos.length}
+                            {t.attachedPhotos}:{" "}
+                            {photos.length}
                         </Text>
 
                     </View>
@@ -598,6 +676,7 @@ export default function InspectionScreen({
 
 
                         {
+
                             inspections.length === 0
 
                                 ?
@@ -613,17 +692,25 @@ export default function InspectionScreen({
                                 :
 
                                 inspections.map(
-                                    (item, index) => (
+                                    (
+                                        item,
+                                        index
+                                    ) => (
 
                                         <View
+
                                             key={
-                                                item._id ||
-                                                item.id ||
+                                                item._id
+                                                ||
+                                                item.id
+                                                ||
                                                 index
                                             }
+
                                             style={
                                                 styles.listItem
                                             }
+
                                         >
 
                                             <Text
@@ -632,7 +719,8 @@ export default function InspectionScreen({
                                                 }
                                             >
                                                 {
-                                                    item.declarationNumber ||
+                                                    item.declarationNumber
+                                                    ||
                                                     t.unknown
                                                 }
                                             </Text>
@@ -643,8 +731,11 @@ export default function InspectionScreen({
                                                     styles.listSubtitle
                                                 }
                                             >
-                                                {t.status}: {
+                                                {t.status}:{" "}
+                                                {
                                                     item.status
+                                                    ||
+                                                    t.unknown
                                                 }
                                             </Text>
 
@@ -652,6 +743,7 @@ export default function InspectionScreen({
 
                                     )
                                 )
+
                         }
 
                     </View>
@@ -660,10 +752,13 @@ export default function InspectionScreen({
 
 
                 <BottomNavigation
+
                     navigation={
                         navigation
                     }
+
                     active="Inspection"
+
                 />
 
             </View>

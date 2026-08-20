@@ -27,91 +27,103 @@ import SafeScreen from "../components/SafeScreen.js";
 import colors from "../styles/colors.js";
 import styles from "../styles/styles.js";
 
+
 export default function LoginScreen({
     navigation
-}){
+}) {
 
     const {
         login,
         loading
     } = useAuth();
 
+
     const {
         language,
         changeLanguage
     } = useLanguage();
 
+
     const t =
         translations[language];
+
 
     const [
         email,
         setEmail
     ] = useState("");
 
+
     const [
         password,
         setPassword
     ] = useState("");
 
-    const handleLogin = async()=>{
 
-        if(
+    const handleLogin = async () => {
+
+        if (
             !email ||
             !password
-        ){
+        ) {
 
             Alert.alert(
-
                 "Missing information",
-
                 "Please enter your email and password."
-
             );
 
             return;
 
         }
 
-        try{
 
-            await login(
+        try {
 
-                email.trim(), password
+            const data =
+                await login(
+                    email.trim(),
+                    password
+                );
 
-            );
+
+            if (
+                data?.user?.mustChangePassword
+            ) {
+
+                navigation.replace(
+                    "ChangePassword"
+                );
+
+                return;
+
+            }
+
 
             Alert.alert(
-
-                "Success", "Login successful"
-
+                "Success",
+                "Login successful"
             );
 
         }
 
-        catch(error){
+        catch (error) {
 
             Alert.alert(
-
                 "Login failed",
 
                 error.response?.data?.error
-
                 ||
-
                 error.message
-
                 ||
-
                 "Unable to login."
-
             );
 
         }
 
     };
 
-    return(
+
+    return (
 
         <SafeScreen>
 
@@ -126,12 +138,13 @@ export default function LoginScreen({
                         styles.logoText,
                         {
                             color:
-                            colors.green
+                                colors.green
                         }
                     ]}
                 >
                     DouaneNav
                 </Text>
+
 
                 <Text
                     style={
@@ -141,6 +154,7 @@ export default function LoginScreen({
                     CAMEROON CUSTOMS
                 </Text>
 
+
                 <Text
                     style={
                         styles.loginTitle
@@ -148,6 +162,7 @@ export default function LoginScreen({
                 >
                     {t.loginTitle}
                 </Text>
+
 
                 <Text
                     style={
@@ -157,13 +172,16 @@ export default function LoginScreen({
                     {t.loginSubtitle}
                 </Text>
 
+
                 <TextInput
 
                     style={
                         styles.input
                     }
 
-                    placeholder={t.email}
+                    placeholder={
+                        t.email
+                    }
 
                     placeholderTextColor={
                         colors.muted
@@ -183,13 +201,16 @@ export default function LoginScreen({
 
                 />
 
+
                 <TextInput
 
                     style={
                         styles.input
                     }
 
-                    placeholder={t.password}
+                    placeholder={
+                        t.password
+                    }
 
                     placeholderTextColor={
                         colors.muted
@@ -207,9 +228,10 @@ export default function LoginScreen({
 
                 />
 
+
                 <TouchableOpacity
 
-                    onPress={()=>{
+                    onPress={() => {
 
                         navigation.navigate(
                             "ForgotPassword"
@@ -229,13 +251,14 @@ export default function LoginScreen({
 
                 </TouchableOpacity>
 
+
                 <TouchableOpacity
 
                     style={[
                         styles.button,
                         {
                             backgroundColor:
-                            colors.green
+                                colors.green
                         }
                     ]}
 
@@ -257,13 +280,9 @@ export default function LoginScreen({
 
                         {
                             loading
-
                             ?
-
                             t.signingIn
-
                             :
-
                             t.signIn
                         }
 
@@ -271,19 +290,27 @@ export default function LoginScreen({
 
                 </TouchableOpacity>
 
+
                 <View
                     style={{
-                        flexDirection:"row",
-                        justifyContent:"center",
-                        marginTop:25
+                        flexDirection:
+                            "row",
+
+                        justifyContent:
+                            "center",
+
+                        marginTop:
+                            25
                     }}
                 >
 
                     <TouchableOpacity
 
-                        onPress={()=>{
+                        onPress={() => {
 
-                            changeLanguage("FR");
+                            changeLanguage(
+                                "FR"
+                            );
 
                         }}
 
@@ -293,13 +320,13 @@ export default function LoginScreen({
                             style={[
                                 styles.language,
                                 {
-                                    marginTop:0,
+                                    marginTop:
+                                        0,
+
                                     fontWeight:
-                                    language==="FR"
-                                    ?
-                                    "700"
-                                    :
-                                    "400"
+                                        language === "FR"
+                                            ? "700"
+                                            : "400"
                                 }
                             ]}
                         >
@@ -308,24 +335,33 @@ export default function LoginScreen({
 
                     </TouchableOpacity>
 
+
                     <Text
                         style={[
                             styles.language,
                             {
-                                marginTop:0,
-                                marginHorizontal:8,
-                                color:colors.muted
+                                marginTop:
+                                    0,
+
+                                marginHorizontal:
+                                    8,
+
+                                color:
+                                    colors.muted
                             }
                         ]}
                     >
                         |
                     </Text>
 
+
                     <TouchableOpacity
 
-                        onPress={()=>{
+                        onPress={() => {
 
-                            changeLanguage("EN");
+                            changeLanguage(
+                                "EN"
+                            );
 
                         }}
 
@@ -335,13 +371,13 @@ export default function LoginScreen({
                             style={[
                                 styles.language,
                                 {
-                                    marginTop:0,
+                                    marginTop:
+                                        0,
+
                                     fontWeight:
-                                    language==="EN"
-                                    ?
-                                    "700"
-                                    :
-                                    "400"
+                                        language === "EN"
+                                            ? "700"
+                                            : "400"
                                 }
                             ]}
                         >

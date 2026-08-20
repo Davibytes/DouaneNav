@@ -23,12 +23,10 @@ import {
 import styles from "../styles/styles.js";
 
 
-
 export default function DeclarationDetailsScreen({
     route,
     navigation
 }) {
-
 
     const {
         language
@@ -39,24 +37,19 @@ export default function DeclarationDetailsScreen({
         translations[language];
 
 
-
     const declaration =
         route?.params?.declaration || {};
-
-
 
 
     return (
 
         <SafeScreen>
 
-
             <View
                 style={{
-                    flex:1
+                    flex: 1
                 }}
             >
-
 
                 <ScrollView
 
@@ -65,8 +58,6 @@ export default function DeclarationDetailsScreen({
                     }
 
                 >
-
-
 
                     <Text
                         style={
@@ -77,7 +68,6 @@ export default function DeclarationDetailsScreen({
                     </Text>
 
 
-
                     <Text
                         style={
                             styles.dashboardRole
@@ -85,11 +75,6 @@ export default function DeclarationDetailsScreen({
                     >
                         {t.cargoVerificationInformation}
                     </Text>
-
-
-
-
-
 
 
                     <View
@@ -114,7 +99,8 @@ export default function DeclarationDetailsScreen({
                         >
                             {t.declarationNumber}:{" "}
                             {
-                                declaration.declarationNumber ||
+                                declaration.declarationNumber
+                                ||
                                 t.notAvailable
                             }
                         </Text>
@@ -127,20 +113,13 @@ export default function DeclarationDetailsScreen({
                         >
                             {t.status}:{" "}
                             {
-                                declaration.status ||
+                                declaration.status
+                                ||
                                 t.pendingVerification
                             }
                         </Text>
 
-
                     </View>
-
-
-
-
-
-
-
 
 
                     <View
@@ -165,7 +144,8 @@ export default function DeclarationDetailsScreen({
                         >
                             {t.company}:{" "}
                             {
-                                declaration.importer?.name ||
+                                declaration.importer?.name
+                                ||
                                 t.notAvailable
                             }
                         </Text>
@@ -178,20 +158,13 @@ export default function DeclarationDetailsScreen({
                         >
                             {t.country}:{" "}
                             {
-                                declaration.importer?.country ||
+                                declaration.importer?.country
+                                ||
                                 t.notAvailable
                             }
                         </Text>
 
-
                     </View>
-
-
-
-
-
-
-
 
 
                     <View
@@ -216,7 +189,8 @@ export default function DeclarationDetailsScreen({
                         >
                             {t.description}:{" "}
                             {
-                                declaration.goods?.description ||
+                                declaration.goods?.description
+                                ||
                                 t.notAvailable
                             }
                         </Text>
@@ -229,7 +203,8 @@ export default function DeclarationDetailsScreen({
                         >
                             {t.category}:{" "}
                             {
-                                declaration.goods?.category ||
+                                declaration.goods?.category
+                                ||
                                 t.notAvailable
                             }
                         </Text>
@@ -242,20 +217,13 @@ export default function DeclarationDetailsScreen({
                         >
                             {t.quantity}:{" "}
                             {
-                                declaration.goods?.quantity ||
+                                declaration.goods?.quantity
+                                ??
                                 t.notAvailable
                             }
                         </Text>
 
-
                     </View>
-
-
-
-
-
-
-
 
 
                     <View
@@ -280,7 +248,8 @@ export default function DeclarationDetailsScreen({
                         >
                             {t.truckPlate}:{" "}
                             {
-                                declaration.transport?.truckPlate ||
+                                declaration.transport?.truckPlate
+                                ||
                                 t.notAvailable
                             }
                         </Text>
@@ -293,20 +262,13 @@ export default function DeclarationDetailsScreen({
                         >
                             {t.driver}:{" "}
                             {
-                                declaration.transport?.driver ||
+                                declaration.transport?.driver
+                                ||
                                 t.notAvailable
                             }
                         </Text>
 
-
                     </View>
-
-
-
-
-
-
-
 
 
                     <View
@@ -331,13 +293,14 @@ export default function DeclarationDetailsScreen({
                         >
                             {t.destination}:{" "}
                             {
-                                declaration.destination?.area ||
+                                declaration.destination?.area
+                                ||
                                 t.notAvailable
-                            }
-                            ,
+                            },
                             {" "}
                             {
-                                declaration.destination?.city ||
+                                declaration.destination?.city
+                                ||
                                 t.notAvailable
                             }
                         </Text>
@@ -350,14 +313,11 @@ export default function DeclarationDetailsScreen({
                         >
                             {t.address}:{" "}
                             {
-                                declaration.destination?.address ||
+                                declaration.destination?.address
+                                ||
                                 t.notAvailable
                             }
                         </Text>
-
-
-
-
 
 
                         <TouchableOpacity
@@ -366,8 +326,7 @@ export default function DeclarationDetailsScreen({
                                 styles.menuButton
                             }
 
-
-                            onPress={()=>{
+                            onPress={() => {
 
                                 navigation.navigate(
                                     "DestinationMap",
@@ -388,21 +347,9 @@ export default function DeclarationDetailsScreen({
                                 {t.verifyDestinationMap}
                             </Text>
 
-
                         </TouchableOpacity>
 
-
                     </View>
-
-
-
-
-
-
-
-
-
-
 
 
                     <View
@@ -427,7 +374,8 @@ export default function DeclarationDetailsScreen({
                         >
                             {t.inspectionStatus}:{" "}
                             {
-                                declaration.inspectionStatus ||
+                                declaration.inspectionStatus
+                                ||
                                 t.awaitingInspection
                             }
                         </Text>
@@ -440,23 +388,13 @@ export default function DeclarationDetailsScreen({
                         >
                             {t.riskLevel}:{" "}
                             {
-                                declaration.riskLevel ||
+                                declaration.riskLevel
+                                ||
                                 t.notAssessed
                             }
                         </Text>
 
-
                     </View>
-
-
-
-
-
-
-
-
-
-
 
 
                     <View
@@ -474,15 +412,13 @@ export default function DeclarationDetailsScreen({
                         </Text>
 
 
-
                         <TouchableOpacity
 
                             style={
                                 styles.menuButton
                             }
 
-
-                            onPress={()=>{
+                            onPress={() => {
 
                                 navigation.navigate(
                                     "AIAnalysis",
@@ -503,13 +439,7 @@ export default function DeclarationDetailsScreen({
                                 {t.runAIAnalysis}
                             </Text>
 
-
                         </TouchableOpacity>
-
-
-
-
-
 
 
                         <TouchableOpacity
@@ -518,8 +448,7 @@ export default function DeclarationDetailsScreen({
                                 styles.menuButton
                             }
 
-
-                            onPress={()=>{
+                            onPress={() => {
 
                                 navigation.navigate(
                                     "Inspection",
@@ -540,23 +469,11 @@ export default function DeclarationDetailsScreen({
                                 {t.startInspection}
                             </Text>
 
-
                         </TouchableOpacity>
-
-
 
                     </View>
 
-
-
-
-
                 </ScrollView>
-
-
-
-
-
 
 
                 <BottomNavigation
@@ -565,16 +482,11 @@ export default function DeclarationDetailsScreen({
                         navigation
                     }
 
-
                     active="Declarations"
 
                 />
 
-
-
             </View>
-
-
 
         </SafeScreen>
 

@@ -351,6 +351,19 @@ export const createApp = async () => {
 
             }
 
+            if (
+    req.method === "POST" &&
+    req.url === "/api/auth/change-password"
+) {
+
+    return auth.changePassword(
+        req,
+        res,
+        await readBody(req)
+    );
+
+}
+
 
             if (
                 req.method === "POST" &&

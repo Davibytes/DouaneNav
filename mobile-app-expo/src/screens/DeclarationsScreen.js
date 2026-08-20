@@ -37,22 +37,17 @@ import styles from "../styles/styles.js";
 import colors from "../styles/colors.js";
 
 
-
 export default function DeclarationsScreen({
     navigation
-}){
-
+}) {
 
     const {
         language
     } = useLanguage();
 
 
-
     const t =
         translations[language];
-
-
 
 
     const [
@@ -61,12 +56,10 @@ export default function DeclarationsScreen({
     ] = useState([]);
 
 
-
     const [
         filteredDeclarations,
         setFilteredDeclarations
     ] = useState([]);
-
 
 
     const [
@@ -75,699 +68,427 @@ export default function DeclarationsScreen({
     ] = useState("");
 
 
-
     const [
         loading,
         setLoading
     ] = useState(true);
 
 
-
-
-
-
-    useEffect(()=>{
+    useEffect(() => {
 
         loadDeclarations();
 
-    },[]);
+    }, []);
 
 
+    const loadDeclarations =
+        async () => {
 
+            try {
 
+                setLoading(true);
 
 
-    const loadDeclarations = async()=>{
+                const data =
+                    await getDeclarations();
 
 
-        try{
+                const list =
+                    Array.isArray(data)
+                        ? data
+                        : data?.declarations || [];
 
 
-            setLoading(true);
+                setDeclarations(
+                    list
+                );
 
+                setFilteredDeclarations(
+                    list
+                );
 
+            }
 
-            const data =
-                await getDeclarations();
+            catch (error) {
 
-
-
-            const list =
-
-                Array.isArray(data)
-
-                ?
-
-                data
-
-                :
-
-                data?.declarations || [];
-
-
-
-
-            setDeclarations(list);
-
-            setFilteredDeclarations(list);
-
-
-
-        }
-
-        catch(error){
-
-
-            console.log(
-                "Declaration error:",
-                error.message
-            );
-
-
-            setDeclarations([]);
-
-            setFilteredDeclarations([]);
-
-
-        }
-
-
-        finally{
-
-
-            setLoading(false);
-
-
-        }
-
-
-    };
-
-
-
-
-
-
-
-
-    const handleSearch = (value)=>{
-
-
-        setSearch(value);
-
-
-
-        const text =
-            value
-            .toLowerCase()
-            .trim();
-
-
-
-
-        if(!text){
-
-
-            setFilteredDeclarations(
-                declarations
-            );
-
-
-            return;
-
-
-        }
-
-
-
-
-
-
-        const results =
-
-            declarations.filter(item=>{
-
-
-                return(
-
-                    item.declarationNumber
-                    ?.toLowerCase()
-                    .includes(text)
-
-
-                    ||
-
-                    item.importer?.name
-                    ?.toLowerCase()
-                    .includes(text)
-
-
-
-                    ||
-
-                    item.destination?.city
-                    ?.toLowerCase()
-                    .includes(text)
-
-
-
-                    ||
-
-                    item.transport?.truckPlate
-                    ?.toLowerCase()
-                    .includes(text)
-
-
-                    ||
-
-                    item.status
-                    ?.toLowerCase()
-                    .includes(text)
-
+                console.log(
+                    "Declaration error:",
+                    error.message
                 );
 
 
-            });
+                setDeclarations([]);
+
+                setFilteredDeclarations([]);
+
+            }
+
+            finally {
+
+                setLoading(false);
+
+            }
+
+        };
 
 
+    const handleSearch =
+        (value) => {
 
-        setFilteredDeclarations(results);
-
-
-    };
-
-
-
+            setSearch(
+                value
+            );
 
 
+            const text =
+                value
+                    .toLowerCase()
+                    .trim();
 
 
+            if (!text) {
+
+                setFilteredDeclarations(
+                    declarations
+                );
+
+                return;
+
+            }
 
 
-    return(
+            const results =
+                declarations.filter(
+                    item => {
 
+                        return (
+
+                            item.declarationNumber
+                                ?.toLowerCase()
+                                .includes(text)
+
+                            ||
+
+                            item.importer?.name
+                                ?.toLowerCase()
+                                .includes(text)
+
+                            ||
+
+                            item.destination?.city
+                                ?.toLowerCase()
+                                .includes(text)
+
+                            ||
+
+                            item.transport?.truckPlate
+                                ?.toLowerCase()
+                                .includes(text)
+
+                            ||
+
+                            item.status
+                                ?.toLowerCase()
+                                .includes(text)
+
+                        );
+
+                    }
+                );
+
+
+            setFilteredDeclarations(
+                results
+            );
+
+        };
+
+
+    return (
 
         <SafeScreen>
 
-
             <View
                 style={{
-                    flex:1
+                    flex: 1
                 }}
             >
 
-
-
                 <ScrollView
 
-
                     contentContainerStyle={{
-
                         ...styles.dashboardContainer,
-
-                        paddingBottom:130
-
+                        paddingBottom: 130
                     }}
 
-
-                    showsVerticalScrollIndicator={false}
-
+                    showsVerticalScrollIndicator={
+                        false
+                    }
 
                 >
 
-
-
-
-
                     <Text
-
                         style={
                             styles.dashboardGreeting
                         }
-
                     >
-
                         {t.declarations}
-
                     </Text>
-
-
-
 
 
                     <Text
-
                         style={
                             styles.dashboardRole
                         }
-
                     >
-
-                        Customs declaration records
-
+                        {
+                            t.customsDeclarationRecords
+                        }
                     </Text>
 
 
-
-
-
-
-
-
                     <TextInput
-
 
                         style={
                             styles.input
                         }
 
-
-
                         placeholder={
                             t.searchDeclarations ||
-                            "Search declarations"
+                            t.declarations
                         }
-
-
 
                         placeholderTextColor={
                             colors.muted
                         }
 
-
-
                         value={
                             search
                         }
-
-
 
                         onChangeText={
                             handleSearch
                         }
 
-
                     />
 
 
-
-
-
-
-
-
-
                     {
-
                         loading &&
 
-
                         <ActivityIndicator
-
-
                             size="large"
-
-
                             color={
                                 colors.green
                             }
-
-
                         />
 
                     }
 
 
-
-
-
-
-
-
-
                     {
-
-
                         !loading &&
-
-                        filteredDeclarations.length===0 &&
-
+                        filteredDeclarations.length === 0 &&
 
                         <View
-
                             style={
                                 styles.section
                             }
-
                         >
 
-
                             <Text
-
                                 style={
                                     styles.sectionTitle
                                 }
-
                             >
-
-                                No Records
-
+                                {t.noRecords}
                             </Text>
-
 
 
                             <Text
-
                                 style={
                                     styles.sectionText
                                 }
-
                             >
-
-                                No declarations available
-
+                                {t.noDeclarationsAvailable}
                             </Text>
 
-
-
                         </View>
-
 
                     }
 
 
-
-
-
-
-
-
-
                     {
-
                         filteredDeclarations.map(
-
-                            (item,index)=>(
-
+                            (
+                                item,
+                                index
+                            ) => (
 
                                 <TouchableOpacity
 
-
                                     key={
-                                        item._id || index
+                                        item._id ||
+                                        index
                                     }
-
 
                                     activeOpacity={
                                         0.85
                                     }
 
-
-
                                     style={{
-
                                         backgroundColor:
-                                        colors.surface,
+                                            colors.surface,
 
-                                        borderRadius:14,
+                                        borderRadius:
+                                            14,
 
-                                        padding:18,
+                                        padding:
+                                            18,
 
-                                        marginBottom:15,
+                                        marginBottom:
+                                            15,
 
-                                        elevation:3
+                                        elevation:
+                                            3
 
                                     }}
 
-
-
-                                    onPress={()=>{
-
+                                    onPress={() => {
 
                                         navigation.navigate(
-
                                             "DeclarationDetails",
-
                                             {
-
-                                                declaration:item
-
+                                                declaration:
+                                                    item
                                             }
-
                                         );
 
-
                                     }}
-
 
                                 >
 
-
-
-
-
                                     <Text
-
                                         style={{
-
-                                            fontSize:18,
-
-                                            fontWeight:"800",
-
-                                            color:colors.greenDark,
-
-                                            marginBottom:12
-
+                                            fontSize: 18,
+                                            fontWeight: "800",
+                                            color:
+                                                colors.greenDark,
+                                            marginBottom: 12
                                         }}
-
                                     >
-
                                         {
-
                                             item.declarationNumber
-
                                             ||
-
-                                            "Declaration"
-
+                                            t.declaration
                                         }
-
-
                                     </Text>
 
 
-
-
-
-
-
-
-
                                     <Text
-
                                         style={
                                             styles.sectionText
                                         }
-
                                     >
-
-                                        Importer:
-
-                                        {" "}
-
+                                        {t.importer}:{" "}
                                         {
-
                                             item.importer?.name
-
                                             ||
-
-                                            "Not available"
-
+                                            t.notAvailable
                                         }
-
-
                                     </Text>
 
 
-
-
-
-
-
-
-
                                     <Text
-
                                         style={
                                             styles.sectionText
                                         }
-
                                     >
-
-                                        Truck Plate:
-
-                                        {" "}
-
+                                        {t.truckPlate}:{" "}
                                         {
-
                                             item.transport?.truckPlate
-
                                             ||
-
-                                            "Not available"
-
+                                            t.notAvailable
                                         }
-
-
                                     </Text>
 
 
-
-
-
-
-
-
-
                                     <Text
-
                                         style={
                                             styles.sectionText
                                         }
-
                                     >
-
-                                        Destination:
-
-                                        {" "}
-
+                                        {t.destination}:{" "}
                                         {
-
                                             item.destination?.city
-
                                             ||
-
-                                            "Unknown"
-
+                                            t.unknown
                                         }
-
-
                                     </Text>
-
-
-
-
-
-
-
 
 
                                     <Text
-
                                         style={
                                             styles.sectionText
                                         }
-
                                     >
-
-                                        Status:
-
-                                        {" "}
-
+                                        {t.status}:{" "}
                                         {
-
                                             item.status
-
                                             ||
-
-                                            "Pending"
-
+                                            t.pending
                                         }
-
-
                                     </Text>
-
-
-
-
-
-
 
 
                                     <View
-
                                         style={{
-
-                                            marginTop:12,
+                                            marginTop: 12,
 
                                             backgroundColor:
-                                            colors.green,
+                                                colors.green,
 
-                                            paddingHorizontal:14,
+                                            paddingHorizontal:
+                                                14,
 
-                                            paddingVertical:6,
+                                            paddingVertical:
+                                                6,
 
-                                            borderRadius:20,
+                                            borderRadius:
+                                                20,
 
-                                            alignSelf:"flex-start"
+                                            alignSelf:
+                                                "flex-start"
 
                                         }}
-
-
                                     >
 
-
-
                                         <Text
-
                                             style={{
-
                                                 color:
-                                                colors.white,
+                                                    colors.white,
 
-                                                fontWeight:"700",
+                                                fontWeight:
+                                                    "700",
 
-                                                fontSize:12
+                                                fontSize:
+                                                    12
 
                                             }}
-
                                         >
-
-                                            View Details
-
+                                            {t.viewDetails}
                                         </Text>
-
 
                                     </View>
 
-
-
-
-
-
                                 </TouchableOpacity>
 
-
                             )
-
                         )
-
 
                     }
 
-
-
-
-
-
                 </ScrollView>
-
-
-
-
-
-
-
 
 
                 <BottomNavigation
@@ -776,23 +497,14 @@ export default function DeclarationsScreen({
                         navigation
                     }
 
-
                     active="Declarations"
-
 
                 />
 
-
-
-
-
             </View>
-
 
         </SafeScreen>
 
-
     );
-
 
 }

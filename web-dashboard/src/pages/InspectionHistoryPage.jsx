@@ -4,13 +4,30 @@ import {
 } from "react";
 
 
+import {
+    useLanguage
+} from "../context/LanguageContext.jsx";
+
+
+import en from "../i18n/en.js";
+import fr from "../i18n/fr.js";
+
 
 const API_URL =
-     "https://douanenav-backend.onrender.com/api";
+    "https://douanenav-backend.onrender.com/api";
 
 
+const InspectionHistoryPage = () => {
 
-const InspectionHistoryPage = ()=>{
+    const {
+        language
+    } = useLanguage();
+
+
+    const t =
+        language === "FR"
+            ? fr
+            : en;
 
 
     const [
@@ -19,12 +36,10 @@ const InspectionHistoryPage = ()=>{
     ] = useState([]);
 
 
-
     const [
         loading,
         setLoading
     ] = useState(true);
-
 
 
     const token =
@@ -33,62 +48,58 @@ const InspectionHistoryPage = ()=>{
         );
 
 
-
-
-
-
-    useEffect(()=>{
+    useEffect(() => {
 
         loadInspections();
 
-    },[]);
+    }, []);
 
 
+    const loadInspections = async () => {
 
+        try {
 
-
-
-
-    const loadInspections = async()=>{
-
-
-        try{
+            setLoading(true);
 
 
             const response =
                 await fetch(
-
                     `${API_URL}/inspections`,
-
                     {
-
-                        headers:{
+                        headers: {
 
                             Authorization:
-                            `Bearer ${token}`
+                                `Bearer ${token}`
 
                         }
 
                     }
-
                 );
-
 
 
             const data =
                 await response.json();
 
 
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "Failed to load inspections."
+                );
+
+            }
+
 
             setInspections(
-                data
+                Array.isArray(data)
+                    ? data
+                    : []
             );
-
 
         }
 
-        catch(error){
-
+        catch (error) {
 
             console.log(
                 "Inspection history error:",
@@ -98,220 +109,180 @@ const InspectionHistoryPage = ()=>{
 
             setInspections([]);
 
-
         }
 
-        finally{
-
+        finally {
 
             setLoading(false);
 
-
         }
-
 
     };
 
 
-
-
-
-
-
     return (
-
 
         <div>
 
-
             <div className="card">
 
-
                 <h2>
-                    Inspection History
+                    {t.inspectionHistory}
                 </h2>
 
 
                 <p className="muted">
-                    Inspection reports and history.
+                    {t.inspectionReports}
                 </p>
-
-
 
             </div>
 
 
-
-
-
-
-
             <div className="card">
 
-
                 {
-                    loading ?
+                    loading
 
+                    ?
 
                     <p>
-                        Loading inspections...
+                        {t.loading}
                     </p>
-
 
                     :
 
+                    inspections.length === 0
 
-                    <table className="inspection-table">
+                    ?
 
+                    <p className="muted">
+                        {t.noData}
+                    </p>
+
+                    :
+
+                    <table
+                        className="inspection-table"
+                    >
 
                         <thead>
 
-
                             <tr>
 
-
                                 <th>
-                                    Declaration
+                                    {t.declaration}
                                 </th>
 
-
                                 <th>
-                                    Officer
+                                    {t.officer}
                                 </th>
 
-
                                 <th>
-                                    Status
+                                    {t.status}
                                 </th>
 
-
                                 <th>
-                                    Location
+                                    {t.location}
                                 </th>
 
-
                                 <th>
-                                    Comments
+                                    {t.comments}
                                 </th>
-
 
                             </tr>
-
 
                         </thead>
 
 
-
-
                         <tbody>
-
 
                             {
                                 inspections.map(
-
-                                    (item,index)=>(
-
+                                    (
+                                        item,
+                                        index
+                                    ) => (
 
                                         <tr
-
                                             key={
                                                 item._id ||
                                                 index
                                             }
-
                                         >
 
-
                                             <td>
-
                                                 {
                                                     item.declarationNumber
+                                                    ||
+                                                    t.notAvailable
                                                 }
-
                                             </td>
 
 
-
                                             <td>
-
                                                 {
-                                                    item.officer ||
-                                                    "Not assigned"
+                                                    item.officer
+                                                    ||
+                                                    t.notAvailable
                                                 }
-
                                             </td>
-
 
 
                                             <td>
 
-                                                <span className="status pending">
-
+                                                <span
+                                                    className={
+                                                        item.status === "Completed"
+                                                            ? "status success"
+                                                            : "status pending"
+                                                    }
+                                                >
                                                     {
                                                         item.status
+                                                        ||
+                                                        t.unknown
                                                     }
-
                                                 </span>
 
                                             </td>
 
 
-
-
                                             <td>
-
                                                 {
-                                                    item.location ||
-                                                    "Unknown"
+                                                    item.location
+                                                    ||
+                                                    t.notAvailable
                                                 }
-
                                             </td>
 
 
-
-
                                             <td>
-
                                                 {
-                                                    item.comments ||
-                                                    "None"
+                                                    item.comments
+                                                    ||
+                                                    t.notAvailable
                                                 }
-
                                             </td>
-
-
 
                                         </tr>
 
-
                                     )
-
                                 )
                             }
 
-
-
                         </tbody>
-
-
 
                     </table>
 
-
                 }
-
 
             </div>
 
-
         </div>
-
 
     );
 
-
 };
-
 
 
 export default InspectionHistoryPage;

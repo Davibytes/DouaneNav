@@ -20,84 +20,96 @@ import {
 } from "../context/LanguageContext.js";
 
 
-import {
-    translations
-} from "../i18n/index.js";
-
-
 import styles from "../styles/styles.js";
 import colors from "../styles/colors.js";
 
 
-
 export default function MoreScreen({
     navigation
-}){
-
+}) {
 
     const {
-        language
+        t
     } = useLanguage();
-
-
-    const t =
-        translations[language];
-
 
 
     const modules = [
 
-
         {
-            title:t.inspectionReports,
-            description:t.inspectionReportsDescription,
-            screen:"Reports",
-            icon:"document-text"
+            title:
+                t.inspectionReports,
+
+            description:
+                t.inspectionReportsDescription,
+
+            screen:
+                "Reports",
+
+            icon:
+                "document-text"
+
         },
 
 
         {
-            title:t.aiAnalysis,
-            description:t.aiAnalysisDescription,
-            screen:"AIAnalysis",
-            icon:"analytics"
+            title:
+                t.aiAnalysis,
+
+            description:
+                t.aiAnalysisDescription,
+
+            screen:
+                "AIAnalysis",
+
+            icon:
+                "analytics"
+
         },
 
 
         {
-            title:t.syncStatus,
-            description:t.syncStatusDescription,
-            screen:"SyncStatus",
-            icon:"sync"
+            title:
+                t.syncStatus,
+
+            description:
+                t.syncStatusDescription,
+
+            screen:
+                "SyncStatus",
+
+            icon:
+                "sync"
+
         },
 
 
         {
-            title:t.profile,
-            description:t.profileDescription,
-            screen:"Profile",
-            icon:"person"
+            title:
+                t.profile,
+
+            description:
+                t.profileDescription,
+
+            screen:
+                "Profile",
+
+            icon:
+                "person"
+
         }
 
-
     ];
-
-
-
 
 
     return (
 
         <SafeScreen>
 
-
             <View
                 style={{
-                    flex:1
+                    flex: 1
                 }}
             >
-
-
 
                 <ScrollView
 
@@ -107,124 +119,82 @@ export default function MoreScreen({
 
                 >
 
-
-
                     <Text
-
                         style={
                             styles.dashboardGreeting
                         }
-
                     >
-
                         {t.more}
-
                     </Text>
-
-
-
 
 
                     <Text
-
                         style={
                             styles.dashboardRole
                         }
-
                     >
-
                         {t.additionalModules}
-
                     </Text>
 
 
-
-
-
-
-
-
                     <View
-
                         style={{
-
-                            flexDirection:"row",
-
-                            flexWrap:"wrap",
-
-                            justifyContent:"space-between"
-
+                            flexDirection: "row",
+                            flexWrap: "wrap",
+                            justifyContent:
+                                "space-between"
                         }}
-
                     >
-
-
-
 
                         {
                             modules.map(
-
-                                (item,index)=>(
-
-
+                                (
+                                    item,
+                                    index
+                                ) => (
 
                                     <TouchableOpacity
 
-
-                                        key={index}
-
-
+                                        key={
+                                            index
+                                        }
 
                                         style={{
-
                                             backgroundColor:
                                                 colors.surface,
 
+                                            width:
+                                                "48%",
 
-                                            width:"48%",
+                                            minHeight:
+                                                150,
 
+                                            borderRadius:
+                                                14,
 
-                                            minHeight:150,
+                                            padding:
+                                                18,
 
+                                            marginBottom:
+                                                15,
 
-                                            borderRadius:14,
+                                            elevation:
+                                                3,
 
-
-                                            padding:18,
-
-
-                                            marginBottom:15,
-
-
-                                            elevation:3,
-
-
-                                            borderLeftWidth:4,
-
+                                            borderLeftWidth:
+                                                4,
 
                                             borderLeftColor:
                                                 colors.green
-
                                         }}
 
-
-
-                                        onPress={()=>{
-
-
+                                        onPress={() =>
                                             navigation.navigate(
                                                 item.screen
-                                            );
-
-
-                                        }}
-
-
+                                            )
+                                        }
 
                                     >
-
-
-
 
                                         <Ionicons
 
@@ -232,120 +202,69 @@ export default function MoreScreen({
                                                 item.icon
                                             }
 
-
-                                            size={32}
-
+                                            size={
+                                                32
+                                            }
 
                                             color={
                                                 colors.green
                                             }
 
-
                                             style={{
-
-                                                marginBottom:15
-
+                                                marginBottom:
+                                                    15
                                             }}
-
 
                                         />
 
 
-
-
-
-
                                         <Text
-
                                             style={{
+                                                fontSize:
+                                                    16,
 
-                                                fontSize:16,
-
-
-                                                fontWeight:"700",
-
+                                                fontWeight:
+                                                    "700",
 
                                                 color:
                                                     colors.text,
 
-
-                                                marginBottom:8
-
-
+                                                marginBottom:
+                                                    8
                                             }}
-
-
                                         >
-
                                             {
                                                 item.title
                                             }
-
                                         </Text>
 
 
-
-
-
-
-
                                         <Text
-
                                             style={{
-
-                                                fontSize:13,
-
+                                                fontSize:
+                                                    13,
 
                                                 color:
                                                     colors.muted,
 
-
-                                                lineHeight:18
-
-
+                                                lineHeight:
+                                                    18
                                             }}
-
-
                                         >
-
                                             {
                                                 item.description
                                             }
-
                                         </Text>
-
-
-
-
 
                                     </TouchableOpacity>
 
-
-
                                 )
-
                             )
-
                         }
-
-
-
-
 
                     </View>
 
-
-
-
-
-
-
                 </ScrollView>
-
-
-
-
-
 
 
                 <BottomNavigation
@@ -354,25 +273,14 @@ export default function MoreScreen({
                         navigation
                     }
 
-
                     active="More"
-
 
                 />
 
-
-
-
-
-
             </View>
-
-
 
         </SafeScreen>
 
-
     );
-
 
 }

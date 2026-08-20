@@ -9,8 +9,26 @@ import {
 } from "../api/dashboardApi";
 
 
+import {
+    useLanguage
+} from "../context/LanguageContext.jsx";
+
+
+import en from "../i18n/en.js";
+import fr from "../i18n/fr.js";
+
 
 const StatisticsPage = () => {
+
+    const {
+        language
+    } = useLanguage();
+
+
+    const t =
+        language === "FR"
+            ? fr
+            : en;
 
 
     const [
@@ -19,81 +37,60 @@ const StatisticsPage = () => {
     ] = useState(null);
 
 
-
     const [
         loading,
         setLoading
     ] = useState(true);
 
 
-
-
-
-    useEffect(()=>{
+    useEffect(() => {
 
         loadStatistics();
 
-    },[]);
+    }, []);
 
 
+    const loadStatistics =
+        async () => {
+
+            try {
+
+                const data =
+                    await getDashboard();
 
 
+                setStatistics(
+                    data
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    "Statistics error:",
+                    error.message
+                );
+
+            }
+
+            finally {
+
+                setLoading(false);
+
+            }
+
+        };
 
 
-
-    const loadStatistics = async()=>{
-
-
-        try{
-
-
-            const data =
-                await getDashboard();
-
-
-
-            setStatistics(data);
-
-
-
-        }
-
-        catch(error){
-
-
-            console.log(
-                "Statistics error:",
-                error.message
-            );
-
-
-        }
-
-        finally{
-
-
-            setLoading(false);
-
-
-        }
-
-
-    };
-
-
-
-
-
-
-
-    if(loading){
+    if (loading) {
 
         return (
 
             <div className="card">
 
                 <p>
-                    Loading statistics...
+                    {t.loading}
                 </p>
 
             </div>
@@ -103,266 +100,149 @@ const StatisticsPage = () => {
     }
 
 
-
-
-
-
-
-
     return (
 
         <div>
 
-
-
-
-
-
             <section className="stats-grid">
-
-
-
-
-
 
                 <div className="card stat-card">
 
-
                     <p className="card-label">
-
-                        Today's Declarations
-
+                        {t["today'sDeclarations"]}
                     </p>
 
-
-
                     <h2>
-
                         {
                             statistics?.counts?.todayDeclarations
                             ??
                             0
                         }
-
                     </h2>
-
 
                 </div>
 
 
-
-
-
-
-
-
-
                 <div className="card stat-card">
 
-
                     <p className="card-label">
-
-                        Total Inspections
-
+                        {t.totalInspections}
                     </p>
 
-
-
                     <h2>
-
                         {
                             statistics?.inspectionStatistics?.total
                             ??
                             0
                         }
-
                     </h2>
-
 
                 </div>
 
 
-
-
-
-
-
-
-
                 <div className="card stat-card">
 
-
                     <p className="card-label">
-
-                        Completed Inspections
-
+                        {t.completedInspections}
                     </p>
 
-
-
                     <h2>
-
                         {
                             statistics?.inspectionStatistics?.completed
                             ??
                             0
                         }
-
                     </h2>
-
 
                 </div>
 
 
-
-
-
-
-
-
-
                 <div className="card stat-card">
 
-
                     <p className="card-label">
-
-                        Pending Synchronizations
-
+                        {t.pendingSynchronizations}
                     </p>
 
-
-
                     <h2>
-
                         {
                             statistics?.counts?.pendingSynchronizations
                             ??
                             0
                         }
-
                     </h2>
 
-
                 </div>
-
-
-
-
 
             </section>
 
 
-
-
-
-
-
-
-
             <section className="card">
 
-
                 <h3>
-                    Destination Statistics
+                    {t.destinationStatistics}
                 </h3>
-
-
-
 
 
                 {
                     statistics?.destinationStats?.map(
-
-                        (item,index)=>(
-
+                        (
+                            item,
+                            index
+                        ) => (
 
                             <div
-
                                 key={index}
-
                                 className="progress-row"
-
                             >
 
-
-
                                 <span>
-
                                     {item.city}
-
                                 </span>
 
 
-
-
-
-                                <div className="progress-bar">
-
+                                <div
+                                    className="progress-bar"
+                                >
 
                                     <span
-
                                         style={{
-
                                             width:
-                                            `${item.total}%`
-
+                                                `${item.total}%`
                                         }}
-
                                     />
 
                                 </div>
 
 
-
-
-
                                 <span>
-
                                     {item.total}
-
                                 </span>
-
-
-
 
                             </div>
 
-
                         )
-
                     )
                 }
 
-
-
-
-
             </section>
-
-
-
-
-
-
-
 
 
             <section className="card">
 
-
                 <h3>
-                    Inspection Statistics
+                    {t.inspectionStatistics}
                 </h3>
 
 
-
-
                 <p>
 
-                    Total:
+                    {t.total}:
                     {" "}
+
                     {
-                        statistics?.inspectionStatistics?.total
+                        statistics
+                            ?.inspectionStatistics
+                            ?.total
                         ??
                         0
                     }
@@ -370,14 +250,15 @@ const StatisticsPage = () => {
                 </p>
 
 
-
-
                 <p>
 
-                    Completed:
+                    {t.completed}:
                     {" "}
+
                     {
-                        statistics?.inspectionStatistics?.completed
+                        statistics
+                            ?.inspectionStatistics
+                            ?.completed
                         ??
                         0
                     }
@@ -385,35 +266,28 @@ const StatisticsPage = () => {
                 </p>
 
 
-
-
                 <p>
 
-                    Pending:
+                    {t.pending}:
                     {" "}
+
                     {
-                        statistics?.inspectionStatistics?.pending
+                        statistics
+                            ?.inspectionStatistics
+                            ?.pending
                         ??
                         0
                     }
 
                 </p>
-
-
-
 
             </section>
-
-
-
-
 
         </div>
 
     );
 
 };
-
 
 
 export default StatisticsPage;

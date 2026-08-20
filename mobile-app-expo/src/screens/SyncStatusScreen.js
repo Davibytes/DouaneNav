@@ -23,13 +23,21 @@ import {
 } from "../services/syncService.js";
 
 
-import styles from "../styles/styles.js";
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
 
+
+import styles from "../styles/styles.js";
 
 
 export default function SyncStatusScreen({
     navigation
-}){
+}) {
+
+    const {
+        t
+    } = useLanguage();
 
 
     const [
@@ -38,188 +46,142 @@ export default function SyncStatusScreen({
     ] = useState(null);
 
 
-
     const [
         loading,
         setLoading
     ] = useState(false);
 
 
-
-
-
-    useEffect(()=>{
+    useEffect(() => {
 
         loadStatus();
 
-    },[]);
+    }, []);
 
 
+    const loadStatus =
+        async () => {
+
+            try {
+
+                const data =
+                    await getSyncStatus();
 
 
+                setStatus(
+                    data
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    "Sync status error:",
+                    error.message
+                );
 
 
-    const loadStatus = async()=>{
+                setStatus({
 
+                    system:
+                        "CAMCIS",
 
-        try{
+                    status:
+                        "Connected",
 
-
-            const data =
-                await getSyncStatus();
-
-
-            setStatus(data);
-
-
-        }
-
-
-        catch(error){
-
-
-            console.log(
-                "Sync status error:",
-                error.message
-            );
-
-
-
-            setStatus({
-
-                system:
-                "CAMCIS",
-
-
-                status:
-                "Connected",
-
-
-                lastSync:
-                "31 Jul 2026 10:30",
-
-
-                synchronized:
-                128,
-
-
-                pending:
-                3,
-
-
-                failed:
-                0,
-
-
-                message:
-                "Synchronization service operational.",
-
-
-
-                history:[
-
-                    {
-
-                        date:
+                    lastSync:
                         "31 Jul 2026 10:30",
 
-                        action:
-                        "Successful synchronization"
+                    synchronized:
+                        128,
 
-                    },
+                    pending:
+                        3,
 
-                    {
+                    failed:
+                        0,
 
-                        date:
-                        "30 Jul 2026 16:15",
+                    message:
+                        t.synchronizationOperational,
 
-                        action:
-                        "Inspection reports uploaded"
+                    history: [
 
-                    }
+                        {
 
-                ]
+                            date:
+                                "31 Jul 2026 10:30",
 
+                            action:
+                                t.successfulSynchronization
 
-            });
+                        },
 
+                        {
 
-        }
+                            date:
+                                "30 Jul 2026 16:15",
 
+                            action:
+                                t.inspectionReportsUploaded
 
-    };
+                        }
 
+                    ]
 
+                });
 
+            }
 
-
-
-
-
-    const runSync = async()=>{
-
-
-        try{
-
-
-            setLoading(true);
-
-
-
-            await synchronize();
+        };
 
 
+    const runSync =
+        async () => {
 
-            await loadStatus();
+            try {
 
-
-
-        }
-
-
-        catch(error){
-
-
-            console.log(
-                "Sync error:",
-                error.message
-            );
+                setLoading(
+                    true
+                );
 
 
-        }
+                await synchronize();
 
 
-        finally{
+                await loadStatus();
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    "Sync error:",
+                    error.message
+                );
+
+            }
+
+            finally {
+
+                setLoading(
+                    false
+                );
+
+            }
+
+        };
 
 
-            setLoading(false);
-
-
-        }
-
-
-    };
-
-
-
-
-
-
-
-
-    return(
-
+    return (
 
         <SafeScreen>
 
-
             <View
                 style={{
-                    flex:1
+                    flex: 1
                 }}
             >
-
-
 
                 <ScrollView
 
@@ -229,19 +191,13 @@ export default function SyncStatusScreen({
 
                 >
 
-
-
-
                     <Text
                         style={
                             styles.dashboardGreeting
                         }
                     >
-                        Synchronization
+                        {t.syncStatus}
                     </Text>
-
-
-
 
 
                     <Text
@@ -249,33 +205,23 @@ export default function SyncStatusScreen({
                             styles.dashboardRole
                         }
                     >
-                        CAMCIS data synchronization monitoring
+                        {t.syncStatusDescription}
                     </Text>
 
 
-
-
-
-
-
                     <View
                         style={
                             styles.section
                         }
                     >
 
-
-
                         <Text
                             style={
                                 styles.sectionTitle
                             }
                         >
-                            CONNECTION STATUS
+                            {t.connectionStatus}
                         </Text>
-
-
-
 
 
                         <Text
@@ -283,17 +229,13 @@ export default function SyncStatusScreen({
                                 styles.sectionText
                             }
                         >
-
-                            System:
-                            {" "}
+                            {t.system}:{" "}
                             {
-                                status?.system || "CAMCIS"
+                                status?.system
+                                ||
+                                "CAMCIS"
                             }
-
                         </Text>
-
-
-
 
 
                         <Text
@@ -301,19 +243,13 @@ export default function SyncStatusScreen({
                                 styles.sectionText
                             }
                         >
-
-                            Status:
-                            {" "}
-                            
-                            {" "}
+                            {t.status}:{" "}
                             {
-                                status?.status || "Connected"
+                                status?.status
+                                ||
+                                t.connected
                             }
-
                         </Text>
-
-
-
 
 
                         <Text
@@ -321,44 +257,30 @@ export default function SyncStatusScreen({
                                 styles.sectionText
                             }
                         >
-
-                            Last successful sync:
-                            {" "}
+                            {t.lastSuccessfulSync}:{" "}
                             {
-                                status?.lastSync || "N/A"
+                                status?.lastSync
+                                ||
+                                t.notAvailable
                             }
-
                         </Text>
-
-
-
 
                     </View>
 
 
-
-
-
-
-
-
-
                     <View
                         style={
                             styles.section
                         }
                     >
 
-
                         <Text
                             style={
                                 styles.sectionTitle
                             }
                         >
-                            SYNCHRONIZATION SUMMARY
+                            {t.synchronizationSummary}
                         </Text>
-
-
 
 
                         <Text
@@ -366,17 +288,13 @@ export default function SyncStatusScreen({
                                 styles.operationItem
                             }
                         >
-
-                            Records synchronized:
-                            {" "}
+                            {t.recordsSynchronized}:{" "}
                             {
-                                status?.synchronized ?? 0
+                                status?.synchronized
+                                ??
+                                0
                             }
-
                         </Text>
-
-
-
 
 
                         <Text
@@ -384,17 +302,13 @@ export default function SyncStatusScreen({
                                 styles.operationItem
                             }
                         >
-
-                            Pending synchronization:
-                            {" "}
+                            {t.pendingSynchronization}:{" "}
                             {
-                                status?.pending ?? 0
+                                status?.pending
+                                ??
+                                0
                             }
-
                         </Text>
-
-
-
 
 
                         <Text
@@ -402,127 +316,92 @@ export default function SyncStatusScreen({
                                 styles.operationItem
                             }
                         >
-
-                            Failed synchronization:
-                            {" "}
+                            {t.failedSynchronization}:{" "}
                             {
-                                status?.failed ?? 0
+                                status?.failed
+                                ??
+                                0
                             }
-
                         </Text>
-
-
 
                     </View>
 
 
-
-
-
-
-
-
-
                     <View
                         style={
                             styles.section
                         }
                     >
 
-
                         <Text
                             style={
                                 styles.sectionTitle
                             }
                         >
-                            SYNCHRONIZATION HISTORY
+                            {t.synchronizationHistory}
                         </Text>
-
-
-
 
 
                         {
-
                             status?.history?.length
 
+                                ?
 
-                            ?
+                                status.history.map(
+                                    (
+                                        item,
+                                        index
+                                    ) => (
 
-
-                            status.history.map(
-
-                                (item,index)=>(
-
-
-                                    <View
-
-                                        key={index}
-
-                                        style={
-                                            styles.listItem
-                                        }
-
-                                    >
-
-
-                                        <Text
+                                        <View
+                                            key={
+                                                index
+                                            }
                                             style={
-                                                styles.listTitle
+                                                styles.listItem
                                             }
                                         >
-                                            {
-                                                item.action
-                                            }
-                                        </Text>
+
+                                            <Text
+                                                style={
+                                                    styles.listTitle
+                                                }
+                                            >
+                                                {
+                                                    item.action
+                                                }
+                                            </Text>
 
 
+                                            <Text
+                                                style={
+                                                    styles.listSubtitle
+                                                }
+                                            >
+                                                {
+                                                    item.date
+                                                }
+                                            </Text>
 
-                                        <Text
-                                            style={
-                                                styles.listSubtitle
-                                            }
-                                        >
-                                            {
-                                                item.date
-                                            }
-                                        </Text>
+                                        </View>
 
-
-
-                                    </View>
-
-
+                                    )
                                 )
 
-                            )
+                                :
 
-
-                            :
-
-
-                            <Text
-                                style={
-                                    styles.sectionText
-                                }
-                            >
-                                No synchronization history available.
-                            </Text>
-
-
+                                <Text
+                                    style={
+                                        styles.sectionText
+                                    }
+                                >
+                                    {
+                                        t.noSynchronizationHistory
+                                    }
+                                </Text>
                         }
 
-
-
-
                     </View>
-
-
-
-
-
-
-
 
 
                     <View
@@ -531,16 +410,13 @@ export default function SyncStatusScreen({
                         }
                     >
 
-
                         <Text
                             style={
                                 styles.sectionTitle
                             }
                         >
-                            INFORMATION
+                            {t.information}
                         </Text>
-
-
 
 
                         <Text
@@ -551,20 +427,11 @@ export default function SyncStatusScreen({
                             {
                                 status?.message
                                 ||
-                                "Synchronization service operating normally."
+                                t.synchronizationOperational
                             }
                         </Text>
 
-
-
                     </View>
-
-
-
-
-
-
-
 
 
                     <TouchableOpacity
@@ -573,11 +440,9 @@ export default function SyncStatusScreen({
                             styles.menuButton
                         }
 
-
                         onPress={
                             runSync
                         }
-
 
                         disabled={
                             loading
@@ -585,48 +450,29 @@ export default function SyncStatusScreen({
 
                     >
 
-
                         {
-
                             loading
 
+                                ?
 
-                            ?
+                                <ActivityIndicator
+                                    color="white"
+                                />
 
+                                :
 
-                            <ActivityIndicator
-                                color="white"
-                            />
-
-
-                            :
-
-
-                            <Text
-                                style={
-                                    styles.menuButtonText
-                                }
-                            >
-                                Synchronize Now
-                            </Text>
-
-
+                                <Text
+                                    style={
+                                        styles.menuButtonText
+                                    }
+                                >
+                                    {t.synchronizeNow}
+                                </Text>
                         }
-
-
 
                     </TouchableOpacity>
 
-
-
-
-
-
                 </ScrollView>
-
-
-
-
 
 
                 <BottomNavigation
@@ -635,21 +481,14 @@ export default function SyncStatusScreen({
                         navigation
                     }
 
-
                     active="More"
 
                 />
 
-
-
-
             </View>
-
 
         </SafeScreen>
 
-
     );
-
 
 }

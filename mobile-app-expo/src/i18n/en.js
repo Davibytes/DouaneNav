@@ -1,6 +1,6 @@
 const en = {
 
-    // Authentication
+    // AUTHENTICATION
 
     loginTitle:
         "Welcome back",
@@ -17,6 +17,12 @@ const en = {
     forgotPassword:
         "Forgot Password?",
 
+    forgotPasswordInstructions:
+        "To reset your password, please contact your administrator to receive new temporary credentials.",
+
+    backToLogin:
+        "Back to Login",
+
     signIn:
         "Sign in securely",
 
@@ -24,8 +30,7 @@ const en = {
         "Signing in...",
 
 
-
-    // Navigation
+    // NAVIGATION
 
     dashboard:
         "Dashboard",
@@ -45,9 +50,11 @@ const en = {
     more:
         "More",
 
+    map:
+        "Map",
 
 
-    // Language
+    // LANGUAGE
 
     language:
         "Language",
@@ -59,15 +66,49 @@ const en = {
         "English",
 
 
-
-
-    // Dashboard
+    // GENERAL
 
     welcome:
         "Welcome",
 
     customsOfficer:
         "Customs Officer",
+
+    officer:
+        "Officer",
+
+    unknown:
+        "Unknown",
+
+    notAvailable:
+        "Not available",
+
+    status:
+        "Status",
+
+    active:
+        "Active",
+
+    success:
+        "Success",
+
+    error:
+        "Error",
+
+    loading:
+        "Loading...",
+
+    total:
+        "Total",
+
+    completed:
+        "Completed",
+
+    pending:
+        "Pending",
+
+
+    // DASHBOARD
 
     activeAlerts:
         "ACTIVE ALERTS",
@@ -105,15 +146,6 @@ const en = {
     inspectionStatistics:
         "INSPECTION STATISTICS",
 
-    total:
-        "Total",
-
-    completed:
-        "Completed",
-
-    pending:
-        "Pending",
-
     quickActions:
         "QUICK ACTIONS",
 
@@ -124,31 +156,10 @@ const en = {
         "More Modules",
 
 
-
-    // General
-
-    unknown:
-        "Unknown",
-
-    notAvailable:
-        "Not available",
-
-    status:
-        "Status",
-
-    active:
-        "Active",
-
-
-
-
-    // Profile
+    // PROFILE
 
     officerAccountInformation:
         "Officer account information",
-
-    officer:
-        "Officer",
 
     permissions:
         "Permissions",
@@ -157,9 +168,7 @@ const en = {
         "Logout",
 
 
-
-
-    // Destination Map
+    // DESTINATION MAP
 
     destinationVerification:
         "Destination Verification",
@@ -186,9 +195,25 @@ const en = {
         "Declared destination",
 
 
+    // DECLARATION LIST
+
+    declarationsTitle:
+        "Declarations",
+
+    customsDeclarationRecords:
+        "Customs declaration records",
+
+    noRecords:
+        "No Records",
+
+    noDeclarationsAvailable:
+        "No declarations available",
+
+    viewDetails:
+        "View Details",
 
 
-    // Declaration Details
+    // DECLARATION DETAILS
 
     declarationDetails:
         "Declaration Details",
@@ -196,14 +221,23 @@ const en = {
     cargoVerificationInformation:
         "Customs cargo verification record",
 
+    declarationInformation:
+        "DECLARATION INFORMATION",
+
     declarationNumber:
         "Declaration Number",
+
+    pendingVerification:
+        "Pending Verification",
 
     importerInformation:
         "IMPORTER INFORMATION",
 
     name:
         "Name",
+
+    company:
+        "Company",
 
     country:
         "Country",
@@ -213,6 +247,9 @@ const en = {
 
     goods:
         "Goods",
+
+    description:
+        "Description",
 
     category:
         "Category",
@@ -224,6 +261,9 @@ const en = {
         "TRANSPORT INFORMATION",
 
     truck:
+        "Truck Plate",
+
+    truckPlate:
         "Truck Plate",
 
     driver:
@@ -241,8 +281,29 @@ const en = {
     unknownStatus:
         "Unknown Status",
 
+    verifyDestinationMap:
+        "Verify Destination Map",
+
     viewDestinationMap:
         "Verify Destination Map",
+
+    customsStatus:
+        "CUSTOMS STATUS",
+
+    inspectionStatus:
+        "INSPECTION STATUS",
+
+    awaitingInspection:
+        "Awaiting Inspection",
+
+    riskLevel:
+        "Risk Level",
+
+    notAssessed:
+        "Not Assessed",
+
+    officerActions:
+        "OFFICER ACTIONS",
 
     runAIAnalysis:
         "Run AI Analysis",
@@ -251,9 +312,7 @@ const en = {
         "Start Inspection",
 
 
-
-
-    // Inspection
+    // INSPECTION
 
     inspectionModule:
         "Inspection Module",
@@ -269,9 +328,6 @@ const en = {
 
     truckPlatePlaceholder:
         "Truck plate number",
-
-    inspectionStatus:
-        "INSPECTION STATUS",
 
     inProgress:
         "In Progress",
@@ -303,12 +359,38 @@ const en = {
     noInspectionsAvailable:
         "No inspections available",
 
+    permissionRequired:
+        "Permission required",
+
+    cameraPermissionRequired:
+        "Camera permission is required.",
+
+    missingInformation:
+        "Missing information",
+
+    declarationNumberRequired:
+        "Declaration number is required.",
+
+    customsInspectionPoint:
+        "Customs Inspection Point",
+
+    inspectionReportSubmitted:
+        "Inspection and report submitted successfully.",
+
+    inspectionSaved:
+        "Inspection saved successfully.",
+
+    inspectionSubmissionFailed:
+        "Inspection submission failed.",
 
 
-    // Reports
+    // REPORTS
 
     inspectionReports:
         "Inspection Reports",
+
+    inspectionRecords:
+        "Customs inspection activity and verification records",
 
     reportsSubtitle:
         "Customs inspection activity and verification records",
@@ -337,9 +419,6 @@ const en = {
     noReportsAvailable:
         "No inspection reports available",
 
-    officer:
-        "Officer",
-
     inspectionResult:
         "Inspection Result",
 
@@ -349,22 +428,20 @@ const en = {
     comments:
         "Comments",
 
+    noComments:
+        "No comments",
+
     notAnalysed:
         "Not analysed",
 
 
-
-
-    // AI Analysis
+    // AI ANALYSIS
 
     aiAnalysis:
         "AI Analysis",
 
     aiSubtitle:
         "Intelligent customs risk assistance",
-
-    declarationInformation:
-        "DECLARATION INFORMATION",
 
     analysisType:
         "Analysis Type",
@@ -375,14 +452,20 @@ const en = {
     aiModuleStatus:
         "AI MODULE STATUS",
 
+    mockAIModule:
+        "Mock AI module",
+
+    aiDescription:
+        "AI analysis is currently simulated for demonstration purposes.",
+
     cargoRiskScore:
         "CARGO RISK SCORE",
 
-    riskLevel:
-        "Risk Level",
-
     riskScore:
         "Risk Score",
+
+    medium:
+        "Medium",
 
     inspectionPriority:
         "INSPECTION PRIORITY",
@@ -396,13 +479,25 @@ const en = {
     riskIndicators:
         "RISK INDICATORS",
 
+    consistencyCheck:
+        "Document consistency check",
+
+    cargoAnalysis:
+        "Cargo analysis",
+
     aiRecommendation:
         "AI RECOMMENDATION",
+
+    reviewDeclaration:
+        "Review declaration before inspection.",
 
     futureAIDevelopment:
         "FUTURE AI DEVELOPMENT",
 
     plannedAICapabilities:
+        "Planned AI capabilities:",
+
+    plannedCapabilities:
         "Planned AI capabilities:",
 
     documentOCR:
@@ -413,22 +508,78 @@ const en = {
 
     machineLearning:
         "Machine learning risk prediction",
-    map:
-        "Map",
-        more: "More",
 
-additionalModules: "Additional system modules",
+    machineLearningRisk:
+        "Machine learning risk prediction",
 
-inspectionReports: "Inspection Reports",
-inspectionReportsDescription: "View and manage inspection reports",
 
-aiAnalysis: "AI Analysis",
-aiAnalysisDescription: "Future intelligence and risk analysis",
+    // MORE
 
-syncStatus: "Synchronization Status",
-syncStatusDescription: "Monitor CAMCIS data synchronization",
+    additionalModules:
+        "Additional system modules",
 
-profileDescription: "Officer account information",
+    inspectionReportsDescription:
+        "View and manage inspection reports",
+
+    aiAnalysisDescription:
+        "Future intelligence and risk analysis",
+
+    syncStatus:
+        "Synchronization Status",
+
+    syncStatusDescription:
+        "Monitor CAMCIS data synchronization",
+
+    profileDescription:
+        "Officer account information",
+
+
+    // SYNCHRONIZATION
+
+    connectionStatus:
+        "CONNECTION STATUS",
+
+    system:
+        "System",
+
+    connected:
+        "Connected",
+
+    lastSuccessfulSync:
+        "Last successful sync",
+
+    synchronizationSummary:
+        "SYNCHRONIZATION SUMMARY",
+
+    recordsSynchronized:
+        "Records synchronized",
+
+    pendingSynchronization:
+        "Pending synchronization",
+
+    failedSynchronization:
+        "Failed synchronization",
+
+    synchronizationHistory:
+        "SYNCHRONIZATION HISTORY",
+
+    noSynchronizationHistory:
+        "No synchronization history available.",
+
+    information:
+        "INFORMATION",
+
+    synchronizationOperational:
+        "Synchronization service operating normally.",
+
+    successfulSynchronization:
+        "Successful synchronization",
+
+    inspectionReportsUploaded:
+        "Inspection reports uploaded",
+
+    synchronizeNow:
+        "Synchronize Now"
 
 };
 

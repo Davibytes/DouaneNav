@@ -1,7 +1,6 @@
 const fr = {
 
-
-    // Authentication
+    // AUTHENTIFICATION
 
     loginTitle:
         "Bienvenue",
@@ -18,6 +17,12 @@ const fr = {
     forgotPassword:
         "Mot de passe oublié ?",
 
+    forgotPasswordInstructions:
+        "Pour réinitialiser votre mot de passe, veuillez contacter votre administrateur afin d'obtenir de nouvelles informations d'accès temporaires.",
+
+    backToLogin:
+        "Retour à la connexion",
+
     signIn:
         "Se connecter",
 
@@ -25,9 +30,7 @@ const fr = {
         "Connexion...",
 
 
-
-
-    // Navigation
+    // NAVIGATION
 
     dashboard:
         "Tableau de bord",
@@ -47,10 +50,11 @@ const fr = {
     more:
         "Plus",
 
+    map:
+        "Carte",
 
 
-
-    // Language
+    // LANGUE
 
     language:
         "Langue",
@@ -62,15 +66,49 @@ const fr = {
         "Anglais",
 
 
-
-
-    // Dashboard
+    // GÉNÉRAL
 
     welcome:
         "Bienvenue",
 
     customsOfficer:
         "Agent des douanes",
+
+    officer:
+        "Agent",
+
+    unknown:
+        "Inconnu",
+
+    notAvailable:
+        "Non disponible",
+
+    status:
+        "Statut",
+
+    active:
+        "Actif",
+
+    success:
+        "Succès",
+
+    error:
+        "Erreur",
+
+    loading:
+        "Chargement...",
+
+    total:
+        "Total",
+
+    completed:
+        "Terminées",
+
+    pending:
+        "En attente",
+
+
+    // TABLEAU DE BORD
 
     activeAlerts:
         "ALERTES ACTIVES",
@@ -108,15 +146,6 @@ const fr = {
     inspectionStatistics:
         "STATISTIQUES D'INSPECTION",
 
-    total:
-        "Total",
-
-    completed:
-        "Terminées",
-
-    pending:
-        "En attente",
-
     quickActions:
         "ACTIONS RAPIDES",
 
@@ -127,32 +156,10 @@ const fr = {
         "Plus de modules",
 
 
-
-
-    // General
-
-    unknown:
-        "Inconnu",
-
-    notAvailable:
-        "Non disponible",
-
-    status:
-        "Statut",
-
-    active:
-        "Actif",
-
-
-
-
-    // Profile
+    // PROFIL
 
     officerAccountInformation:
         "Informations du compte agent",
-
-    officer:
-        "Agent",
 
     permissions:
         "Permissions",
@@ -161,9 +168,7 @@ const fr = {
         "Déconnexion",
 
 
-
-
-    // Destination Map
+    // CARTE DE DESTINATION
 
     destinationVerification:
         "Vérification de la destination",
@@ -190,9 +195,25 @@ const fr = {
         "Destination déclarée",
 
 
+    // LISTE DES DÉCLARATIONS
+
+    declarationsTitle:
+        "Déclarations",
+
+    customsDeclarationRecords:
+        "Registres des déclarations douanières",
+
+    noRecords:
+        "Aucun enregistrement",
+
+    noDeclarationsAvailable:
+        "Aucune déclaration disponible",
+
+    viewDetails:
+        "Voir les détails",
 
 
-    // Declaration Details
+    // DÉTAILS DE LA DÉCLARATION
 
     declarationDetails:
         "Détails de la déclaration",
@@ -200,14 +221,23 @@ const fr = {
     cargoVerificationInformation:
         "Informations de vérification de la cargaison",
 
+    declarationInformation:
+        "INFORMATIONS DE LA DÉCLARATION",
+
     declarationNumber:
         "Numéro de déclaration",
+
+    pendingVerification:
+        "Vérification en attente",
 
     importerInformation:
         "INFORMATIONS SUR L'IMPORTATEUR",
 
     name:
         "Nom",
+
+    company:
+        "Entreprise",
 
     country:
         "Pays",
@@ -217,6 +247,9 @@ const fr = {
 
     goods:
         "Marchandises",
+
+    description:
+        "Description",
 
     category:
         "Catégorie",
@@ -228,6 +261,9 @@ const fr = {
         "INFORMATIONS SUR LE TRANSPORT",
 
     truck:
+        "Plaque du camion",
+
+    truckPlate:
         "Plaque du camion",
 
     driver:
@@ -245,8 +281,29 @@ const fr = {
     unknownStatus:
         "Statut inconnu",
 
+    verifyDestinationMap:
+        "Vérifier la destination sur la carte",
+
     viewDestinationMap:
         "Vérifier la destination sur la carte",
+
+    customsStatus:
+        "STATUT DOUANIER",
+
+    inspectionStatus:
+        "STATUT DE L'INSPECTION",
+
+    awaitingInspection:
+        "En attente d'inspection",
+
+    riskLevel:
+        "Niveau de risque",
+
+    notAssessed:
+        "Non évalué",
+
+    officerActions:
+        "ACTIONS DE L'AGENT",
 
     runAIAnalysis:
         "Lancer l'analyse IA",
@@ -255,9 +312,7 @@ const fr = {
         "Commencer l'inspection",
 
 
-
-
-    // Inspection
+    // INSPECTION
 
     inspectionModule:
         "Module d'inspection",
@@ -273,9 +328,6 @@ const fr = {
 
     truckPlatePlaceholder:
         "Numéro de plaque du camion",
-
-    inspectionStatus:
-        "STATUT DE L'INSPECTION",
 
     inProgress:
         "En cours",
@@ -307,13 +359,38 @@ const fr = {
     noInspectionsAvailable:
         "Aucune inspection disponible",
 
+    permissionRequired:
+        "Autorisation requise",
+
+    cameraPermissionRequired:
+        "L'autorisation de la caméra est requise.",
+
+    missingInformation:
+        "Informations manquantes",
+
+    declarationNumberRequired:
+        "Le numéro de déclaration est requis.",
+
+    customsInspectionPoint:
+        "Point d'inspection douanière",
+
+    inspectionReportSubmitted:
+        "Le rapport d'inspection a été soumis avec succès.",
+
+    inspectionSaved:
+        "L'inspection a été enregistrée avec succès.",
+
+    inspectionSubmissionFailed:
+        "Échec de la soumission de l'inspection.",
 
 
-
-    // Reports
+    // RAPPORTS
 
     inspectionReports:
         "Rapports d'inspection",
+
+    inspectionRecords:
+        "Activités d'inspection et dossiers de vérification douanière",
 
     reportsSubtitle:
         "Activités d'inspection et dossiers de vérification douanière",
@@ -351,22 +428,20 @@ const fr = {
     comments:
         "Commentaires",
 
+    noComments:
+        "Aucun commentaire",
+
     notAnalysed:
         "Non analysé",
 
 
-
-
-    // AI Analysis
+    // ANALYSE IA
 
     aiAnalysis:
         "Analyse IA",
 
     aiSubtitle:
         "Assistance intelligente pour l'évaluation des risques douaniers",
-
-    declarationInformation:
-        "INFORMATIONS DE LA DÉCLARATION",
 
     analysisType:
         "Type d'analyse",
@@ -377,14 +452,20 @@ const fr = {
     aiModuleStatus:
         "STATUT DU MODULE IA",
 
+    mockAIModule:
+        "Module IA simulé",
+
+    aiDescription:
+        "L'analyse IA est actuellement simulée à des fins de démonstration.",
+
     cargoRiskScore:
         "SCORE DE RISQUE DE LA CARGAISON",
 
-    riskLevel:
-        "Niveau de risque",
-
     riskScore:
         "Score de risque",
+
+    medium:
+        "Moyen",
 
     inspectionPriority:
         "PRIORITÉ D'INSPECTION",
@@ -398,8 +479,17 @@ const fr = {
     riskIndicators:
         "INDICATEURS DE RISQUE",
 
+    consistencyCheck:
+        "Vérification de la cohérence des documents",
+
+    cargoAnalysis:
+        "Analyse de la cargaison",
+
     aiRecommendation:
         "RECOMMANDATION IA",
+
+    reviewDeclaration:
+        "Vérifier la déclaration avant l'inspection.",
 
     futureAIDevelopment:
         "DÉVELOPPEMENT FUTUR DE L'IA",
@@ -407,6 +497,8 @@ const fr = {
     plannedAICapabilities:
         "Capacités IA prévues :",
 
+    plannedCapabilities:
+        "Capacités IA prévues :",
 
     documentOCR:
         "Extraction OCR des documents",
@@ -417,22 +509,77 @@ const fr = {
     machineLearning:
         "Prédiction des risques par apprentissage automatique",
 
-    map:
-        "Carte",
-        more: "Plus",
+    machineLearningRisk:
+        "Prédiction des risques par apprentissage automatique",
 
-additionalModules: "Modules supplémentaires",
 
-inspectionReports: "Rapports d'inspection",
-inspectionReportsDescription: "Consulter et gérer les rapports d'inspection",
+    // PLUS
 
-aiAnalysis: "Analyse IA",
-aiAnalysisDescription: "Intelligence future et analyse des risques",
+    additionalModules:
+        "Modules supplémentaires",
 
-syncStatus: "État de synchronisation",
-syncStatusDescription: "Surveiller la synchronisation des données CAMCIS",
+    inspectionReportsDescription:
+        "Consulter et gérer les rapports d'inspection",
 
-profileDescription: "Informations du compte de l'agent",
+    aiAnalysisDescription:
+        "Intelligence future et analyse des risques",
+
+    syncStatus:
+        "État de synchronisation",
+
+    syncStatusDescription:
+        "Surveiller la synchronisation des données CAMCIS",
+
+    profileDescription:
+        "Informations du compte de l'agent",
+
+
+    // SYNCHRONISATION
+
+    connectionStatus:
+        "ÉTAT DE LA CONNEXION",
+
+    system:
+        "Système",
+
+    connected:
+        "Connecté",
+
+    lastSuccessfulSync:
+        "Dernière synchronisation réussie",
+
+    synchronizationSummary:
+        "RÉSUMÉ DE LA SYNCHRONISATION",
+
+    recordsSynchronized:
+        "Enregistrements synchronisés",
+
+    pendingSynchronization:
+        "Synchronisation en attente",
+
+    failedSynchronization:
+        "Synchronisations échouées",
+
+    synchronizationHistory:
+        "HISTORIQUE DE LA SYNCHRONISATION",
+
+    noSynchronizationHistory:
+        "Aucun historique de synchronisation disponible.",
+
+    information:
+        "INFORMATIONS",
+
+    synchronizationOperational:
+        "Le service de synchronisation fonctionne normalement.",
+
+    successfulSynchronization:
+        "Synchronisation réussie",
+
+    inspectionReportsUploaded:
+        "Rapports d'inspection téléchargés",
+
+    synchronizeNow:
+        "Synchroniser maintenant"
 
 };
 

@@ -4,11 +4,31 @@ import {
 } from "react";
 
 
+import {
+    useLanguage
+} from "../context/LanguageContext.jsx";
+
+
+import en from "../i18n/en.js";
+import fr from "../i18n/fr.js";
+
+
 const API_URL =
     "https://douanenav-backend.onrender.com/api";
 
 
 const UsersPage = () => {
+
+    const {
+        language
+    } = useLanguage();
+
+
+    const t =
+        language === "FR"
+            ? fr
+            : en;
+
 
     const [
         users,
@@ -45,10 +65,10 @@ const UsersPage = () => {
         setForm
     ] = useState({
 
-        name:"",
-        email:"",
-        phone:"",
-        temporaryPassword:""
+        name: "",
+        email: "",
+        phone: "",
+        temporaryPassword: ""
 
     });
 
@@ -66,179 +86,192 @@ const UsersPage = () => {
     }, []);
 
 
-    const loadUsers = async () => {
+    const loadUsers =
+        async () => {
 
-        try {
+            try {
 
-            setLoading(true);
+                setLoading(true);
 
-            const response =
-                await fetch(
-                    `${API_URL}/users`,
-                    {
-                        headers:{
-                            Authorization:
-                                `Bearer ${token}`,
 
-                            "Content-Type":
-                                "application/json"
+                const response =
+                    await fetch(
+                        `${API_URL}/users`,
+                        {
+                            headers: {
+
+                                Authorization:
+                                    `Bearer ${token}`,
+
+                                "Content-Type":
+                                    "application/json"
+
+                            }
                         }
-                    }
-                );
+                    );
 
 
-            const data =
-                await response.json();
+                const data =
+                    await response.json();
 
 
-            if(!response.ok){
+                if (!response.ok) {
 
-                throw new Error(
-                    data.error ||
-                    "Failed to load users."
-                );
+                    throw new Error(
+                        data.error ||
+                        t.usersUnavailable
+                    );
 
-            }
-
-
-            setUsers(data);
-
-        }
-
-        catch(error){
-
-            console.error(
-                error.message
-            );
-
-            setError(
-                error.message
-            );
-
-        }
-
-        finally{
-
-            setLoading(false);
-
-        }
-
-    };
+                }
 
 
-    const handleChange = (
-        event
-    ) => {
-
-        setForm({
-
-            ...form,
-
-            [event.target.name]:
-                event.target.value
-
-        });
-
-    };
-
-
-    const createOfficer = async (
-        event
-    ) => {
-
-        event.preventDefault();
-
-        setMessage("");
-        setError("");
-
-
-        try {
-
-            setCreating(true);
-
-
-            const response =
-                await fetch(
-                    `${API_URL}/users/officers`,
-                    {
-                        method:"POST",
-
-                        headers:{
-                            Authorization:
-                                `Bearer ${token}`,
-
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body:
-                            JSON.stringify(
-                                form
-                            )
-                    }
-                );
-
-
-            const data =
-                await response.json();
-
-
-            if(!response.ok){
-
-                throw new Error(
-                    data.error ||
-                    "Failed to create officer."
+                setUsers(
+                    Array.isArray(data)
+                        ? data
+                        : []
                 );
 
             }
 
+            catch (error) {
 
-            setMessage(
-                `Officer account created successfully. Temporary password: ${form.temporaryPassword}`
-            );
+                console.error(
+                    error.message
+                );
 
+
+                setError(
+                    error.message
+                );
+
+            }
+
+            finally {
+
+                setLoading(false);
+
+            }
+
+        };
+
+
+    const handleChange =
+        (event) => {
 
             setForm({
 
-                name:"",
-                email:"",
-                phone:"",
-                temporaryPassword:""
+                ...form,
+
+                [event.target.name]:
+                    event.target.value
 
             });
 
-
-            await loadUsers();
-
-        }
-
-        catch(error){
-
-            setError(
-                error.message
-            );
-
-        }
-
-        finally{
-
-            setCreating(false);
-
-        }
-
-    };
+        };
 
 
-    if(loading){
+    const createOfficer =
+        async (event) => {
+
+            event.preventDefault();
+
+
+            setMessage("");
+            setError("");
+
+
+            try {
+
+                setCreating(true);
+
+
+                const response =
+                    await fetch(
+                        `${API_URL}/users/officers`,
+                        {
+                            method: "POST",
+
+                            headers: {
+
+                                Authorization:
+                                    `Bearer ${token}`,
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    form
+                                )
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "Failed to create officer."
+                    );
+
+                }
+
+
+                setMessage(
+                    `${t.officerCreated} ${t.temporaryPassword}: ${form.temporaryPassword}`
+                );
+
+
+                setForm({
+
+                    name: "",
+                    email: "",
+                    phone: "",
+                    temporaryPassword: ""
+
+                });
+
+
+                await loadUsers();
+
+            }
+
+            catch (error) {
+
+                setError(
+                    error.message
+                );
+
+            }
+
+            finally {
+
+                setCreating(false);
+
+            }
+
+        };
+
+
+    if (loading) {
 
         return (
+
             <div className="card">
 
                 <p>
-                    Loading users...
+                    {t.loading}
                 </p>
 
             </div>
+
         );
 
     }
@@ -251,11 +284,12 @@ const UsersPage = () => {
             <div className="card">
 
                 <h2>
-                    User Management
+                    {t.userManagement}
                 </h2>
 
+
                 <p className="muted">
-                    Create and manage authorized CustomsTrack AI users.
+                    {t.authorizedUsers}
                 </p>
 
             </div>
@@ -264,7 +298,7 @@ const UsersPage = () => {
             <div className="card">
 
                 <h3>
-                    Add Customs Officer
+                    {t.addOfficer}
                 </h3>
 
 
@@ -284,7 +318,9 @@ const UsersPage = () => {
                             onChange={
                                 handleChange
                             }
-                            placeholder="Officer name"
+                            placeholder={
+                                t.officerName
+                            }
                             required
                         />
 
@@ -298,7 +334,9 @@ const UsersPage = () => {
                             onChange={
                                 handleChange
                             }
-                            placeholder="Officer email"
+                            placeholder={
+                                t.officerEmail
+                            }
                             required
                         />
 
@@ -315,7 +353,9 @@ const UsersPage = () => {
                             onChange={
                                 handleChange
                             }
-                            placeholder="Phone"
+                            placeholder={
+                                t.phone
+                            }
                         />
 
 
@@ -328,7 +368,9 @@ const UsersPage = () => {
                             onChange={
                                 handleChange
                             }
-                            placeholder="Temporary password"
+                            placeholder={
+                                t.temporaryPassword
+                            }
                             required
                         />
 
@@ -344,8 +386,8 @@ const UsersPage = () => {
 
                         {
                             creating
-                                ? "Creating..."
-                                : "Create Officer"
+                                ? t.creating
+                                : t.createOfficer
                         }
 
                     </button>
@@ -379,26 +421,28 @@ const UsersPage = () => {
 
             <div className="card">
 
-                <table className="inspection-table">
+                <table
+                    className="inspection-table"
+                >
 
                     <thead>
 
                         <tr>
 
                             <th>
-                                Name
+                                {t.officerName}
                             </th>
 
                             <th>
-                                Email
+                                {t.email}
                             </th>
 
                             <th>
-                                Role
+                                {t.users}
                             </th>
 
                             <th>
-                                Status
+                                {t.status}
                             </th>
 
                         </tr>
@@ -410,7 +454,10 @@ const UsersPage = () => {
 
                         {
                             users.map(
-                                (user,index) => (
+                                (
+                                    user,
+                                    index
+                                ) => (
 
                                     <tr
                                         key={
@@ -422,21 +469,24 @@ const UsersPage = () => {
 
                                         <td>
                                             {
-                                                user.name
+                                                user.name ||
+                                                t.notAvailable
                                             }
                                         </td>
 
 
                                         <td>
                                             {
-                                                user.email
+                                                user.email ||
+                                                t.notAvailable
                                             }
                                         </td>
 
 
                                         <td>
                                             {
-                                                user.role
+                                                user.role ||
+                                                t.unknown
                                             }
                                         </td>
 
@@ -452,7 +502,7 @@ const UsersPage = () => {
                                             >
                                                 {
                                                     user.status ||
-                                                    "Active"
+                                                    t.active
                                                 }
                                             </span>
 

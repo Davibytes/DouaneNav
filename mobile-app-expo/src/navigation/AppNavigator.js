@@ -22,6 +22,7 @@ import AIAnalysisScreen from "../screens/AIAnalysisScreen.js";
 import SyncStatusScreen from "../screens/SyncStatusScreen.js";
 import ProfileScreen from "../screens/ProfileScreen.js";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen.js";
+import ChangePasswordScreen from "../screens/ChangePasswordScreen.js";
 
 const Stack =
     createNativeStackNavigator();
@@ -64,6 +65,11 @@ export default function AppNavigator(){
 
                     component={LoginScreen}
 
+                />
+                <Stack.Screen
+                    name="ChangePassword"
+                    
+                    component={ChangePasswordScreen}
                 />
 
                 <Stack.Screen

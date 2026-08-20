@@ -6,12 +6,6 @@ export const login = async (
     password
 ) => {
 
-    console.log(
-        "LOGIN REQUEST:",
-        email
-    );
-
-
     const response =
         await api.post(
             "/auth/login",
@@ -38,6 +32,24 @@ export const getCurrentUser = async () => {
     const response =
         await api.get(
             "/auth/me"
+        );
+
+
+    return response.data;
+
+};
+
+
+export const changePassword = async (
+    newPassword
+) => {
+
+    const response =
+        await api.post(
+            "/auth/change-password",
+            {
+                newPassword
+            }
         );
 
 

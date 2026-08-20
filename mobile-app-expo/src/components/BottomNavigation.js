@@ -18,14 +18,8 @@ import {
 } from "../context/LanguageContext.js";
 
 
-import {
-    translations
-} from "../i18n/index.js";
-
-
 import styles from "../styles/styles.js";
 import colors from "../styles/colors.js";
-
 
 
 export default function BottomNavigation({
@@ -34,239 +28,206 @@ export default function BottomNavigation({
 
     active
 
-}){
-
+}) {
 
     const {
-        language
+        t
     } = useLanguage();
-
-
-
-    const t =
-        translations[language];
-
-
 
 
     const tabs = [
 
         {
 
-            name:"Dashboard",
+            name:
+                "Dashboard",
 
-            label:t.dashboard,
+            label:
+                t.dashboard,
 
-            icon:"dashboard"
-
-        },
-
-        {
-
-            name:"Declarations",
-
-            label:t.declarations,
-
-            icon:"description"
+            icon:
+                "dashboard"
 
         },
 
         {
 
-            name:"Inspection",
+            name:
+                "Declarations",
 
-            label:t.inspection,
+            label:
+                t.declarations,
 
-            icon:"fact-check"
-
-        },
-
-        {
-
-            name:"DestinationMap",
-
-            label:t.map,
-
-            icon:"place"
+            icon:
+                "description"
 
         },
 
         {
 
-            name:"More",
+            name:
+                "Inspection",
 
-            label:t.more,
+            label:
+                t.inspection,
 
-            icon:"menu"
+            icon:
+                "fact-check"
+
+        },
+
+        {
+
+            name:
+                "DestinationMap",
+
+            label:
+                t.map,
+
+            icon:
+                "place"
+
+        },
+
+        {
+
+            name:
+                "More",
+
+            label:
+                t.more,
+
+            icon:
+                "menu"
 
         }
 
     ];
 
 
-
-
-
     return (
 
         <View
-
             style={
                 styles.bottomNavigation
             }
-
         >
 
-
-
             {
+                tabs.map(
+                    tab => (
 
-                tabs.map((tab)=>(
+                        <TouchableOpacity
 
-
-                    <TouchableOpacity
-
-
-                        key={
-                            tab.name
-                        }
-
-
-                        style={
-                            styles.bottomNavigationItem
-                        }
-
-
-                        activeOpacity={0.8}
-
-
-                        onPress={()=>{
-
-
-                            if(tab.name !== active){
-
-
-                                navigation.navigate(
-
-                                    tab.name
-
-                                );
-
-
+                            key={
+                                tab.name
                             }
 
-
-                        }}
-
-
-                    >
-
-
-
-
-                        <MaterialIcons
-
-
-                            name={
-                                tab.icon
+                            style={
+                                styles.bottomNavigationItem
                             }
 
-
-                            size={26}
-
-
-                            color={
-
-                                active === tab.name
-
-                                ?
-
-                                colors.green
-
-                                :
-
-                                colors.muted
-
+                            activeOpacity={
+                                0.8
                             }
 
+                            onPress={() => {
 
-                        />
+                                if (
+                                    tab.name !== active
+                                ) {
 
-
-
-
-
-
-
-                        <Text
-
-
-                            style={[
-
-
-                                styles.bottomNavigationText,
-
-
-                                {
-
-
-                                    color:
-
-
-                                    active === tab.name
-
-
-                                    ?
-
-
-                                    colors.green
-
-
-                                    :
-
-
-                                    colors.muted,
-
-
-
-                                    marginTop:4
-
+                                    navigation.navigate(
+                                        tab.name
+                                    );
 
                                 }
 
-
-                            ]}
-
-
+                            }}
 
                         >
 
+                            <MaterialIcons
 
-                            {
-                                tab.label
-                            }
+                                name={
+                                    tab.icon
+                                }
+
+                                size={
+                                    24
+                                }
+
+                                color={
+
+                                    active === tab.name
+
+                                        ?
+
+                                        colors.green
+
+                                        :
+
+                                        colors.muted
+
+                                }
+
+                            />
 
 
+                            <Text
 
-                        </Text>
+                                numberOfLines={
+                                    2
+                                }
 
+                                adjustsFontSizeToFit={
+                                    true
+                                }
 
+                                minimumFontScale={
+                                    0.8
+                                }
 
+                                style={[
 
+                                    styles.bottomNavigationText,
 
+                                    {
 
-                    </TouchableOpacity>
+                                        color:
 
+                                            active === tab.name
 
+                                                ?
 
-                ))
+                                                colors.green
 
+                                                :
+
+                                                colors.muted,
+
+                                        marginTop:
+                                            3
+
+                                    }
+
+                                ]}
+
+                            >
+
+                                {
+                                    tab.label
+                                }
+
+                            </Text>
+
+                        </TouchableOpacity>
+
+                    )
+                )
             }
 
-
-
         </View>
-
 
     );
 

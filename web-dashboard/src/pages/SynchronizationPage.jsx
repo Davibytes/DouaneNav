@@ -4,12 +4,30 @@ import {
 } from "react";
 
 
+import {
+    useLanguage
+} from "../context/LanguageContext.jsx";
+
+
+import en from "../i18n/en.js";
+import fr from "../i18n/fr.js";
+
+
 const API_URL =
-     "https://douanenav-backend.onrender.com/api";
+    "https://douanenav-backend.onrender.com/api";
 
 
+const SynchronizationPage = () => {
 
-const SynchronizationPage = ()=>{
+    const {
+        language
+    } = useLanguage();
+
+
+    const t =
+        language === "FR"
+            ? fr
+            : en;
 
 
     const [
@@ -18,14 +36,10 @@ const SynchronizationPage = ()=>{
     ] = useState(null);
 
 
-
     const [
         loading,
         setLoading
     ] = useState(false);
-
-
-
 
 
     const token =
@@ -34,157 +48,134 @@ const SynchronizationPage = ()=>{
         );
 
 
-
-
-
-    useEffect(()=>{
+    useEffect(() => {
 
         loadStatus();
 
-    },[]);
+    }, []);
 
 
+    const loadStatus =
+        async () => {
 
+            try {
 
-
-    const loadStatus = async()=>{
-
-
-        try{
-
-
-            const response =
-                await fetch(
-
-                    `${API_URL}/synchronization/status`,
-
-                    {
-
-                        headers:{
-
-                            Authorization:
-                            `Bearer ${token}`
-
+                const response =
+                    await fetch(
+                        `${API_URL}/synchronization/status`,
+                        {
+                            headers: {
+                                Authorization:
+                                    `Bearer ${token}`
+                            }
                         }
-
-                    }
-
-                );
+                    );
 
 
-
-            const data =
-                await response.json();
-
+                const data =
+                    await response.json();
 
 
-            setStatus(data);
+                if (!response.ok) {
 
-
-        }
-
-        catch(error){
-
-
-            console.log(
-                error.message
-            );
-
-
-        }
-
-
-    };
-
-
-
-
-
-
-
-    const synchronize = async()=>{
-
-
-        try{
-
-
-            setLoading(true);
-
-
-
-            await fetch(
-
-                `${API_URL}/synchronization`,
-
-                {
-
-                    method:"POST",
-
-                    headers:{
-
-                        Authorization:
-                        `Bearer ${token}`
-
-                    }
+                    throw new Error(
+                        data.error ||
+                        "Failed to load synchronization status."
+                    );
 
                 }
 
-            );
+
+                setStatus(
+                    data
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    "Synchronization error:",
+                    error.message
+                );
+
+            }
+
+        };
 
 
+    const synchronize =
+        async () => {
 
-            await loadStatus();
+            try {
 
-
-        }
-
-        catch(error){
-
-
-            console.log(
-                error.message
-            );
+                setLoading(true);
 
 
-        }
+                const response =
+                    await fetch(
+                        `${API_URL}/synchronization`,
+                        {
+                            method: "POST",
 
-        finally{
-
-
-            setLoading(false);
-
-
-        }
-
-
-    };
-
-
+                            headers: {
+                                Authorization:
+                                    `Bearer ${token}`
+                            }
+                        }
+                    );
 
 
+                const data =
+                    await response.json();
 
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "Synchronization failed."
+                    );
+
+                }
+
+
+                await loadStatus();
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    "Synchronization error:",
+                    error.message
+                );
+
+            }
+
+            finally {
+
+                setLoading(false);
+
+            }
+
+        };
 
 
     return (
 
-
         <div>
-
 
             <div className="card">
 
-
                 <h2>
-                    Synchronization
+                    {t.synchronizationTitle}
                 </h2>
 
 
-
                 <p className="muted">
-                    CAMCIS synchronization status.
+                    {t.synchronizationMonitoring}
                 </p>
-
-
 
 
                 {
@@ -192,50 +183,50 @@ const SynchronizationPage = ()=>{
 
                         <div>
 
-
                             <p>
-                                Status:
+                                {t.status}:
                                 {" "}
-                                {status.status}
+                                {status.status ||
+                                    t.unknown}
                             </p>
 
 
-
                             <p>
-                                System:
+                                {language === "FR"
+                                    ? "Système"
+                                    : "System"}:
                                 {" "}
-                                {status.system}
+                                {status.system ||
+                                    t.notAvailable}
                             </p>
 
 
-
                             <p>
-                                Message:
+                                {t.comments}:
                                 {" "}
-                                {status.message}
+                                {status.message ||
+                                    t.notAvailable}
                             </p>
 
 
-
                             <p>
-                                Last Sync:
+                                {language === "FR"
+                                    ? "Dernière synchronisation"
+                                    : "Last Sync"}:
                                 {" "}
                                 {
-                                    new Date(
-                                        status.createdAt
-                                    )
-                                    .toLocaleString()
+                                    status.createdAt
+                                        ? new Date(
+                                            status.createdAt
+                                        ).toLocaleString()
+                                        : t.notAvailable
                                 }
                             </p>
-
 
                         </div>
 
                     )
                 }
-
-
-
 
 
                 <button
@@ -254,25 +245,25 @@ const SynchronizationPage = ()=>{
 
                     {
                         loading
-                        ?
-                        "Synchronizing..."
-                        :
-                        "Synchronize Now"
+                            ? (
+                                language === "FR"
+                                    ? "Synchronisation..."
+                                    : "Synchronizing..."
+                            )
+                            : (
+                                language === "FR"
+                                    ? "Synchroniser maintenant"
+                                    : "Synchronize Now"
+                            )
                     }
-
 
                 </button>
 
-
-
             </div>
-
 
         </div>
 
-
     );
-
 
 };
 

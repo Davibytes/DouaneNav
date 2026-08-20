@@ -1,242 +1,343 @@
-import { useEffect, useState } from "react";
-import { getDeclarations, searchDeclarations } from "../api/declarationApi";
+import {
+    useEffect,
+    useState
+} from "react";
+
+
+import {
+    getDeclarations,
+    searchDeclarations
+} from "../api/declarationApi";
+
+
+import {
+    useLanguage
+} from "../context/LanguageContext.jsx";
+
+
+import en from "../i18n/en.js";
+import fr from "../i18n/fr.js";
 
 
 const DeclarationsPage = () => {
 
-
-  const [declarations, setDeclarations] = useState([]);
-
-  const [loading, setLoading] = useState(true);
-
-  const [search, setSearch] = useState("");
-
-  const loadDeclarations = async () => {
-
-    try {
-
-      const data =
-        await getDeclarations();
+    const {
+        language
+    } = useLanguage();
 
 
-      setDeclarations(data);
-
-    }
-
-    catch(error) {
-
-      console.error(
-        error.message
-      );
-
-    }
-
-    finally {
-
-      setLoading(false);
-
-    }
-
-  };
-
-  useEffect(() => {
-
-    loadDeclarations();
-
-  }, []);
-
-  const handleSearch = async () => {
-
-    if (!search.trim()) {
-
-      loadDeclarations();
-
-      return;
-
-    }
-
-    try {
-
-      const data =
-        await searchDeclarations(search);
-
-      setDeclarations(data);
-
-    }
-
-    catch(error) {
-
-      console.error(
-        error.message
-      );
-
-    }
+    const t =
+        language === "FR"
+            ? fr
+            : en;
 
 
-  };
+    const [
+        declarations,
+        setDeclarations
+    ] = useState([]);
 
-  return (
 
-    <div>
+    const [
+        loading,
+        setLoading
+    ] = useState(true);
 
-      <div className="card">
 
-        <div className="search-bar">
+    const [
+        search,
+        setSearch
+    ] = useState("");
 
-          <input
 
-            value={search}
+    const loadDeclarations =
+        async () => {
 
-            onChange={(e)=>
-              setSearch(e.target.value)
+            try {
+
+                setLoading(true);
+
+
+                const data =
+                    await getDeclarations();
+
+
+                setDeclarations(
+                    Array.isArray(data)
+                        ? data
+                        : []
+                );
+
             }
 
-            placeholder="
-              Search declaration, importer, destination...
-            "
+            catch (error) {
 
-          />
+                console.error(
+                    error.message
+                );
 
-          <button
+            }
 
-            onClick={handleSearch}
+            finally {
 
-          >
+                setLoading(false);
 
-            Search
+            }
 
-          </button>
+        };
 
+
+    useEffect(() => {
+
+        loadDeclarations();
+
+    }, []);
+
+
+    const handleSearch =
+        async () => {
+
+            if (!search.trim()) {
+
+                loadDeclarations();
+
+                return;
+
+            }
+
+
+            try {
+
+                setLoading(true);
+
+
+                const data =
+                    await searchDeclarations(
+                        search
+                    );
+
+
+                setDeclarations(
+                    Array.isArray(data)
+                        ? data
+                        : []
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    error.message
+                );
+
+            }
+
+            finally {
+
+                setLoading(false);
+
+            }
+
+        };
+
+
+    return (
+
+        <div>
+
+            <div className="card">
+
+                <div className="search-bar">
+
+                    <input
+
+                        value={
+                            search
+                        }
+
+                        onChange={
+                            event =>
+                                setSearch(
+                                    event.target.value
+                                )
+                        }
+
+                        onKeyDown={
+                            event => {
+
+                                if (
+                                    event.key === "Enter"
+                                ) {
+
+                                    handleSearch();
+
+                                }
+
+                            }
+                        }
+
+                        placeholder={
+                            t.searchDeclarations
+                        }
+
+                    />
+
+
+                    <button
+                        onClick={
+                            handleSearch
+                        }
+                    >
+
+                        {t.searchButton}
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div className="card">
+
+                {
+                    loading
+
+                    ?
+
+                    <p>
+                        {t.loadingDeclarations}
+                    </p>
+
+                    :
+
+                    declarations.length === 0
+
+                    ?
+
+                    <p className="muted">
+                        {t.noData}
+                    </p>
+
+                    :
+
+                    <table
+                        className="inspection-table"
+                    >
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    {t.declaration}
+                                </th>
+
+                                <th>
+                                    {t.importer}
+                                </th>
+
+                                <th>
+                                    {t.destination}
+                                </th>
+
+                                <th>
+                                    {t.status}
+                                </th>
+
+                                <th>
+                                    {t.truck}
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {
+                                declarations.map(
+                                    declaration => (
+
+                                        <tr
+                                            key={
+                                                declaration._id
+                                            }
+                                        >
+
+                                            <td>
+                                                {
+                                                    declaration.declarationNumber
+                                                    ||
+                                                    t.notAvailable
+                                                }
+                                            </td>
+
+
+                                            <td>
+                                                {
+                                                    declaration.importer?.name
+                                                    ||
+                                                    t.notAvailable
+                                                }
+                                            </td>
+
+
+                                            <td>
+                                                {
+                                                    declaration.destination?.city
+                                                    ||
+                                                    t.notAvailable
+                                                }
+                                            </td>
+
+
+                                            <td>
+
+                                                <span
+                                                    className={
+                                                        declaration.status === "Completed"
+                                                            ? "status success"
+                                                            : "status pending"
+                                                    }
+                                                >
+                                                    {
+                                                        declaration.status
+                                                        ||
+                                                        t.unknown
+                                                    }
+                                                </span>
+
+                                            </td>
+
+
+                                            <td>
+                                                {
+                                                    declaration.transport?.truckPlate
+                                                    ||
+                                                    t.notAvailable
+                                                }
+                                            </td>
+
+                                        </tr>
+
+                                    )
+                                )
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                }
+
+            </div>
 
         </div>
 
-
-      </div>
-
-
-      <div className="card">
-
-
-        {
-          loading ?
-
-          <p>
-            Loading declarations...
-          </p>
-
-          :
-
-          <table className="inspection-table">
-
-
-            <thead>
-
-              <tr>
-
-                <th>
-                  Declaration
-                </th>
-
-
-                <th>
-                  Importer
-                </th>
-
-
-                <th>
-                  Destination
-                </th>
-
-
-                <th>
-                  Status
-                </th>
-
-
-                <th>
-                  Truck
-                </th>
-
-
-              </tr>
-
-
-            </thead>
-
-            <tbody>
-
-
-            {
-              declarations.map(
-                (declaration)=>(
-
-
-                  <tr key={declaration._id}>
-
-
-                    <td>
-                      {declaration.declarationNumber}
-                    </td>
-
-
-                    <td>
-                      {declaration.importer.name}
-                    </td>
-
-
-                    <td>
-                      {
-                        declaration.destination.city
-                      }
-                    </td>
-
-
-                    <td>
-
-                      <span className="status pending">
-
-                        {
-                          declaration.status
-                        }
-
-                      </span>
-
-                    </td>
-
-
-                    <td>
-
-                      {
-                        declaration.transport.truckPlate
-                      }
-
-                    </td>
-
-
-                  </tr>
-
-
-                )
-
-              )
-            }
-
-
-            </tbody>
-
-
-
-          </table>
-
-        }
-
-
-      </div>
-
-
-    </div>
-
-  );
+    );
 
 };
 

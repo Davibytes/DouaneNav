@@ -29,25 +29,13 @@ import {
 import styles from "../styles/styles.js";
 
 
-
 export default function ReportScreen({
     navigation
 }) {
 
-
     const {
-        language
+        t
     } = useLanguage();
-
-
-
-    const t =
-        language === "fr"
-        ? require("../i18n/fr.js").default
-        : require("../i18n/en.js").default;
-
-
-
 
 
     const [
@@ -56,120 +44,70 @@ export default function ReportScreen({
     ] = useState([]);
 
 
-
-
-
-    useEffect(()=>{
+    useEffect(() => {
 
         loadReports();
 
-    },[]);
+    }, []);
 
 
+    const loadReports =
+        async () => {
+
+            try {
+
+                const data =
+                    await getReports();
 
 
+                setReports(
+                    Array.isArray(data)
+                        ? data
+                        : []
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    "Reports error:",
+                    error.message
+                );
 
 
-    const loadReports = async()=>{
+                setReports([]);
+
+            }
+
+        };
 
 
-        try{
+    const completedCount =
+        reports.filter(
+            report =>
+                report.status ===
+                    "Completed"
+        ).length;
 
 
-            const data =
-                await getReports();
+    const pendingCount =
+        reports.filter(
+            report =>
+                report.status ===
+                    "Pending"
+        ).length;
 
 
-            setReports(
-                data || []
-            );
-
-
-        }
-
-        catch(error){
-
-
-            console.log(
-                "Reports error:",
-                error.message
-            );
-
-
-
-            setReports([
-
-                {
-
-                    declarationNumber:
-                    "CMR-2026-001",
-
-                    result:
-                    "Approved",
-
-                    officer:
-                    "Officer Mbarga",
-
-                    status:
-                    "Completed",
-
-                    comments:
-                    "Cargo verified successfully",
-
-                    aiAnalysis:
-                    "Low risk"
-
-                },
-
-                {
-
-                    declarationNumber:
-                    "CMR-2026-002",
-
-                    result:
-                    "Pending Review",
-
-                    officer:
-                    "Officer Njoya",
-
-                    status:
-                    "Pending",
-
-                    comments:
-                    "Additional verification required",
-
-                    aiAnalysis:
-                    "Medium risk"
-
-                }
-
-            ]);
-
-        }
-
-
-    };
-
-
-
-
-
-
-
-
-    return(
-
+    return (
 
         <SafeScreen>
 
-
             <View
                 style={{
-                    flex:1
+                    flex: 1
                 }}
             >
-
-
 
                 <ScrollView
 
@@ -179,23 +117,13 @@ export default function ReportScreen({
 
                 >
 
-
-
-
-
                     <Text
                         style={
                             styles.dashboardGreeting
                         }
                     >
-
                         {t.inspectionReports}
-
                     </Text>
-
-
-
-
 
 
                     <Text
@@ -203,38 +131,23 @@ export default function ReportScreen({
                             styles.dashboardRole
                         }
                     >
-
-                        {t.inspectionRecords}
-
+                        {t.reportsSubtitle}
                     </Text>
 
 
-
-
-
-
-
-
-
                     <View
                         style={
                             styles.section
                         }
                     >
 
-
                         <Text
                             style={
                                 styles.sectionTitle
                             }
                         >
-
                             {t.reportSummary}
-
                         </Text>
-
-
-
 
 
                         <Text
@@ -242,18 +155,9 @@ export default function ReportScreen({
                                 styles.sectionText
                             }
                         >
-
-                            {t.totalReports}:
-                            {" "}
-                            {
-                                reports.length
-                            }
-
+                            {t.totalReports}:{" "}
+                            {reports.length}
                         </Text>
-
-
-
-
 
 
                         <Text
@@ -261,21 +165,9 @@ export default function ReportScreen({
                                 styles.sectionText
                             }
                         >
-
-                            {t.completed}:
-                            {" "}
-                            {
-                                reports.filter(
-                                    r=>r.status==="Completed"
-                                ).length
-                            }
-
+                            {t.completed}:{" "}
+                            {completedCount}
                         </Text>
-
-
-
-
-
 
 
                         <Text
@@ -283,28 +175,11 @@ export default function ReportScreen({
                                 styles.sectionText
                             }
                         >
-
-                            {t.pending}:
-                            {" "}
-                            {
-                                reports.filter(
-                                    r=>r.status==="Pending"
-                                ).length
-                            }
-
+                            {t.pending}:{" "}
+                            {pendingCount}
                         </Text>
-
-
-
 
                     </View>
-
-
-
-
-
-
-
 
 
                     <View
@@ -313,19 +188,13 @@ export default function ReportScreen({
                         }
                     >
 
-
                         <Text
                             style={
                                 styles.sectionTitle
                             }
                         >
-
                             {t.exportReports}
-
                         </Text>
-
-
-
 
 
                         <Text
@@ -333,22 +202,14 @@ export default function ReportScreen({
                                 styles.sectionText
                             }
                         >
-
                             {t.generateReports}
-
                         </Text>
 
 
-
-
-
-
                         <TouchableOpacity
-
                             style={
                                 styles.menuButton
                             }
-
                         >
 
                             <Text
@@ -356,25 +217,16 @@ export default function ReportScreen({
                                     styles.menuButtonText
                                 }
                             >
-
                                 {t.exportPDF}
-
                             </Text>
-
 
                         </TouchableOpacity>
 
 
-
-
-
-
                         <TouchableOpacity
-
                             style={
                                 styles.menuButton
                             }
-
                         >
 
                             <Text
@@ -382,25 +234,16 @@ export default function ReportScreen({
                                     styles.menuButtonText
                                 }
                             >
-
                                 {t.exportExcel}
-
                             </Text>
-
 
                         </TouchableOpacity>
 
 
-
-
-
-
                         <TouchableOpacity
-
                             style={
                                 styles.menuButton
                             }
-
                         >
 
                             <Text
@@ -408,221 +251,161 @@ export default function ReportScreen({
                                     styles.menuButtonText
                                 }
                             >
-
                                 {t.exportCSV}
-
                             </Text>
 
-
                         </TouchableOpacity>
-
-
-
 
                     </View>
-
-
-
-
-
-
-
 
 
                     {
+                        reports.length === 0
 
-                        reports.length === 0 ?
+                            ?
 
-
-                        <View
-                            style={
-                                styles.section
-                            }
-                        >
-
-
-                            <Text
+                            <View
                                 style={
-                                    styles.sectionText
+                                    styles.section
                                 }
                             >
 
-                                {t.noReportsAvailable}
-
-                            </Text>
-
-
-                        </View>
-
-
-                        :
-
-
-
-                        reports.map(
-
-                            (item,index)=>(
-
-
-                                <View
-
-                                    key={index}
-
+                                <Text
                                     style={
-                                        styles.section
+                                        styles.sectionText
                                     }
-
                                 >
+                                    {t.noReportsAvailable}
+                                </Text>
 
+                            </View>
 
+                            :
 
+                            reports.map(
+                                (
+                                    item,
+                                    index
+                                ) => (
 
-                                    <Text
+                                    <View
+                                        key={
+                                            item._id
+                                            ||
+                                            item.id
+                                            ||
+                                            index
+                                        }
                                         style={
-                                            styles.sectionTitle
+                                            styles.section
                                         }
                                     >
 
-                                        {
-                                            item.declarationNumber
-                                            ||
-                                            t.declaration
-                                        }
+                                        <Text
+                                            style={
+                                                styles.sectionTitle
+                                            }
+                                        >
+                                            {
+                                                item.declarationNumber
+                                                ||
+                                                t.declaration
+                                            }
+                                        </Text>
 
 
-                                    </Text>
+                                        <Text
+                                            style={
+                                                styles.sectionText
+                                            }
+                                        >
+                                            {t.officer}:{" "}
+                                            {
+                                                item.officer
+                                                ||
+                                                t.notAvailable
+                                            }
+                                        </Text>
 
 
+                                        <Text
+                                            style={
+                                                styles.sectionText
+                                            }
+                                        >
+                                            {t.inspectionResult}:{" "}
+                                            {
+                                                item.result
+                                                ||
+                                                t.notAvailable
+                                            }
+                                        </Text>
 
 
+                                        <Text
+                                            style={
+                                                styles.sectionText
+                                            }
+                                        >
+                                            {t.status}:{" "}
+                                            {
+                                                item.status
+                                                ||
+                                                t.unknown
+                                            }
+                                        </Text>
 
 
-                                    <Text
-                                        style={
-                                            styles.sectionText
-                                        }
-                                    >
-
-                                        {t.officer}:
-                                        {" "}
-                                        {
-                                            item.officer
-                                            ||
-                                            "N/A"
-                                        }
-
-                                    </Text>
+                                        <Text
+                                            style={
+                                                styles.sectionText
+                                            }
+                                        >
+                                            {t.aiRisk}:{" "}
+                                            {
+                                                item.aiAnalysis
+                                                ||
+                                                t.notAnalysed
+                                            }
+                                        </Text>
 
 
+                                        <Text
+                                            style={
+                                                styles.sectionText
+                                            }
+                                        >
+                                            {t.comments}:{" "}
+                                            {
+                                                item.comments
+                                                ||
+                                                t.noComments
+                                            }
+                                        </Text>
 
 
+                                        <Text
+                                            style={
+                                                styles.sectionText
+                                            }
+                                        >
+                                            {t.attachedPhotos}:{" "}
+                                            {
+                                                Array.isArray(
+                                                    item.photos
+                                                )
+                                                    ? item.photos.length
+                                                    : 0
+                                            }
+                                        </Text>
 
+                                    </View>
 
-                                    <Text
-                                        style={
-                                            styles.sectionText
-                                        }
-                                    >
-
-                                        {t.inspectionResult}:
-                                        {" "}
-                                        {
-                                            item.result
-                                            ||
-                                            "N/A"
-                                        }
-
-                                    </Text>
-
-
-
-
-
-
-                                    <Text
-                                        style={
-                                            styles.sectionText
-                                        }
-                                    >
-
-                                        {t.status}:
-                                        {" "}
-                                        {
-                                            item.status
-                                            ||
-                                            t.unknown
-                                        }
-
-                                    </Text>
-
-
-
-
-
-
-                                    <Text
-                                        style={
-                                            styles.sectionText
-                                        }
-                                    >
-
-                                        {t.aiRisk}:
-                                        {" "}
-                                        {
-                                            item.aiAnalysis
-                                            ||
-                                            t.notAnalysed
-                                        }
-
-                                    </Text>
-
-
-
-
-
-
-
-                                    <Text
-                                        style={
-                                            styles.sectionText
-                                        }
-                                    >
-
-                                        {t.comments}:
-                                        {" "}
-                                        {
-                                            item.comments
-                                            ||
-                                            t.noComments
-                                        }
-
-                                    </Text>
-
-
-
-
-
-                                </View>
-
-
+                                )
                             )
-
-                        )
-
                     }
 
-
-
-
-
-
-
                 </ScrollView>
-
-
-
-
-
 
 
                 <BottomNavigation
@@ -631,22 +414,14 @@ export default function ReportScreen({
                         navigation
                     }
 
-
                     active="More"
 
                 />
 
-
-
-
-
             </View>
-
 
         </SafeScreen>
 
-
     );
-
 
 }

@@ -1,10 +1,16 @@
 import { randomUUID } from "node:crypto";
-import { hashPassword } from "../../domain/auth/password.js";
-import { ROLE_PERMISSIONS, ROLES } from "../../domain/auth/roles.js";
+
+import {
+    hashPassword
+} from "../../domain/auth/password.js";
+
+import {
+    ROLE_PERMISSIONS,
+    ROLES
+} from "../../domain/auth/roles.js";
 
 
 export class MongoAuthRepository {
-
 
     constructor(database) {
 
@@ -25,45 +31,41 @@ export class MongoAuthRepository {
     }
 
 
-
-
-
     async initialize() {
 
         const rolesCount =
             await this.roles.countDocuments();
 
 
-        if(rolesCount === 0){
-
+        if (rolesCount === 0) {
 
             const roles =
                 Object.values(ROLES)
-                .map(
-                    (name, index) => ({
-                        id:`role-${index + 1}`,
-                        name,
-                        permissions:
-                            ROLE_PERMISSIONS[name]
-                    })
-                );
+                    .map(
+                        (name, index) => ({
+                            id:
+                                `role-${index + 1}`,
+
+                            name,
+
+                            permissions:
+                                ROLE_PERMISSIONS[name]
+                        })
+                    );
 
 
             await this.roles.insertMany(
                 roles
             );
 
-
         }
-
 
 
         const usersCount =
             await this.users.countDocuments();
 
 
-        if(usersCount === 0){
-
+        if (usersCount === 0) {
 
             const administrator =
                 await this.roles.findOne({
@@ -79,13 +81,6 @@ export class MongoAuthRepository {
                 });
 
 
-            const brigade =
-                await this.roles.findOne({
-                    name:
-                        ROLES.MOBILE_BRIGADE
-                });
-
-
             const supervisor =
                 await this.roles.findOne({
                     name:
@@ -93,80 +88,108 @@ export class MongoAuthRepository {
                 });
 
 
-
             await this.users.insertMany([
 
                 {
-                    id:"user-1",
-                    name:"Amina Ndi",
-                    email:"admin@douanenav.cm",
-                    phone:"",
-                    status:"active",
+                    id:
+                        "user-1",
+
+                    name:
+                        "Amina Ndi",
+
+                    email:
+                        "admin@douanenav.cm",
+
+                    phone:
+                        "",
+
+                    status:
+                        "active",
+
                     roleId:
                         administrator.id,
+
                     passwordHash:
                         hashPassword(
                             "DouaneNav!2026"
                         ),
+
+                    mustChangePassword:
+                        false,
+
                     createdAt:
                         new Date(),
+
                     updatedAt:
                         new Date()
                 },
 
 
                 {
-                    id:"user-2",
-                    name:"Jean Mbarga",
-                    email:"officer@douanenav.cm",
-                    phone:"",
-                    status:"active",
+                    id:
+                        "user-2",
+
+                    name:
+                        "Jean Mbarga",
+
+                    email:
+                        "officer@douanenav.cm",
+
+                    phone:
+                        "",
+
+                    status:
+                        "active",
+
                     roleId:
                         officer.id,
+
                     passwordHash:
                         hashPassword(
                             "DouaneNav!2026"
                         ),
+
+                    mustChangePassword:
+                        false,
+
                     createdAt:
                         new Date(),
+
                     updatedAt:
                         new Date()
                 },
 
 
                 {
-                    id:"user-3",
-                    name:"Estelle Fongang",
-                    email:"brigade@douanenav.cm",
-                    phone:"",
-                    status:"active",
-                    roleId:
-                        brigade.id,
-                    passwordHash:
-                        hashPassword(
-                            "DouaneNav!2026"
-                        ),
-                    createdAt:
-                        new Date(),
-                    updatedAt:
-                        new Date()
-                },
+                    id:
+                        "user-3",
 
+                    name:
+                        "Paul Tchana",
 
-                {
-                    id:"user-4",
-                    name:"Paul Tchana",
-                    email:"supervisor@douanenav.cm",
-                    phone:"",
-                    status:"active",
+                    email:
+                        "supervisor@douanenav.cm",
+
+                    phone:
+                        "",
+
+                    status:
+                        "active",
+
                     roleId:
                         supervisor.id,
+
                     passwordHash:
                         hashPassword(
                             "DouaneNav!2026"
                         ),
+
+                    mustChangePassword:
+                        false,
+
                     createdAt:
                         new Date(),
+
                     updatedAt:
                         new Date()
                 }
@@ -178,12 +201,7 @@ export class MongoAuthRepository {
     }
 
 
-
-
-
-
-
-    async findUserByEmail(email){
+    async findUserByEmail(email) {
 
         return await this.users.findOne({
             email
@@ -192,12 +210,7 @@ export class MongoAuthRepository {
     }
 
 
-
-
-
-
-
-    async findUserById(id){
+    async findUserById(id) {
 
         return await this.users.findOne({
             id
@@ -206,12 +219,7 @@ export class MongoAuthRepository {
     }
 
 
-
-
-
-
-
-    async findRoleById(id){
+    async findRoleById(id) {
 
         return await this.roles.findOne({
             id
@@ -220,45 +228,97 @@ export class MongoAuthRepository {
     }
 
 
-
-
-
-
-
     publicUser(
         user,
         role
-    ){
+    ) {
 
         return {
 
-            id:user.id,
+            id:
+                user.id,
 
-            name:user.name,
+            name:
+                user.name,
 
-            email:user.email,
+            email:
+                user.email,
 
-            phone:user.phone,
+            phone:
+                user.phone,
 
-            status:user.status,
+            status:
+                user.status,
 
-            role:role.name,
+            role:
+                role.name,
 
             permissions:
-                role.permissions
+                role.permissions,
+
+            mustChangePassword:
+                Boolean(
+                    user.mustChangePassword
+                )
 
         };
 
     }
 
 
+    async changePassword(
+        userId,
+        newPassword
+    ) {
+
+        const passwordHash =
+            hashPassword(
+                newPassword
+            );
 
 
+        const result =
+            await this.users.updateOne(
+
+                {
+                    id:
+                        userId
+                },
+
+                {
+                    $set: {
+
+                        passwordHash,
+
+                        mustChangePassword:
+                            false,
+
+                        updatedAt:
+                            new Date()
+
+                    }
+                }
+
+            );
 
 
+        if (
+            result.matchedCount === 0
+        ) {
 
-    async recordAudit(event){
+            throw new Error(
+                "User not found."
+            );
 
+        }
+
+
+        return true;
+
+    }
+
+
+    async recordAudit(event) {
 
         await this.auditLogs.insertOne({
 
@@ -272,20 +332,13 @@ export class MongoAuthRepository {
 
         });
 
-
     }
-
-
-
-
-
 
 
     async revokeToken(
         jti,
         expiresAt
-    ){
-
+    ) {
 
         await this.revokedTokens.insertOne({
 
@@ -298,17 +351,10 @@ export class MongoAuthRepository {
 
         });
 
-
     }
 
 
-
-
-
-
-
-    async isTokenRevoked(jti){
-
+    async isTokenRevoked(jti) {
 
         const token =
             await this.revokedTokens.findOne({
@@ -318,8 +364,6 @@ export class MongoAuthRepository {
 
         return Boolean(token);
 
-
     }
-
 
 }

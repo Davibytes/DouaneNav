@@ -15,9 +15,26 @@ import {
 } from "../api/dashboardApi.js";
 
 
+import {
+    useLanguage
+} from "../context/LanguageContext.jsx";
 
 
-const DashboardPage = ()=>{
+import en from "../i18n/en.js";
+import fr from "../i18n/fr.js";
+
+
+const DashboardPage = () => {
+
+    const {
+        language
+    } = useLanguage();
+
+
+    const t =
+        language === "FR"
+            ? fr
+            : en;
 
 
     const [
@@ -26,12 +43,10 @@ const DashboardPage = ()=>{
     ] = useState(null);
 
 
-
     const [
         loading,
         setLoading
     ] = useState(true);
-
 
 
     const [
@@ -40,46 +55,33 @@ const DashboardPage = ()=>{
     ] = useState("");
 
 
-
-
-
-    useEffect(()=>{
-
+    useEffect(() => {
 
         loadDashboard();
 
-
-    },[]);
-
+    }, []);
 
 
+    const loadDashboard = async () => {
 
-
-
-    const loadDashboard = async()=>{
-
-
-        try{
-
+        try {
 
             setLoading(true);
+
+            setError("");
 
 
             const data =
                 await getDashboard();
 
 
-
             setDashboard(
                 data
             );
 
-
         }
 
-
-        catch(error){
-
+        catch (error) {
 
             console.log(
                 "Dashboard error:",
@@ -91,36 +93,25 @@ const DashboardPage = ()=>{
                 error.message
             );
 
-
         }
 
-
-        finally{
-
+        finally {
 
             setLoading(false);
 
-
         }
-
 
     };
 
 
-
-
-
-
-
-    if(loading){
-
+    if (loading) {
 
         return (
 
             <div className="card">
 
                 <p>
-                    Loading CustomsTrack AI dashboard...
+                    {t.loading}
                 </p>
 
             </div>
@@ -130,28 +121,20 @@ const DashboardPage = ()=>{
     }
 
 
-
-
-
-
-    if(error){
-
+    if (error) {
 
         return (
 
             <div className="card">
 
                 <h3>
-                    Dashboard unavailable
+                    {t.dashboard} — {t.error}
                 </h3>
 
 
                 <p className="muted">
-
                     {error}
-
                 </p>
-
 
             </div>
 
@@ -160,26 +143,17 @@ const DashboardPage = ()=>{
     }
 
 
-
-
-
-
-
-
     return (
-
 
         <>
 
-
-
             <section className="stats-grid">
-
-
 
                 <StatCard
 
-                    title="Today's Declarations"
+                    title={
+                        t["today'sDeclarations"]
+                    }
 
                     value={
                         dashboard?.counts?.todayDeclarations
@@ -190,12 +164,11 @@ const DashboardPage = ()=>{
                 />
 
 
-
-
-
                 <StatCard
 
-                    title="Pending Inspections"
+                    title={
+                        t.pendingInspections
+                    }
 
                     value={
                         dashboard?.counts?.pendingInspections
@@ -206,12 +179,11 @@ const DashboardPage = ()=>{
                 />
 
 
-
-
-
                 <StatCard
 
-                    title="Completed Inspections"
+                    title={
+                        t.completedInspections
+                    }
 
                     value={
                         dashboard?.counts?.completedInspections
@@ -222,12 +194,11 @@ const DashboardPage = ()=>{
                 />
 
 
-
-
-
                 <StatCard
 
-                    title="Pending Synchronizations"
+                    title={
+                        t.pendingSynchronizations
+                    }
 
                     value={
                         dashboard?.counts?.pendingSynchronizations
@@ -237,207 +208,118 @@ const DashboardPage = ()=>{
 
                 />
 
-
-
             </section>
-
-
-
-
-
-
-
 
 
             <section className="dashboard-row">
 
-
-
                 <div className="dashboard-left">
-
-
 
                     <InspectionTable
 
                         inspections={
-
                             dashboard?.recentInspections
                             ??
                             []
-
                         }
 
                     />
 
-
-
                 </div>
 
 
-
-
-
-
-
                 <div className="dashboard-right">
-
-
 
                     <AlertCard
 
                         alerts={
-
                             dashboard?.alerts
                             ??
                             []
-
                         }
 
                     />
 
-
-
                 </div>
 
-
-
             </section>
-
-
-
-
-
-
-
 
 
             <section className="dashboard-row">
 
-
-
                 <div className="dashboard-left">
-
-
 
                     <SyncStatusCard
 
-
                         synchronization={
-
                             dashboard?.synchronization
                             ??
                             {}
-
                         }
-
 
                     />
 
-
-
                 </div>
-
-
 
 
                 <div className="dashboard-right">
 
-
                     <div className="card">
 
-
                         <h3>
-                            Declaration Statistics
+                            {t.declarationStatistics}
                         </h3>
 
 
-
-
                         {
-
                             dashboard?.declarationStatus?.map(
-
-                                (item,index)=>(
-
+                                (
+                                    item,
+                                    index
+                                ) => (
 
                                     <div
-
                                         key={index}
-
                                         className="progress-row"
-
                                     >
 
-
-
                                         <span>
-
                                             {
                                                 item.status
                                             }
-
                                         </span>
 
 
-
-
-
                                         <div
-
                                             className="progress-bar"
-
                                         >
 
                                             <span
-
                                                 style={{
-
                                                     width:
-                                                    `${item.value}%`
-
+                                                        `${item.value}%`
                                                 }}
-
                                             />
 
                                         </div>
 
-
-
                                     </div>
 
-
                                 )
-
                             )
-
                         }
-
-
 
                     </div>
 
-
-
                 </div>
-
-
 
             </section>
 
-
-
-
-
-
         </>
-
 
     );
 
-
 };
-
-
 
 
 export default DashboardPage;

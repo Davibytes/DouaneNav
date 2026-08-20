@@ -41,18 +41,14 @@ import styles from "../styles/styles.js";
 import colors from "../styles/colors.js";
 
 
-
-
 export default function DestinationMapScreen({
     route,
     navigation
 }) {
 
 
-
     const mapRef =
         useRef(null);
-
 
 
     const {
@@ -60,594 +56,370 @@ export default function DestinationMapScreen({
     } = useLanguage();
 
 
-
     const t =
         translations[language];
 
 
-
-
     const declaration =
-        route?.params?.declaration;
-
-
+        route?.params?.declaration || {};
 
 
     const destination =
         declaration?.destination || {};
 
 
-
-
-
     const destinationLatitude =
-
-        destination?.coordinates?.latitude
-
+        Number(
+            destination?.coordinates?.latitude
+        )
         ||
-
-        destination?.latitude
-
+        Number(
+            destination?.latitude
+        )
         ||
-
         3.8792;
 
 
-
     const destinationLongitude =
-
-        destination?.coordinates?.longitude
-
+        Number(
+            destination?.coordinates?.longitude
+        )
         ||
-
-        destination?.longitude
-
+        Number(
+            destination?.longitude
+        )
         ||
-
         11.5119;
 
 
-
-
-
     const [
-
         officerLocation,
-
         setOfficerLocation
-
     ] = useState(null);
 
 
-
-
-
     const [
-
         loadingLocation,
-
         setLoadingLocation
-
     ] = useState(true);
 
 
-
-
-
-
-
-
-    useEffect(()=>{
-
+    useEffect(() => {
 
         getCurrentLocation();
 
+    }, []);
 
-    },[]);
 
+    const getCurrentLocation =
+        async () => {
 
+            try {
 
+                const permission =
+                    await Location
+                        .requestForegroundPermissionsAsync();
 
 
+                if (
+                    permission.status !==
+                    "granted"
+                ) {
 
-
-
-
-    const getCurrentLocation = async()=>{
-
-
-        try{
-
-
-            const permission =
-
-                await Location.requestForegroundPermissionsAsync();
-
-
-
-            if(permission.status !== "granted"){
-
-
-                setLoadingLocation(false);
-
-                return;
-
-
-            }
-
-
-
-
-
-
-
-            const location =
-
-                await Location.getCurrentPositionAsync({
-
-                    accuracy:
-                    Location.Accuracy.High
-
-                });
-
-
-
-
-
-            const current = {
-
-
-                latitude:
-
-                    location.coords.latitude,
-
-
-                longitude:
-
-                    location.coords.longitude
-
-
-            };
-
-
-
-
-
-            setOfficerLocation(current);
-
-
-
-
-
-
-
-            setTimeout(()=>{
-
-
-                if(mapRef.current){
-
-
-                    mapRef.current.fitToCoordinates(
-
-
-                        [
-
-                            current,
-
-
-                            {
-
-                                latitude:
-                                destinationLatitude,
-
-
-                                longitude:
-                                destinationLongitude
-
-                            }
-
-                        ],
-
-
-                        {
-
-
-                            edgePadding:{
-
-
-                                top:120,
-
-                                right:80,
-
-                                bottom:120,
-
-                                left:80
-
-
-                            },
-
-
-                            animated:true
-
-
-                        }
-
-
+                    setLoadingLocation(
+                        false
                     );
 
+                    return;
 
                 }
 
 
-            },500);
+                const location =
+                    await Location
+                        .getCurrentPositionAsync({
+
+                            accuracy:
+                                Location.Accuracy.High
+
+                        });
 
 
+                const current = {
+
+                    latitude:
+                        Number(
+                            location.coords.latitude
+                        ),
+
+                    longitude:
+                        Number(
+                            location.coords.longitude
+                        )
+
+                };
 
 
-
-        }
-
-
-        catch(error){
+                setOfficerLocation(
+                    current
+                );
 
 
-            console.log(
+                setTimeout(() => {
 
-                "Location error:",
+                    if (
+                        mapRef.current
+                    ) {
 
-                error.message
+                        try {
 
-            );
+                            mapRef.current
+                                .fitToCoordinates(
+
+                                    [
+
+                                        current,
+
+                                        {
+
+                                            latitude:
+                                                destinationLatitude,
+
+                                            longitude:
+                                                destinationLongitude
+
+                                        }
+
+                                    ],
+
+                                    {
+
+                                        edgePadding: {
+
+                                            top: 120,
+
+                                            right: 80,
+
+                                            bottom: 120,
+
+                                            left: 80
+
+                                        },
+
+                                        animated:
+                                            true
+
+                                    }
+
+                                );
+
+                        }
+                        catch (error) {
+
+                            console.log(
+                                "Map fit error:",
+                                error.message
+                            );
+
+                        }
+
+                    }
+
+                }, 500);
+
+            }
+            catch (error) {
+
+                console.log(
+                    "Location error:",
+                    error.message
+                );
+
+            }
+            finally {
+
+                setLoadingLocation(
+                    false
+                );
+
+            }
+
+        };
 
 
-        }
-
-
-        finally{
-
-
-            setLoadingLocation(false);
-
-
-        }
-
-
-    };
-
-
-
-
-
-
-
-
-
-
-
-
-    return(
-
+    return (
 
         <SafeScreen>
 
-
             <View
-
                 style={{
-
-                    flex:1
-
+                    flex: 1
                 }}
-
             >
 
-
-
-
-
                 <View
-
                     style={{
-
-                        padding:20
-
+                        padding: 20
                     }}
-
                 >
 
-
-
-
-
                     <Text
-
                         style={
                             styles.dashboardGreeting
                         }
-
                     >
-
                         {t.destinationVerification}
-
                     </Text>
-
-
-
-
 
 
                     <Text
-
                         style={
                             styles.dashboardRole
                         }
-
                     >
-
                         {t.destinationVerificationSubtitle}
-
                     </Text>
 
 
-
-
-
-
-
-
                     <View
-
                         style={
                             styles.section
                         }
-
                     >
 
-
-
-
-
                         <Text
-
                             style={
                                 styles.sectionTitle
                             }
-
                         >
-
                             {t.destinationInformation}
-
                         </Text>
 
 
-
-
-
-
-
                         <Text
-
                             style={
                                 styles.sectionText
                             }
-
                         >
-
                             {t.declaration}:{" "}
-
                             {
-
                                 declaration?.declarationNumber
-
                                 ||
-
                                 t.notAvailable
-
                             }
-
-
                         </Text>
 
 
-
-
-
-
-
                         <Text
-
                             style={
                                 styles.sectionText
                             }
-
                         >
-
                             {t.city}:{" "}
-
                             {
-
-                                destination.city
-
+                                destination?.city
                                 ||
-
                                 t.unknown
-
                             }
-
-
                         </Text>
-
-
-
-
-
 
 
                         <Text
-
                             style={
                                 styles.sectionText
                             }
-
                         >
-
                             {t.address}:{" "}
-
                             {
-
-                                destination.address
-
+                                destination?.address
                                 ||
-
                                 t.notAvailable
-
                             }
-
-
                         </Text>
-
-
-
-
 
 
                     </View>
 
 
-
-
-
                 </View>
 
 
-
-
-
-
-
-
-
                 {
-
                     loadingLocation &&
 
-
                     <ActivityIndicator
-
                         size="large"
-
-                        color={colors.green}
-
+                        color={
+                            colors.green
+                        }
                     />
 
                 }
 
 
-
-
-
-
-
-
-
                 <MapView
 
-
-                    ref={mapRef}
-
+                    ref={
+                        mapRef
+                    }
 
                     style={{
-
-                        flex:1
-
+                        flex: 1
                     }}
-
-
 
                     initialRegion={{
 
-
                         latitude:
-                        destinationLatitude,
-
+                            destinationLatitude,
 
                         longitude:
-                        destinationLongitude,
+                            destinationLongitude,
 
+                        latitudeDelta:
+                            0.05,
 
-                        latitudeDelta:0.05,
-
-
-                        longitudeDelta:0.05
-
+                        longitudeDelta:
+                            0.05
 
                     }}
 
+                    showsUserLocation={
+                        true
+                    }
 
-
-                    showsUserLocation={true}
-
-
-                    showsMyLocationButton={true}
-
-
+                    showsMyLocationButton={
+                        true
+                    }
 
                 >
 
-
-
-
-
-
-
                     {
-
                         officerLocation &&
-
 
                         <Marker
 
-
                             coordinate={
-
                                 officerLocation
-
                             }
-
 
                             title="Officer Location"
 
-
                         />
-
 
                     }
 
 
-
-
-
-
-
-
-
                     <Marker
-
 
                         coordinate={{
 
-
                             latitude:
-                            destinationLatitude,
-
+                                destinationLatitude,
 
                             longitude:
-                            destinationLongitude
-
+                                destinationLongitude
 
                         }}
-
-
 
                         title={
 
@@ -659,11 +431,9 @@ export default function DestinationMapScreen({
 
                         }
 
-
-
                         description={
 
-                            destination.address
+                            destination?.address
 
                             ||
 
@@ -671,102 +441,58 @@ export default function DestinationMapScreen({
 
                         }
 
-
-
                     />
-
-
-
-
-
-
-
-
 
 
                     {
 
                         officerLocation &&
 
-
                         <Polyline
-
 
                             coordinates={[
 
-
                                 officerLocation,
-
 
                                 {
 
-
                                     latitude:
-                                    destinationLatitude,
-
+                                        destinationLatitude,
 
                                     longitude:
-                                    destinationLongitude
-
+                                        destinationLongitude
 
                                 }
 
-
                             ]}
 
-
-
-                            strokeWidth={4}
-
-
+                            strokeWidth={
+                                4
+                            }
 
                         />
 
-
                     }
-
-
-
-
 
 
                 </MapView>
 
 
-
-
-
-
-
-
-
                 <BottomNavigation
 
+                    navigation={
+                        navigation
+                    }
 
-                    navigation={navigation}
-
-
-                    active="Map"
-
+                    active="DestinationMap"
 
                 />
 
 
-
-
-
-
-
             </View>
-
-
-
-
 
         </SafeScreen>
 
-
     );
-
 
 }
