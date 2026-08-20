@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const API_URL = "http://YOUR_IP:5000/api";
+const API_URL = "https://douanenav-backend.onrender.com/api";
 
 
 const getToken = async () => {

@@ -7,7 +7,7 @@ let authToken = null;
 
 const api = axios.create({
 
-    baseURL: "http://192.168.1.169:5000/api",
+    baseURL: "https://douanenav-backend.onrender.com/api",
 
     timeout:15000,
 
@@ -17,7 +17,7 @@ const api = axios.create({
 
 });
 
-console.log("Using API:", "http://192.168.1.169:5000/api");
+console.log("Using API:", "https://douanenav-backend.onrender.com/api");
 
 export const setAuthToken = (
     token

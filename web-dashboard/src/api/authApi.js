@@ -1,24 +1,27 @@
 const API_URL =
-    "http://localhost:5000/api/auth";
+    "https://douanenav-backend.onrender.com/api/auth";
 
 
 export const loginUser = async (
     email,
     password
-)=>{
+) => {
 
     const response =
         await fetch(
             `${API_URL}/login`,
             {
-                method:"POST",
+                method: "POST",
 
-                headers:{
+                headers: {
                     "Content-Type":
-                    "application/json"
+                        "application/json",
+
+                    "X-Client-Platform":
+                        "web"
                 },
 
-                body:JSON.stringify({
+                body: JSON.stringify({
                     email,
                     password
                 })
@@ -30,7 +33,7 @@ export const loginUser = async (
         await response.json();
 
 
-    if(!response.ok){
+    if (!response.ok) {
 
         throw new Error(
             data.error ||
@@ -45,35 +48,27 @@ export const loginUser = async (
 };
 
 
-
-
-
-export const getCurrentUser = async(
+export const getCurrentUser = async (
     token
-)=>{
-
+) => {
 
     const response =
         await fetch(
             `${API_URL}/me`,
             {
-
-                headers:{
+                headers: {
                     Authorization:
-                    `Bearer ${token}`
+                        `Bearer ${token}`
                 }
-
             }
         );
-
 
 
     const data =
         await response.json();
 
 
-
-    if(!response.ok){
+    if (!response.ok) {
 
         throw new Error(
             data.error ||
@@ -83,37 +78,25 @@ export const getCurrentUser = async(
     }
 
 
-
     return data.user;
-
 
 };
 
 
-
-
-
-export const logoutUser = async(
+export const logoutUser = async (
     token
-)=>{
-
+) => {
 
     await fetch(
-
         `${API_URL}/logout`,
-
         {
+            method: "POST",
 
-            method:"POST",
-
-            headers:{
+            headers: {
                 Authorization:
-                `Bearer ${token}`
+                    `Bearer ${token}`
             }
-
         }
-
     );
-
 
 };

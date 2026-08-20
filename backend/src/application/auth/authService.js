@@ -1,5 +1,6 @@
 import { createToken, verifyToken } from "../../domain/auth/jwt.js";
 import { verifyPassword } from "../../domain/auth/password.js";
+import { ROLES } from "../../domain/auth/roles.js";
 
 
 const createError = (
@@ -7,14 +8,29 @@ const createError = (
     statusCode
 ) => {
 
-    const error = new Error(message);
+    const error =
+        new Error(message);
 
-    error.statusCode = statusCode;
+    error.statusCode =
+        statusCode;
 
     return error;
 
 };
 
+
+const allowedLoginRoles = {
+
+    web: new Set([
+        ROLES.ADMINISTRATOR,
+        ROLES.SUPERVISOR
+    ]),
+
+    mobile: new Set([
+        ROLES.CUSTOMS_OFFICER
+    ])
+
+};
 
 
 export const createAuthService = (
@@ -22,26 +38,16 @@ export const createAuthService = (
     secret = "development-secret"
 ) => ({
 
-
     async login(
         credentials,
-        ipAddress
+        ipAddress,
+        platform = "web"
     ){
 
         const {
             email,
             password
         } = credentials;
-
-
-
-        console.log(
-            "AUTH SERVICE LOGIN:",
-            {
-                email
-            }
-        );
-
 
 
         if(
@@ -57,14 +63,12 @@ export const createAuthService = (
         }
 
 
-
         const user =
             await repository.findUserByEmail(
                 email
                     .trim()
                     .toLowerCase()
             );
-
 
 
         if(!user){
@@ -77,13 +81,11 @@ export const createAuthService = (
         }
 
 
-
         const passwordValid =
             verifyPassword(
                 password,
                 user.passwordHash
             );
-
 
 
         if(!passwordValid){
@@ -98,14 +100,12 @@ export const createAuthService = (
 
             });
 
-
             throw createError(
                 "Invalid email or password.",
                 401
             );
 
         }
-
 
 
         if(
@@ -120,12 +120,42 @@ export const createAuthService = (
         }
 
 
-
         const role =
             await repository.findRoleById(
                 user.roleId
             );
 
+
+        if(!role){
+
+            throw createError(
+                "User role unavailable.",
+                401
+            );
+
+        }
+
+
+        const platformRoles =
+            allowedLoginRoles[
+                platform === "mobile"
+                    ? "mobile"
+                    : "web"
+            ];
+
+
+        if(
+            !platformRoles.has(role.name)
+        ){
+
+            throw createError(
+                platform === "mobile"
+                    ? "This account is not authorized to use the mobile application."
+                    : "This account is not authorized to use the web dashboard.",
+                403
+            );
+
+        }
 
 
         const token =
@@ -137,7 +167,6 @@ export const createAuthService = (
                 },
                 secret
             );
-
 
 
         await repository.recordAudit({
@@ -155,14 +184,12 @@ export const createAuthService = (
         });
 
 
-
         return {
 
             token,
 
             expiresIn:
                 8 * 60 * 60,
-
 
             user:
                 repository.publicUser(
@@ -173,8 +200,6 @@ export const createAuthService = (
         };
 
     },
-
-
 
 
     async authenticate(
@@ -194,7 +219,6 @@ export const createAuthService = (
             );
 
         }
-
 
 
         let claims;
@@ -220,12 +244,10 @@ export const createAuthService = (
         }
 
 
-
         const user =
             await repository.findUserById(
                 claims.sub
             );
-
 
 
         if(
@@ -241,12 +263,10 @@ export const createAuthService = (
         }
 
 
-
         const role =
             await repository.findRoleById(
                 user.roleId
             );
-
 
 
         return {
@@ -264,8 +284,6 @@ export const createAuthService = (
     },
 
 
-
-
     async logout(
         authorization,
         ipAddress
@@ -280,12 +298,10 @@ export const createAuthService = (
             );
 
 
-
         await repository.revokeToken(
             claims.jti,
             claims.exp
         );
-
 
 
         await repository.recordAudit({
@@ -303,6 +319,5 @@ export const createAuthService = (
         });
 
     }
-
 
 });

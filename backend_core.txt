@@ -1,0 +1,2861 @@
+export const ROLES = Object.freeze({
+  ADMINISTRATOR: 'Administrator',
+  CUSTOMS_OFFICER: 'Customs Officer',
+  MOBILE_BRIGADE: 'Mobile Brigade',
+  SUPERVISOR: 'Supervisor'
+});
+
+export const ROLE_PERMISSIONS = Object.freeze({
+  [ROLES.ADMINISTRATOR]: ['users:manage', 'declarations:read', 'inspections:read', 'synchronization:read'],
+  [ROLES.CUSTOMS_OFFICER]: ['declarations:read', 'documents:write', 'inspections:write', 'reports:write'],
+  [ROLES.MOBILE_BRIGADE]: ['declarations:read', 'inspections:write', 'inspection-photos:write'],
+  [ROLES.SUPERVISOR]: ['declarations:read', 'inspections:read', 'reports:read', 'synchronization:read', 'statistics:read']
+});
+import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
+
+const encode = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
+const sign = (content, secret) => createHmac('sha256', secret).update(content).digest('base64url');
+
+export const createToken = (claims, secret, expiresInSeconds = 8 * 60 * 60) => {
+  const now = Math.floor(Date.now() / 1000);
+  const header = encode({ alg: 'HS256', typ: 'JWT' });
+  const payload = encode({ ...claims, iat: now, exp: now + expiresInSeconds, jti: randomUUID() });
+  return `${header}.${payload}.${sign(`${header}.${payload}`, secret)}`;
+};
+
+export const verifyToken = (token, secret) => {
+  const [header, payload, signature] = String(token).split('.');
+  if (!header || !payload || !signature) throw new Error('Invalid authentication token.');
+  const expected = sign(`${header}.${payload}`, secret);
+  if (signature.length !== expected.length || !timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) throw new Error('Invalid authentication token.');
+  const claims = JSON.parse(Buffer.from(payload, 'base64url').toString());
+  if (!claims.exp || claims.exp <= Math.floor(Date.now() / 1000)) throw new Error('Authentication token has expired.');
+  return claims;
+};
+import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
+
+export const hashPassword = (password, salt = randomBytes(16).toString('hex')) =>
+  `${salt}:${scryptSync(password, salt, 64).toString('hex')}`;
+
+export const verifyPassword = (password, storedHash) => {
+  const [salt, hash] = storedHash.split(':');
+  const actual = scryptSync(password, salt, 64);
+  return timingSafeEqual(actual, Buffer.from(hash, 'hex'));
+};
+import { createToken, verifyToken } from "../../domain/auth/jwt.js";
+import { verifyPassword } from "../../domain/auth/password.js";
+
+
+const createError = (
+    message,
+    statusCode
+) => {
+
+    const error = new Error(message);
+
+    error.statusCode = statusCode;
+
+    return error;
+
+};
+
+
+
+export const createAuthService = (
+    repository,
+    secret = "development-secret"
+) => ({
+
+
+    async login(
+        credentials,
+        ipAddress
+    ){
+
+        const {
+            email,
+            password
+        } = credentials;
+
+
+
+        console.log(
+            "AUTH SERVICE LOGIN:",
+            {
+                email
+            }
+        );
+
+
+
+        if(
+            !email ||
+            !password
+        ){
+
+            throw createError(
+                "Email and password are required.",
+                422
+            );
+
+        }
+
+
+
+        const user =
+            await repository.findUserByEmail(
+                email
+                    .trim()
+                    .toLowerCase()
+            );
+
+
+
+        if(!user){
+
+            throw createError(
+                "Invalid email or password.",
+                401
+            );
+
+        }
+
+
+
+        const passwordValid =
+            verifyPassword(
+                password,
+                user.passwordHash
+            );
+
+
+
+        if(!passwordValid){
+
+            await repository.recordAudit({
+
+                action:"login.failed",
+
+                ipAddress,
+
+                targetEntity:"Users"
+
+            });
+
+
+            throw createError(
+                "Invalid email or password.",
+                401
+            );
+
+        }
+
+
+
+        if(
+            user.status !== "active"
+        ){
+
+            throw createError(
+                "User account is inactive.",
+                401
+            );
+
+        }
+
+
+
+        const role =
+            await repository.findRoleById(
+                user.roleId
+            );
+
+
+
+        const token =
+            createToken(
+                {
+                    sub:user.id,
+                    email:user.email,
+                    role:role.name
+                },
+                secret
+            );
+
+
+
+        await repository.recordAudit({
+
+            userId:user.id,
+
+            action:"login",
+
+            targetEntity:"Users",
+
+            targetId:user.id,
+
+            ipAddress
+
+        });
+
+
+
+        return {
+
+            token,
+
+            expiresIn:
+                8 * 60 * 60,
+
+
+            user:
+                repository.publicUser(
+                    user,
+                    role
+                )
+
+        };
+
+    },
+
+
+
+
+    async authenticate(
+        authorization
+    ){
+
+        if(
+            !authorization ||
+            !authorization.startsWith(
+                "Bearer "
+            )
+        ){
+
+            throw createError(
+                "Bearer token required.",
+                401
+            );
+
+        }
+
+
+
+        let claims;
+
+
+        try {
+
+            claims =
+                verifyToken(
+                    authorization.slice(7),
+                    secret
+                );
+
+        }
+
+        catch(error){
+
+            throw createError(
+                error.message,
+                401
+            );
+
+        }
+
+
+
+        const user =
+            await repository.findUserById(
+                claims.sub
+            );
+
+
+
+        if(
+            !user ||
+            user.status !== "active"
+        ){
+
+            throw createError(
+                "User unavailable.",
+                401
+            );
+
+        }
+
+
+
+        const role =
+            await repository.findRoleById(
+                user.roleId
+            );
+
+
+
+        return {
+
+            claims,
+
+            user:
+                repository.publicUser(
+                    user,
+                    role
+                )
+
+        };
+
+    },
+
+
+
+
+    async logout(
+        authorization,
+        ipAddress
+    ){
+
+        const {
+            claims,
+            user
+        } =
+            await this.authenticate(
+                authorization
+            );
+
+
+
+        await repository.revokeToken(
+            claims.jti,
+            claims.exp
+        );
+
+
+
+        await repository.recordAudit({
+
+            userId:user.id,
+
+            action:"logout",
+
+            targetEntity:"Users",
+
+            targetId:user.id,
+
+            ipAddress
+
+        });
+
+    }
+
+
+});const canSeeOperationalData = new Set([
+  'Administrator',
+  'Customs Officer',
+  'Mobile Brigade',
+  'Supervisor'
+]);
+
+
+export const createDashboardService = (repository) => ({
+
+
+  async getDashboard(user) {
+
+
+    if (!canSeeOperationalData.has(user.role)) {
+
+      throw Object.assign(
+        new Error(
+          'You are not authorized to view the dashboard.'
+        ),
+        {
+          statusCode: 403
+        }
+      );
+
+    }
+
+
+
+    const data = await repository.getDashboardData();
+
+
+
+    const today =
+      new Date()
+        .toISOString()
+        .slice(0, 10);
+
+
+
+    const allInspections =
+      data.inspections;
+
+
+
+    const ownInspections =
+      user.role === 'Mobile Brigade' ||
+      user.role === 'Customs Officer'
+
+        ? allInspections.filter(
+            (item) =>
+              item.officerId === user.id
+          )
+
+        : allInspections;
+
+
+
+
+    const visibleRecent =
+
+      (
+        user.role === 'Mobile Brigade' ||
+        user.role === 'Customs Officer'
+
+          ? ownInspections
+
+          : allInspections
+
+      )
+
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt) -
+          new Date(a.createdAt)
+      )
+
+      .slice(0, 5);
+
+
+
+
+
+    const counts = {
+
+
+      todayDeclarations:
+
+        data.declarations.filter(
+          (item) =>
+            item.createdAt
+              .toISOString()
+              .startsWith(today)
+        ).length,
+
+
+
+      pendingInspections:
+
+        data.declarations.filter(
+          (item) =>
+            item.status === 'pending'
+        ).length,
+
+
+
+      completedInspections:
+
+        ownInspections.filter(
+          (item) =>
+            item.status === 'submitted' ||
+            item.status === 'synced'
+        ).length,
+
+
+
+      pendingSynchronizations:
+
+        data.synchronizationLogs.filter(
+          (item) =>
+            item.status === 'pending' ||
+            item.status === 'processing'
+        ).length,
+
+
+
+      activeAlerts:
+
+        data.alerts.filter(
+          (item) =>
+            item.status === 'active'
+        ).length
+
+
+    };
+
+
+
+
+    if (user.role === 'Administrator') {
+
+      counts.activeUsers =
+        data.activeUserCount;
+
+    }
+
+
+
+
+    return {
+
+
+      generatedAt:
+        new Date().toISOString(),
+
+
+
+      scope:
+        user.role,
+
+
+
+      counts,
+
+
+
+      alerts:
+
+        data.alerts
+
+          .filter(
+            (item) =>
+              item.status === 'active'
+          )
+
+          .slice(0, 4),
+
+
+
+
+      recentInspections:
+        visibleRecent,
+
+
+
+      synchronization:
+
+        data.synchronizationLogs
+
+          .sort(
+            (a, b) =>
+              new Date(b.attemptedAt) -
+              new Date(a.attemptedAt)
+          )
+
+          .slice(0, 4)
+
+    };
+
+
+  }
+
+
+});const allowedRoles = new Set([
+  "Administrator",
+  "Customs Officer",
+  "Mobile Brigade",
+  "Supervisor"
+]);
+
+
+export const createDeclarationService = (repository) => ({
+
+
+  async getDeclarations(user) {
+
+
+    if (!allowedRoles.has(user.role)) {
+
+      throw Object.assign(
+        new Error(
+          "You are not authorized to view declarations."
+        ),
+        {
+          statusCode: 403
+        }
+      );
+
+    }
+
+
+    return await repository.findAll();
+
+  },
+
+
+
+  async getDeclarationById(user, id) {
+
+
+    if (!allowedRoles.has(user.role)) {
+
+      throw Object.assign(
+        new Error(
+          "You are not authorized to view declarations."
+        ),
+        {
+          statusCode: 403
+        }
+      );
+
+    }
+
+
+    const declaration =
+      await repository.findById(id);
+
+
+
+    if (!declaration) {
+
+      throw Object.assign(
+        new Error(
+          "Declaration not found."
+        ),
+        {
+          statusCode: 404
+        }
+      );
+
+    }
+
+
+    return declaration;
+
+  },
+
+
+
+  async searchDeclarations(user, query) {
+
+
+    if (!allowedRoles.has(user.role)) {
+
+      throw Object.assign(
+        new Error(
+          "You are not authorized to search declarations."
+        ),
+        {
+          statusCode: 403
+        }
+      );
+
+    }
+
+
+
+    if (!query) {
+
+      return [];
+
+    }
+
+
+
+    return await repository.search(query);
+
+  }
+
+
+});export const createInspectionService = (
+    inspectionRepository
+) => ({
+
+    async getInspections(user){
+
+        return await inspectionRepository.findAll();
+
+    },
+
+
+    async getInspectionById(
+        user,
+        id
+    ){
+
+        return await inspectionRepository.findById(id);
+
+    },
+
+
+    async createInspection(
+        user,
+        data
+    ){
+
+        return await inspectionRepository.create(
+            data
+        );
+
+    },
+
+
+    async updateStatus(
+        user,
+        id,
+        status
+    ){
+
+        return await inspectionRepository.updateStatus(
+            id,
+            status
+        );
+
+    }
+
+});import { ReportRepository } from "../../infrastructure/persistence/reportRepository.js";
+
+
+const reportRepository =
+    new ReportRepository();
+
+
+
+export const createReportService = () => ({
+
+
+
+    async getReports(user){
+
+
+        return await reportRepository.findAll();
+
+
+    },
+
+
+
+
+
+    async getReportById(
+        user,
+        id
+    ){
+
+
+        return await reportRepository.findById(
+            id
+        );
+
+
+    },
+
+
+
+
+
+
+    async createReport(
+        user,
+        data
+    ){
+
+
+        const report = {
+
+            ...data,
+
+            officer:
+                user.name
+
+        };
+
+
+
+        return await reportRepository.create(
+            report
+        );
+
+
+    },
+
+
+
+
+
+
+    async getReportsByDeclaration(
+        user,
+        declarationNumber
+    ){
+
+
+        return await reportRepository.findByDeclaration(
+            declarationNumber
+        );
+
+
+    }
+
+
+
+});export const createUserService = (
+    userRepository
+) => ({
+
+    async getAllUsers(){
+
+        return await userRepository.getAll();
+
+    }
+
+});import './environment.js';
+
+import { connectMongo } from './mongo.js';
+import { MongoAuthRepository } from '../persistence/mongoAuthRepository.js';
+
+
+const seed = async () => {
+
+    try {
+
+
+        const database =
+            await connectMongo();
+
+
+
+        const repository =
+            new MongoAuthRepository(
+                database
+            );
+
+
+
+        await repository.initialize();
+
+
+
+        console.log(
+            "MongoDB seed completed successfully."
+        );
+
+
+
+        process.exit(0);
+
+
+
+    } catch(error) {
+
+
+        console.error(
+            "MongoDB seed failed:",
+            error.message
+        );
+
+
+        process.exit(1);
+
+
+    }
+
+
+};
+
+
+
+seed();import '../config/environment.js';
+import { connectMongo, closeMongo } from './mongo.js';
+
+const seedDeclarations = async () => {
+
+    try {
+
+        const database =
+            await connectMongo();
+
+        const declarations =
+            database.collection("declarations");
+
+        const inspections =
+            database.collection("inspections");
+
+        const alerts =
+            database.collection("alerts");
+
+        const synchronizationLogs =
+            database.collection("synchronization_logs");
+
+
+        await declarations.deleteMany({});
+        await inspections.deleteMany({});
+        await alerts.deleteMany({});
+        await synchronizationLogs.deleteMany({});
+
+
+        await declarations.insertMany([
+
+            {
+                declarationNumber:"CM2026-0001",
+
+                importer:{
+                    name:"Africa Import SARL",
+                    country:"Cameroon"
+                },
+
+                goods:{
+                    description:"Electronic equipment",
+                    category:"Technology",
+                    quantity:250
+                },
+
+                destination:{
+                    city:"Douala",
+                    area:"Bonanjo",
+                    address:"Bonanjo, Douala, Cameroon",
+                    country:"Cameroon",
+                    coordinates:{
+                        latitude:4.0511,
+                        longitude:9.7679
+                    }
+                },
+
+                transport:{
+                    truckPlate:"LT-458-AA",
+                    driver:"Jean Mbarga"
+                },
+
+                route:[
+                    "Port Autonome de Douala",
+                    "Bonaberi",
+                    "Yaounde"
+                ],
+
+                status:"In Transit",
+
+                createdAt:new Date()
+
+            },
+
+
+            {
+                declarationNumber:"CM2026-0002",
+
+                importer:{
+                    name:"Cameroon Food Trading",
+                    country:"Cameroon"
+                },
+
+                goods:{
+                    description:"Food products",
+                    category:"Agriculture",
+                    quantity:500
+                },
+
+                destination:{
+                    city:"Yaounde",
+                    area:"Tsinga",
+                    address:"Tsinga, Yaounde, Cameroon",
+                    country:"Cameroon",
+                    coordinates:{
+                        latitude:3.8792,
+                        longitude:11.5119
+                    }
+                },
+
+                transport:{
+                    truckPlate:"CE-902-BB",
+                    driver:"Paul Tchana"
+                },
+
+                route:[
+                    "Kribi Port",
+                    "Edea",
+                    "Yaounde"
+                ],
+
+                status:"Pending Inspection",
+
+                createdAt:new Date()
+
+            }
+
+        ]);
+
+
+        await inspections.insertMany([
+
+            {
+                declarationNumber:"CM2026-0002",
+                officer:"Estelle Fongang",
+                status:"Pending",
+                location:"Tsinga, Yaounde, Cameroon",
+                createdAt:new Date()
+            }
+
+        ]);
+
+
+        await alerts.insertMany([
+
+            {
+                type:"Delay",
+                message:"Truck CM2026-0001 delayed on route.",
+                severity:"medium",
+                createdAt:new Date()
+            }
+
+        ]);
+
+
+        await synchronizationLogs.insertMany([
+
+            {
+                action:"Initial synchronization",
+                status:"success",
+                createdAt:new Date()
+            }
+
+        ]);
+
+
+        console.log(
+            "Declaration data seeded successfully."
+        );
+
+
+    }
+    catch(error){
+
+        console.error(
+            "Declaration seed failed:",
+            error.message
+        );
+
+    }
+    finally{
+
+        await closeMongo();
+
+    }
+
+};
+
+
+seedDeclarations();import { randomUUID } from "node:crypto";
+import { hashPassword } from "../../domain/auth/password.js";
+import { ROLE_PERMISSIONS, ROLES } from "../../domain/auth/roles.js";
+
+
+export class MongoAuthRepository {
+
+
+    constructor(database) {
+
+        this.database = database;
+
+        this.users =
+            database.collection("users");
+
+        this.roles =
+            database.collection("roles");
+
+        this.auditLogs =
+            database.collection("auditLogs");
+
+        this.revokedTokens =
+            database.collection("revokedTokens");
+
+    }
+
+
+
+
+
+    async initialize() {
+
+        const rolesCount =
+            await this.roles.countDocuments();
+
+
+        if(rolesCount === 0){
+
+
+            const roles =
+                Object.values(ROLES)
+                .map(
+                    (name, index) => ({
+                        id:`role-${index + 1}`,
+                        name,
+                        permissions:
+                            ROLE_PERMISSIONS[name]
+                    })
+                );
+
+
+            await this.roles.insertMany(
+                roles
+            );
+
+
+        }
+
+
+
+        const usersCount =
+            await this.users.countDocuments();
+
+
+        if(usersCount === 0){
+
+
+            const administrator =
+                await this.roles.findOne({
+                    name:
+                        ROLES.ADMINISTRATOR
+                });
+
+
+            const officer =
+                await this.roles.findOne({
+                    name:
+                        ROLES.CUSTOMS_OFFICER
+                });
+
+
+            const brigade =
+                await this.roles.findOne({
+                    name:
+                        ROLES.MOBILE_BRIGADE
+                });
+
+
+            const supervisor =
+                await this.roles.findOne({
+                    name:
+                        ROLES.SUPERVISOR
+                });
+
+
+
+            await this.users.insertMany([
+
+                {
+                    id:"user-1",
+                    name:"Amina Ndi",
+                    email:"admin@douanenav.cm",
+                    phone:"",
+                    status:"active",
+                    roleId:
+                        administrator.id,
+                    passwordHash:
+                        hashPassword(
+                            "DouaneNav!2026"
+                        ),
+                    createdAt:
+                        new Date(),
+                    updatedAt:
+                        new Date()
+                },
+
+
+                {
+                    id:"user-2",
+                    name:"Jean Mbarga",
+                    email:"officer@douanenav.cm",
+                    phone:"",
+                    status:"active",
+                    roleId:
+                        officer.id,
+                    passwordHash:
+                        hashPassword(
+                            "DouaneNav!2026"
+                        ),
+                    createdAt:
+                        new Date(),
+                    updatedAt:
+                        new Date()
+                },
+
+
+                {
+                    id:"user-3",
+                    name:"Estelle Fongang",
+                    email:"brigade@douanenav.cm",
+                    phone:"",
+                    status:"active",
+                    roleId:
+                        brigade.id,
+                    passwordHash:
+                        hashPassword(
+                            "DouaneNav!2026"
+                        ),
+                    createdAt:
+                        new Date(),
+                    updatedAt:
+                        new Date()
+                },
+
+
+                {
+                    id:"user-4",
+                    name:"Paul Tchana",
+                    email:"supervisor@douanenav.cm",
+                    phone:"",
+                    status:"active",
+                    roleId:
+                        supervisor.id,
+                    passwordHash:
+                        hashPassword(
+                            "DouaneNav!2026"
+                        ),
+                    createdAt:
+                        new Date(),
+                    updatedAt:
+                        new Date()
+                }
+
+            ]);
+
+        }
+
+    }
+
+
+
+
+
+
+
+    async findUserByEmail(email){
+
+        return await this.users.findOne({
+            email
+        });
+
+    }
+
+
+
+
+
+
+
+    async findUserById(id){
+
+        return await this.users.findOne({
+            id
+        });
+
+    }
+
+
+
+
+
+
+
+    async findRoleById(id){
+
+        return await this.roles.findOne({
+            id
+        });
+
+    }
+
+
+
+
+
+
+
+    publicUser(
+        user,
+        role
+    ){
+
+        return {
+
+            id:user.id,
+
+            name:user.name,
+
+            email:user.email,
+
+            phone:user.phone,
+
+            status:user.status,
+
+            role:role.name,
+
+            permissions:
+                role.permissions
+
+        };
+
+    }
+
+
+
+
+
+
+
+    async recordAudit(event){
+
+
+        await this.auditLogs.insertOne({
+
+            id:
+                randomUUID(),
+
+            timestamp:
+                new Date(),
+
+            ...event
+
+        });
+
+
+    }
+
+
+
+
+
+
+
+    async revokeToken(
+        jti,
+        expiresAt
+    ){
+
+
+        await this.revokedTokens.insertOne({
+
+            jti,
+
+            expiresAt,
+
+            createdAt:
+                new Date()
+
+        });
+
+
+    }
+
+
+
+
+
+
+
+    async isTokenRevoked(jti){
+
+
+        const token =
+            await this.revokedTokens.findOne({
+                jti
+            });
+
+
+        return Boolean(token);
+
+
+    }
+
+
+}import { ObjectId } from "mongodb";
+
+
+export class MongoDeclarationRepository {
+
+
+    constructor(database){
+
+        this.declarations =
+            database.collection("declarations");
+
+    }
+
+
+
+
+
+
+
+    async findAll(){
+
+        return await this.declarations
+            .find({})
+            .sort({
+                createdAt:-1
+            })
+            .toArray();
+
+    }
+
+
+
+
+
+
+
+    async findById(id){
+
+
+        let declaration = null;
+
+
+
+        try {
+
+            declaration =
+                await this.declarations.findOne({
+                    _id:
+                        new ObjectId(id)
+                });
+
+
+        }
+        catch{
+
+            declaration = null;
+
+        }
+
+
+
+        return declaration;
+
+
+    }
+
+
+
+
+
+
+
+    async search(query){
+
+
+        if(!query){
+
+            return [];
+
+        }
+
+
+
+        return await this.declarations
+            .find(
+                {
+                    $or:[
+
+                        {
+                            declarationNumber:{
+                                $regex:query,
+                                $options:"i"
+                            }
+                        },
+
+
+                        {
+                            importer:{
+                                $regex:query,
+                                $options:"i"
+                            }
+                        },
+
+
+                        {
+                            exporter:{
+                                $regex:query,
+                                $options:"i"
+                            }
+                        },
+
+
+                        {
+                            truckNumber:{
+                                $regex:query,
+                                $options:"i"
+                            }
+                        }
+
+                    ]
+                }
+            )
+            .toArray();
+
+
+    }
+
+
+
+
+
+
+
+    async create(data){
+
+
+        const declaration = {
+
+
+            ...data,
+
+
+            status:
+                data.status ||
+                "pending",
+
+
+            createdAt:
+                new Date(),
+
+
+            updatedAt:
+                new Date()
+
+
+        };
+
+
+
+        const result =
+            await this.declarations.insertOne(
+                declaration
+            );
+
+
+
+        return {
+
+            id:
+                result.insertedId,
+
+            ...declaration
+
+        };
+
+
+    }
+
+
+
+
+
+
+
+    async update(id, data){
+
+
+        let objectId;
+
+
+        try {
+
+            objectId =
+                new ObjectId(id);
+
+        }
+        catch{
+
+            throw new Error(
+                "Invalid declaration id."
+            );
+
+        }
+
+
+
+
+
+        const result =
+            await this.declarations.findOneAndUpdate(
+
+                {
+                    _id:
+                        objectId
+                },
+
+
+                {
+                    $set:{
+                        ...data,
+                        updatedAt:
+                            new Date()
+                    }
+                },
+
+
+                {
+                    returnDocument:
+                        "after"
+                }
+
+            );
+
+
+
+        return result.value;
+
+
+    }
+
+
+
+
+
+
+
+    async delete(id){
+
+
+        return await this.declarations.deleteOne({
+
+            _id:
+                new ObjectId(id)
+
+        });
+
+
+    }
+
+}import { ObjectId } from "mongodb";
+import { connectMongo } from "../database/mongo.js";
+
+
+export class InspectionRepository {
+
+
+    async findAll(){
+
+        const database =
+            await connectMongo();
+
+        return await database
+            .collection("inspections")
+            .find({})
+            .sort({
+                createdAt:-1
+            })
+            .toArray();
+
+    }
+
+
+
+    async findById(id){
+
+        const database =
+            await connectMongo();
+
+
+        return await database
+            .collection("inspections")
+            .findOne({
+
+                _id:
+                    new ObjectId(id)
+
+            });
+
+    }
+
+
+
+
+    async create(data){
+
+        const database =
+            await connectMongo();
+
+
+        const inspection = {
+
+            ...data,
+
+            status:
+                data.status ||
+                "Pending",
+
+            createdAt:
+                new Date()
+
+        };
+
+
+        const result =
+            await database
+                .collection("inspections")
+                .insertOne(
+                    inspection
+                );
+
+
+        return {
+
+            id:
+                result.insertedId,
+
+            ...inspection
+
+        };
+
+    }
+
+
+
+
+
+    async updateStatus(id,status){
+
+        const database =
+            await connectMongo();
+
+
+        return await database
+            .collection("inspections")
+            .updateOne(
+
+                {
+
+                    _id:
+                        new ObjectId(id)
+
+                },
+
+                {
+
+                    $set:{
+
+                        status
+
+                    }
+
+                }
+
+            );
+
+    }
+
+
+}import { connectMongo } from "../database/mongo.js";
+
+
+export class ReportRepository {
+
+
+    async findAll(){
+
+        const database =
+            await connectMongo();
+
+
+        return await database
+            .collection("inspection_reports")
+            .find({})
+            .sort({
+                createdAt:-1
+            })
+            .toArray();
+
+    }
+
+
+
+    async findById(id){
+
+        const database =
+            await connectMongo();
+
+
+        return await database
+            .collection("inspection_reports")
+            .findOne({
+                _id:id
+            });
+
+    }
+
+
+
+
+    async create(data){
+
+        const database =
+            await connectMongo();
+
+
+        const report = {
+
+            ...data,
+
+            createdAt:
+                new Date()
+
+        };
+
+
+        const result =
+            await database
+                .collection("inspection_reports")
+                .insertOne(report);
+
+
+
+        return {
+
+            id:
+                result.insertedId,
+
+            ...report
+
+        };
+
+    }
+
+
+
+
+    async findByDeclaration(
+        declarationNumber
+    ){
+
+        const database =
+            await connectMongo();
+
+
+        return await database
+            .collection("inspection_reports")
+            .find({
+                declarationNumber
+            })
+            .sort({
+                createdAt:-1
+            })
+            .toArray();
+
+    }
+
+
+}export class UserRepository {
+
+    constructor(database){
+
+        this.collection =
+            database.collection("users");
+
+    }
+
+    async getAll(){
+
+        return await this.collection
+            .find(
+                {},
+                {
+                    projection:{
+                        passwordHash:0
+                    }
+                }
+            )
+            .toArray();
+
+    }
+
+}import { connectMongo } from "../database/mongo.js";
+
+export class DashboardRepository {
+
+    async getDashboardData(){
+
+        const database =
+            await connectMongo();
+
+
+        const declarations =
+            await database
+                .collection("declarations")
+                .find({})
+                .toArray();
+
+
+        const inspections =
+            await database
+                .collection("inspections")
+                .find({})
+                .toArray();
+
+
+        const alerts =
+            await database
+                .collection("alerts")
+                .find({})
+                .toArray();
+
+
+        const synchronizationLogs =
+            await database
+                .collection("synchronization_logs")
+                .find({})
+                .toArray();
+
+
+
+        let activeUserCount = 0;
+
+
+        if(
+            database
+                .listCollections()
+        ){
+
+
+            activeUserCount =
+                await database
+                    .collection("users")
+                    .countDocuments({
+                        active:true
+                    });
+
+        }
+
+
+
+        return {
+
+            declarations,
+
+            inspections,
+
+            alerts,
+
+            synchronizationLogs,
+
+            activeUserCount
+
+        };
+
+    }
+
+}const clientIp = (req) =>
+  req.headers["x-forwarded-for"]?.split(",")[0].trim()
+  ||
+  req.socket.remoteAddress
+  ||
+  "unknown";
+
+
+
+const reply = (
+  res,
+  status,
+  payload
+) => {
+
+  res.writeHead(
+    status,
+    {
+      "Content-Type":
+        "application/json; charset=utf-8"
+    }
+  );
+
+
+  res.end(
+    JSON.stringify(payload)
+  );
+
+};
+
+
+
+
+
+export const createAuthController = (
+  service
+) => ({
+
+
+
+  async login(
+    req,
+    res,
+    credentials
+  ) {
+
+
+    console.log(
+      "LOGIN RECEIVED:",
+      credentials
+    );
+
+
+
+    try {
+
+
+      const result =
+        await service.login(
+          credentials,
+          clientIp(req)
+        );
+
+
+
+      console.log(
+        "LOGIN SUCCESS:",
+        result.user
+      );
+
+
+
+      return reply(
+        res,
+        200,
+        result
+      );
+
+
+    }
+
+    catch(error){
+
+
+      console.log(
+        "LOGIN ERROR:",
+        error.message
+      );
+
+
+      throw error;
+
+
+    }
+
+
+  },
+
+
+
+
+
+
+
+  async logout(
+    req,
+    res
+  ){
+
+
+    await service.logout(
+      req.headers.authorization,
+      clientIp(req)
+    );
+
+
+
+    return reply(
+      res,
+      204,
+      {}
+    );
+
+
+  },
+
+
+
+
+
+
+
+  async me(
+    req,
+    res
+  ){
+
+
+
+    const {
+      user
+    } =
+      await service.authenticate(
+        req.headers.authorization
+      );
+
+
+
+    return reply(
+      res,
+      200,
+      {
+        user
+      }
+    );
+
+
+  }
+
+
+
+});const reply = (
+  res,
+  status,
+  payload
+) => {
+
+  res.writeHead(
+    status,
+    {
+      'Content-Type':
+        'application/json; charset=utf-8'
+    }
+  );
+
+
+  res.end(
+    JSON.stringify(payload)
+  );
+
+};
+
+
+
+export const createDashboardController = (
+  authService,
+  dashboardService
+) => ({
+
+
+  async get(req, res) {
+
+
+    const { user } =
+      await authService.authenticate(
+        req.headers.authorization
+      );
+
+
+
+    const dashboard =
+      await dashboardService.getDashboard(
+        user
+      );
+
+
+
+    return reply(
+      res,
+      200,
+      dashboard
+    );
+
+
+  }
+
+
+});const reply = (
+    res,
+    status,
+    payload
+) => {
+
+    res.writeHead(
+        status,
+        {
+            "Content-Type":
+                "application/json; charset=utf-8"
+        }
+    );
+
+
+    res.end(
+        JSON.stringify(payload)
+    );
+
+};
+
+
+
+
+export const createDeclarationController = (
+
+    authService,
+
+    declarationService
+
+) => ({
+
+
+
+
+
+    async getAll(
+        req,
+        res
+    ){
+
+
+        try {
+
+
+            /*
+                TEMPORARY DEMO MODE
+
+                Authentication removed
+                to allow screenshots.
+
+                Production:
+                restore authService.authenticate()
+            */
+
+
+            const declarations =
+                await declarationService.getDeclarations(
+                    {
+                        role:"Administrator"
+                    }
+                );
+
+
+
+            return reply(
+
+                res,
+
+                200,
+
+                declarations
+
+            );
+
+
+        }
+
+
+        catch(error){
+
+
+            console.log(
+                "GET DECLARATIONS ERROR:",
+                error.message
+            );
+
+
+            return reply(
+
+                res,
+
+                error.statusCode || 500,
+
+                {
+                    error:
+                    error.message
+                }
+
+            );
+
+
+        }
+
+
+    },
+
+
+
+
+
+
+
+
+
+    async getById(
+
+        req,
+
+        res,
+
+        id
+
+    ){
+
+
+        try {
+
+
+
+            const declaration =
+
+                await declarationService.getDeclarationById(
+
+                    {
+                        role:"Administrator"
+                    },
+
+                    id
+
+                );
+
+
+
+
+
+            return reply(
+
+                res,
+
+                200,
+
+                declaration
+
+            );
+
+
+
+        }
+
+
+        catch(error){
+
+
+            return reply(
+
+                res,
+
+                error.statusCode || 500,
+
+                {
+                    error:
+                    error.message
+                }
+
+            );
+
+
+        }
+
+
+    },
+
+
+
+
+
+
+
+
+
+    async search(
+
+        req,
+
+        res,
+
+        query
+
+    ){
+
+
+        try {
+
+
+
+            const declarations =
+
+                await declarationService.searchDeclarations(
+
+                    {
+                        role:"Administrator"
+                    },
+
+                    query
+
+                );
+
+
+
+
+
+            return reply(
+
+                res,
+
+                200,
+
+                declarations
+
+            );
+
+
+
+        }
+
+
+        catch(error){
+
+
+            return reply(
+
+                res,
+
+                error.statusCode || 500,
+
+                {
+                    error:
+                    error.message
+                }
+
+            );
+
+
+        }
+
+
+    }
+
+
+
+
+
+});const reply = (
+    res,
+    status,
+    payload
+) => {
+
+    res.writeHead(
+        status,
+        {
+            "Content-Type":
+                "application/json; charset=utf-8"
+        }
+    );
+
+
+    res.end(
+        JSON.stringify(payload)
+    );
+
+};
+
+
+
+export const createInspectionController = (
+    authService,
+    inspectionService
+) => ({
+
+
+
+    async getAll(
+        req,
+        res
+    ){
+
+
+        const { user } =
+            await authService.authenticate(
+                req.headers.authorization
+            );
+
+
+
+        const inspections =
+            await inspectionService.getInspections(
+                user
+            );
+
+
+
+        return reply(
+            res,
+            200,
+            inspections
+        );
+
+    },
+
+
+
+
+
+
+
+    async getById(
+        req,
+        res,
+        id
+    ){
+
+
+        const { user } =
+            await authService.authenticate(
+                req.headers.authorization
+            );
+
+
+
+        const inspection =
+            await inspectionService.getInspectionById(
+                user,
+                id
+            );
+
+
+
+        return reply(
+            res,
+            200,
+            inspection
+        );
+
+    },
+
+
+
+
+
+
+
+
+
+    async create(
+        req,
+        res,
+        body
+    ){
+
+
+        const { user } =
+            await authService.authenticate(
+                req.headers.authorization
+            );
+
+
+
+        const inspectionData = {
+
+            ...body,
+
+            officer:
+                user.name
+
+        };
+
+
+
+        const inspection =
+            await inspectionService.createInspection(
+                user,
+                inspectionData
+            );
+
+
+
+        return reply(
+            res,
+            201,
+            inspection
+        );
+
+
+    },
+
+
+
+
+
+
+
+
+
+    async updateStatus(
+        req,
+        res,
+        id,
+        body
+    ){
+
+
+        const { user } =
+            await authService.authenticate(
+                req.headers.authorization
+            );
+
+
+
+        const result =
+            await inspectionService.updateStatus(
+                user,
+                id,
+                body.status
+            );
+
+
+
+        return reply(
+            res,
+            200,
+            result
+        );
+
+
+    }
+
+
+
+});const reply = (
+    res,
+    status,
+    payload
+) => {
+
+    res.writeHead(
+        status,
+        {
+            "Content-Type":
+                "application/json; charset=utf-8"
+        }
+    );
+
+
+    res.end(
+        JSON.stringify(payload)
+    );
+
+};
+
+
+
+export const createReportController = (
+    authService,
+    reportService
+) => ({
+
+
+
+    async getAll(
+        req,
+        res
+    ){
+
+
+        const { user } =
+            await authService.authenticate(
+                req.headers.authorization
+            );
+
+
+
+        const reports =
+            await reportService.getReports(
+                user
+            );
+
+
+
+        return reply(
+            res,
+            200,
+            reports
+        );
+
+
+    },
+
+
+
+
+
+
+
+
+
+    async getById(
+        req,
+        res,
+        id
+    ){
+
+
+        const { user } =
+            await authService.authenticate(
+                req.headers.authorization
+            );
+
+
+
+        const report =
+            await reportService.getReportById(
+                user,
+                id
+            );
+
+
+
+        return reply(
+            res,
+            200,
+            report
+        );
+
+
+    },
+
+
+
+
+
+
+
+
+
+    async create(
+        req,
+        res,
+        body
+    ){
+
+
+        const { user } =
+            await authService.authenticate(
+                req.headers.authorization
+            );
+
+
+
+        const report =
+            await reportService.createReport(
+                user,
+                body
+            );
+
+
+
+        return reply(
+            res,
+            201,
+            report
+        );
+
+
+    }
+
+
+
+});const reply = (
+    res,
+    status,
+    payload
+) => {
+
+    res.writeHead(
+        status,
+        {
+            "Content-Type":
+                "application/json; charset=utf-8"
+        }
+    );
+
+
+    res.end(
+        JSON.stringify(payload)
+    );
+
+};
+
+
+
+
+
+export const createUserController = (
+    authService,
+    userService
+) => ({
+
+
+
+    async getAll(
+        req,
+        res
+    ){
+
+
+        const { user } =
+            await authService.authenticate(
+                req.headers.authorization
+            );
+
+
+
+        const users =
+            await userService.getAllUsers(
+                user
+            );
+
+
+
+        return reply(
+            res,
+            200,
+            users
+        );
+
+
+    }
+
+
+
+});export const createAuthMiddleware = (authService) => {
+  return (req, res, next) => {
+    try {
+      const authorization = req.headers.authorization;
+
+      const authentication = authService.authenticate(authorization);
+
+      req.user = authentication.user;
+      req.claims = authentication.claims;
+
+      return next();
+    } catch (error) {
+      const status = error.statusCode || 401;
+
+      res.writeHead(status, {
+        'Content-Type': 'application/json; charset=utf-8'
+      });
+
+      return res.end(JSON.stringify({
+        error: error.message || 'Unauthorized.'
+      }));
+    }
+  };
+};export const requirePermission = (permission) => {
+  return (req, res, next) => {
+
+    if (!req.user) {
+      res.writeHead(401, {
+        'Content-Type': 'application/json; charset=utf-8'
+      });
+
+      return res.end(JSON.stringify({
+        error: 'Authentication required.'
+      }));
+    }
+
+
+    const permissions = req.user.permissions || [];
+
+
+    if (!permissions.includes(permission)) {
+
+      res.writeHead(403, {
+        'Content-Type': 'application/json; charset=utf-8'
+      });
+
+      return res.end(JSON.stringify({
+        error: 'You do not have permission to perform this action.'
+      }));
+    }
+
+
+    return next();
+  };
+};

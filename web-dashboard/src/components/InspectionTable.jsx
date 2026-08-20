@@ -1,4 +1,5 @@
-const InspectionTable = ({ inspections }) => {
+const InspectionTable = ({ inspections = [] }) => {
+
   return (
     <div className="card">
 
@@ -9,7 +10,6 @@ const InspectionTable = ({ inspections }) => {
       <table className="inspection-table">
 
         <thead>
-
           <tr>
             <th>Declaration</th>
             <th>Officer</th>
@@ -18,42 +18,79 @@ const InspectionTable = ({ inspections }) => {
             <th>Status</th>
             <th>Date</th>
           </tr>
-
         </thead>
 
         <tbody>
 
-          {inspections.map((inspection) => (
+          {inspections.length === 0 ? (
 
-            <tr key={inspection.id}>
-
-              <td>{inspection.declaration}</td>
-
-              <td>{inspection.officer}</td>
-
-              <td>{inspection.destination}</td>
-
-              <td>{inspection.result}</td>
-
-              <td>
-
-                <span
-                  className={
-                    inspection.status === "Synced"
-                      ? "status success"
-                      : "status pending"
-                  }
-                >
-                  {inspection.status}
-                </span>
-
+            <tr>
+              <td
+                colSpan="6"
+                style={{ textAlign: "center" }}
+              >
+                No recent inspections.
               </td>
-
-              <td>{inspection.date}</td>
-
             </tr>
 
-          ))}
+          ) : (
+
+            inspections.map((inspection, index) => (
+
+              <tr
+                key={
+                  inspection._id ||
+                  inspection.id ||
+                  index
+                }
+              >
+
+                <td>
+                  {inspection.declarationNumber || "N/A"}
+                </td>
+
+                <td>
+                  {inspection.officer || "N/A"}
+                </td>
+
+                <td>
+                  {inspection.location || "N/A"}
+                </td>
+
+                <td>
+                  {inspection.result ||
+                    inspection.comments ||
+                    "N/A"}
+                </td>
+
+                <td>
+
+                  <span
+                    className={
+                      inspection.status === "Completed" ||
+                      inspection.status === "Synced"
+                        ? "status success"
+                        : "status pending"
+                    }
+                  >
+                    {inspection.status || "Unknown"}
+                  </span>
+
+                </td>
+
+                <td>
+                  {inspection.createdAt
+                    ? new Date(
+                        inspection.createdAt
+                      ).toLocaleDateString()
+                    : "N/A"}
+                </td>
+
+              </tr>
+
+            ))
+
+          )}
 
         </tbody>
 

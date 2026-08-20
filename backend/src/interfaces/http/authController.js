@@ -1,162 +1,106 @@
 const clientIp = (req) =>
-  req.headers["x-forwarded-for"]?.split(",")[0].trim()
-  ||
-  req.socket.remoteAddress
-  ||
-  "unknown";
-
+    req.headers["x-forwarded-for"]?.split(",")[0].trim()
+    ||
+    req.socket.remoteAddress
+    ||
+    "unknown";
 
 
 const reply = (
-  res,
-  status,
-  payload
+    res,
+    status,
+    payload
 ) => {
 
-  res.writeHead(
-    status,
-    {
-      "Content-Type":
-        "application/json; charset=utf-8"
-    }
-  );
+    res.writeHead(
+        status,
+        {
+            "Content-Type":
+                "application/json; charset=utf-8"
+        }
+    );
 
-
-  res.end(
-    JSON.stringify(payload)
-  );
+    res.end(
+        JSON.stringify(payload)
+    );
 
 };
 
 
-
-
-
 export const createAuthController = (
-  service
+    service
 ) => ({
 
+    async login(
+        req,
+        res,
+        credentials
+    ){
+
+        const platform =
+            req.headers["x-client-platform"] === "mobile"
+                ? "mobile"
+                : "web";
 
 
-  async login(
-    req,
-    res,
-    credentials
-  ) {
+        const result =
+            await service.login(
+                credentials,
+                clientIp(req),
+                platform
+            );
 
 
-    console.log(
-      "LOGIN RECEIVED:",
-      credentials
-    );
+        return reply(
+            res,
+            200,
+            result
+        );
+
+    },
 
 
+    async logout(
+        req,
+        res
+    ){
 
-    try {
-
-
-      const result =
-        await service.login(
-          credentials,
-          clientIp(req)
+        await service.logout(
+            req.headers.authorization,
+            clientIp(req)
         );
 
 
+        return reply(
+            res,
+            204,
+            {}
+        );
 
-      console.log(
-        "LOGIN SUCCESS:",
-        result.user
-      );
+    },
 
 
+    async me(
+        req,
+        res
+    ){
 
-      return reply(
-        res,
-        200,
-        result
-      );
+        const {
+            user
+        } =
+            await service.authenticate(
+                req.headers.authorization
+            );
 
+
+        return reply(
+            res,
+            200,
+            {
+                user
+            }
+        );
 
     }
-
-    catch(error){
-
-
-      console.log(
-        "LOGIN ERROR:",
-        error.message
-      );
-
-
-      throw error;
-
-
-    }
-
-
-  },
-
-
-
-
-
-
-
-  async logout(
-    req,
-    res
-  ){
-
-
-    await service.logout(
-      req.headers.authorization,
-      clientIp(req)
-    );
-
-
-
-    return reply(
-      res,
-      204,
-      {}
-    );
-
-
-  },
-
-
-
-
-
-
-
-  async me(
-    req,
-    res
-  ){
-
-
-
-    const {
-      user
-    } =
-      await service.authenticate(
-        req.headers.authorization
-      );
-
-
-
-    return reply(
-      res,
-      200,
-      {
-        user
-      }
-    );
-
-
-  }
-
-
 
 });

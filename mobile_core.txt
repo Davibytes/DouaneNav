@@ -1,0 +1,6904 @@
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useState
+} from "react";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import {
+    login as loginRequest,
+    getCurrentUser,
+    logout as logoutRequest
+} from "../services/authService.js";
+
+import {
+    setAuthToken
+} from "../api/axios.js";
+
+const AuthContext = createContext();
+
+export const AuthProvider = ({
+    children
+}) => {
+
+    const [
+        user,
+        setUser
+    ] = useState(null);
+
+    const [
+        loading,
+        setLoading
+    ] = useState(false);
+
+    const [
+        authChecking,
+        setAuthChecking
+    ] = useState(true);
+
+    // Restore previous session when the app starts
+    useEffect(() => {
+
+        restoreSession();
+
+    }, []);
+
+    const restoreSession = async () => {
+
+        try {
+
+            const token =
+                await AsyncStorage.getItem(
+                    "token"
+                );
+
+            if (token) {
+
+                setAuthToken(
+                    token
+                );
+
+                const response =
+                    await getCurrentUser();
+
+                setUser(
+                    response.user
+                );
+
+            }
+
+        }
+        catch (error) {
+
+            await AsyncStorage.removeItem(
+                "token"
+            );
+
+            setAuthToken(null);
+
+            setUser(null);
+
+        }
+        finally {
+
+            setAuthChecking(false);
+
+        }
+
+    };
+
+    const login = async (
+        email,
+        password
+    ) => {
+
+        setLoading(true);
+
+        try {
+
+            const data =
+                await loginRequest(
+                    email,
+                    password
+                );
+
+            await AsyncStorage.setItem(
+                "token",
+                data.token
+            );
+
+            setAuthToken(
+                data.token
+            );
+
+            setUser(
+                data.user
+            );
+
+            return data;
+
+        }
+        finally {
+
+            setLoading(false);
+
+        }
+
+    };
+
+    const logout = async () => {
+
+        try {
+
+            await logoutRequest();
+
+        }
+        catch (error) {
+
+            console.log(
+                "Logout error:",
+                error.message
+            );
+
+        }
+
+        await AsyncStorage.removeItem(
+            "token"
+        );
+
+        setAuthToken(null);
+
+        setUser(null);
+
+    };
+
+    return (
+
+        <AuthContext.Provider
+
+            value={{
+
+                user,
+
+                loading,
+
+                authChecking,
+
+                login,
+
+                logout,
+
+                setUser
+
+            }}
+
+        >
+
+            {children}
+
+        </AuthContext.Provider>
+
+    );
+
+};
+
+export const useAuth = () => {
+
+    return useContext(
+        AuthContext
+    );
+
+};import api from "../api/axios.js";
+
+
+export const login = async (
+    email,
+    password
+) => {
+
+ console.log("LOGIN REQUEST:", email, password);
+    const response =
+        await api.post(
+            "/auth/login",
+            {
+                email,
+                password
+            }
+        );
+
+
+    return response.data;
+
+};
+
+
+
+
+export const getCurrentUser = async () => {
+
+
+    const response =
+        await api.get(
+            "/auth/me"
+        );
+
+
+    return response.data;
+
+};
+
+
+
+
+export const logout = async () => {
+
+
+    const response =
+        await api.post(
+            "/auth/logout"
+        );
+
+
+    return response.data;
+
+};import api from "../api/axios.js";
+
+export const getDashboard = async () => {
+    const response = await api.get("/dashboard");
+
+    return response.data;
+};import api from "../api/axios.js";
+
+
+// Get all declarations from backend
+export const getDeclarations = async () => {
+
+    const response =
+        await api.get(
+            "declarations"
+        );
+
+    return response.data;
+
+};
+
+
+
+// Get one declaration details
+export const getDeclarationById = async (
+    id
+) => {
+
+    const response =
+        await api.get(
+            `declarations/${id}`
+        );
+
+    return response.data;
+
+};
+
+
+
+// Search declarations
+export const searchDeclarations = async (
+    query
+) => {
+
+    const response =
+        await api.get(
+            `declarations/search?q=${encodeURIComponent(query)}`
+        );
+
+    return response.data;
+
+};import api from "../api/axios.js";
+
+
+export const getInspections = async () => {
+
+    const response =
+        await api.get("/inspections");
+
+
+    return response.data;
+
+};
+
+
+
+
+export const createInspection = async (inspection) => {
+
+    const response =
+        await api.post(
+            "/inspections",
+            inspection
+        );
+
+
+    return response.data;
+
+};import api from "../api/axios.js";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+
+const REPORT_STORAGE_KEY =
+    "douanenav_reports";
+
+
+
+
+export const getReports = async () => {
+
+
+    try{
+
+        const response =
+            await api.get(
+                "/reports"
+            );
+
+
+        const reports =
+            response.data;
+
+
+
+        await AsyncStorage.setItem(
+
+            REPORT_STORAGE_KEY,
+
+            JSON.stringify(
+                reports
+            )
+
+        );
+
+
+
+        return reports;
+
+
+    }
+
+
+    catch(error){
+
+
+        const savedReports =
+            await AsyncStorage.getItem(
+                REPORT_STORAGE_KEY
+            );
+
+
+
+        if(savedReports){
+
+            return JSON.parse(
+                savedReports
+            );
+
+        }
+
+
+
+        throw error;
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+export const createReport = async (
+    report
+) => {
+
+
+    try{
+
+
+        const response =
+            await api.post(
+                "/reports",
+                report
+            );
+
+
+
+        const savedReports =
+            await AsyncStorage.getItem(
+                REPORT_STORAGE_KEY
+            );
+
+
+
+        let reports =
+            savedReports
+            ?
+            JSON.parse(savedReports)
+            :
+            [];
+
+
+
+        reports.push(
+            response.data
+        );
+
+
+
+        await AsyncStorage.setItem(
+
+            REPORT_STORAGE_KEY,
+
+            JSON.stringify(
+                reports
+            )
+
+        );
+
+
+
+        return response.data;
+
+
+    }
+
+
+    catch(error){
+
+
+        const offlineReport = {
+
+            ...report,
+
+            offline:true,
+
+            createdAt:
+                new Date()
+                .toISOString()
+
+        };
+
+
+
+        const savedReports =
+            await AsyncStorage.getItem(
+                REPORT_STORAGE_KEY
+            );
+
+
+
+        let reports =
+            savedReports
+            ?
+            JSON.parse(savedReports)
+            :
+            [];
+
+
+
+        reports.push(
+            offlineReport
+        );
+
+
+
+        await AsyncStorage.setItem(
+
+            REPORT_STORAGE_KEY,
+
+            JSON.stringify(
+                reports
+            )
+
+        );
+
+
+
+        return offlineReport;
+
+
+    }
+
+
+};import {
+    useState
+} from "react";
+
+import {
+    View,
+    ScrollView,
+    Text,
+    TouchableOpacity
+} from "react-native";
+
+import {
+    useFocusEffect
+} from "@react-navigation/native";
+
+import {
+    useCallback
+} from "react";
+
+import SafeScreen from "../components/SafeScreen.js";
+import BottomNavigation from "../components/BottomNavigation.js";
+
+import {
+    useAuth
+} from "../context/AuthContext.js";
+
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+import {
+    getDashboard
+} from "../services/dashboardService.js";
+
+import styles from "../styles/styles.js";
+
+
+export default function DashboardScreen({
+    navigation
+}) {
+
+
+    const {
+        user
+    } = useAuth();
+
+
+    const {
+        t
+    } = useLanguage();
+
+
+
+
+    const [
+        dashboard,
+        setDashboard
+    ] = useState(null);
+
+
+
+
+    useFocusEffect(
+
+        useCallback(()=>{
+
+            loadDashboard();
+
+        },[])
+
+    );
+
+
+
+
+
+    const loadDashboard = async()=>{
+
+        try{
+
+            const data =
+                await getDashboard();
+
+            setDashboard(
+                data
+            );
+
+        }
+
+        catch(error){
+
+            console.log(
+                "Dashboard error:",
+                error.message
+            );
+
+
+            setDashboard({
+
+                counts:{
+
+                    todayDeclarations:0,
+
+                    pendingInspections:0,
+
+                    completedInspections:0,
+
+                    pendingSynchronizations:0
+
+                },
+
+
+                alerts:[],
+
+                recentInspections:[],
+
+                destinationStats:[],
+
+
+                inspectionStatistics:{
+
+                    total:0,
+
+                    completed:0,
+
+                    pending:0
+
+                }
+
+            });
+
+
+        }
+
+    };
+
+
+
+
+
+
+    return (
+
+        <SafeScreen>
+
+
+            <View
+                style={{
+                    flex:1
+                }}
+            >
+
+
+                <ScrollView
+
+                    contentContainerStyle={
+                        styles.dashboardContainer
+                    }
+
+                >
+
+
+
+                    <Text
+
+                        style={
+                            styles.dashboardGreeting
+                        }
+
+                    >
+
+                        {t.welcome}
+
+                    </Text>
+
+
+
+                    <Text
+
+                        style={
+                            styles.dashboardRole
+                        }
+
+                    >
+
+                        {
+                            user?.name
+                            ||
+                            t.customsOfficer
+                        }
+
+                    </Text>
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.activeAlerts}
+
+                        </Text>
+
+
+
+                        <Text
+
+                            style={
+                                styles.sectionText
+                            }
+
+                        >
+
+                            {
+                                dashboard?.alerts?.length
+
+                                ?
+
+                                dashboard.alerts[0].message
+
+                                :
+
+                                t.noActiveAlerts
+
+                            }
+
+                        </Text>
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.todaysOperations}
+
+                        </Text>
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.operationItem
+                            }
+
+                        >
+
+                            {t.todaysDeclarations}:
+                            {" "}
+                            {
+                                dashboard?.counts?.todayDeclarations
+                                ??
+                                0
+                            }
+
+                        </Text>
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.operationItem
+                            }
+
+                        >
+
+                            {t.pendingInspections}:
+                            {" "}
+                            {
+                                dashboard?.counts?.pendingInspections
+                                ??
+                                0
+                            }
+
+                        </Text>
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.operationItem
+                            }
+
+                        >
+
+                            {t.completedInspections}:
+                            {" "}
+                            {
+                                dashboard?.counts?.completedInspections
+                                ??
+                                0
+                            }
+
+                        </Text>
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.operationItem
+                            }
+
+                        >
+
+                            {t.pendingSynchronizations}:
+                            {" "}
+                            {
+                                dashboard?.counts?.pendingSynchronizations
+                                ??
+                                0
+                            }
+
+                        </Text>
+
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.recentInspections}
+
+                        </Text>
+
+
+
+                        {
+
+                            dashboard?.recentInspections?.length
+
+                            ?
+
+                            dashboard.recentInspections.map(
+
+                                (item,index)=>(
+
+                                    <View
+
+                                        key={
+                                            item._id || index
+                                        }
+
+                                        style={
+                                            styles.listItem
+                                        }
+
+                                    >
+
+                                        <Text
+
+                                            style={
+                                                styles.listTitle
+                                            }
+
+                                        >
+
+                                            {
+                                                item.declarationNumber
+                                                ||
+                                                t.unknown
+                                            }
+
+                                        </Text>
+
+
+
+                                        <Text
+
+                                            style={
+                                                styles.listSubtitle
+                                            }
+
+                                        >
+
+                                            {
+                                                item.status
+                                                ||
+                                                t.pending
+                                            }
+
+                                        </Text>
+
+
+                                    </View>
+
+                                )
+
+                            )
+
+                            :
+
+                            <Text
+
+                                style={
+                                    styles.sectionText
+                                }
+
+                            >
+
+                                {t.noRecentInspections}
+
+                            </Text>
+
+                        }
+
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.commonDestinations}
+
+                        </Text>
+
+
+
+
+                        {
+
+                            dashboard?.destinationStats?.map(
+
+                                (item,index)=>(
+
+                                    <Text
+
+                                        key={
+                                            index
+                                        }
+
+                                        style={
+                                            styles.operationItem
+                                        }
+
+                                    >
+
+                                        {
+                                            item.city
+                                        }
+
+                                        :
+                                        {" "}
+                                        {
+                                            item.total
+                                        }
+
+                                        {" "}
+                                        {t.declarationsCount}
+
+                                    </Text>
+
+                                )
+
+                            )
+
+                        }
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.inspectionStatistics}
+
+                        </Text>
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.operationItem
+                            }
+
+                        >
+
+                            {t.total}:
+                            {" "}
+                            {
+                                dashboard?.inspectionStatistics?.total
+                                ??
+                                0
+                            }
+
+                        </Text>
+
+
+
+                        <Text
+
+                            style={
+                                styles.operationItem
+                            }
+
+                        >
+
+                            {t.completed}:
+                            {" "}
+                            {
+                                dashboard?.inspectionStatistics?.completed
+                                ??
+                                0
+                            }
+
+                        </Text>
+
+
+
+                        <Text
+
+                            style={
+                                styles.operationItem
+                            }
+
+                        >
+
+                            {t.pending}:
+                            {" "}
+                            {
+                                dashboard?.inspectionStatistics?.pending
+                                ??
+                                0
+                            }
+
+                        </Text>
+
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.quickActions}
+
+                        </Text>
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+
+                            onPress={()=>{
+
+                                navigation.navigate(
+                                    "Declarations"
+                                );
+
+                            }}
+
+                        >
+
+                            <Text
+
+                                style={
+                                    styles.menuButtonText
+                                }
+
+                            >
+
+                                {t.searchDeclarations}
+
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+
+                            onPress={()=>{
+
+                                navigation.navigate(
+                                    "More"
+                                );
+
+                            }}
+
+                        >
+
+                            <Text
+
+                                style={
+                                    styles.menuButtonText
+                                }
+
+                            >
+
+                                {t.moreModules}
+
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+                    </View>
+
+
+
+
+                </ScrollView>
+
+
+
+
+
+                <BottomNavigation
+
+                    navigation={
+                        navigation
+                    }
+
+                    active="Dashboard"
+
+                />
+
+
+
+            </View>
+
+
+        </SafeScreen>
+
+    );
+
+}import {
+    useEffect,
+    useState
+} from "react";
+
+
+import {
+    View,
+    Text,
+    TextInput,
+    ScrollView,
+    TouchableOpacity,
+    ActivityIndicator
+} from "react-native";
+
+
+import SafeScreen from "../components/SafeScreen.js";
+import BottomNavigation from "../components/BottomNavigation.js";
+
+
+import {
+    getDeclarations
+} from "../services/declarationService.js";
+
+
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+
+import {
+    translations
+} from "../i18n/index.js";
+
+
+import styles from "../styles/styles.js";
+import colors from "../styles/colors.js";
+
+
+
+export default function DeclarationsScreen({
+    navigation
+}){
+
+
+    const {
+        language
+    } = useLanguage();
+
+
+
+    const t =
+        translations[language];
+
+
+
+
+    const [
+        declarations,
+        setDeclarations
+    ] = useState([]);
+
+
+
+    const [
+        filteredDeclarations,
+        setFilteredDeclarations
+    ] = useState([]);
+
+
+
+    const [
+        search,
+        setSearch
+    ] = useState("");
+
+
+
+    const [
+        loading,
+        setLoading
+    ] = useState(true);
+
+
+
+
+
+
+    useEffect(()=>{
+
+        loadDeclarations();
+
+    },[]);
+
+
+
+
+
+
+    const loadDeclarations = async()=>{
+
+
+        try{
+
+
+            setLoading(true);
+
+
+
+            const data =
+                await getDeclarations();
+
+
+
+            const list =
+
+                Array.isArray(data)
+
+                ?
+
+                data
+
+                :
+
+                data?.declarations || [];
+
+
+
+
+            setDeclarations(list);
+
+            setFilteredDeclarations(list);
+
+
+
+        }
+
+        catch(error){
+
+
+            console.log(
+                "Declaration error:",
+                error.message
+            );
+
+
+            setDeclarations([]);
+
+            setFilteredDeclarations([]);
+
+
+        }
+
+
+        finally{
+
+
+            setLoading(false);
+
+
+        }
+
+
+    };
+
+
+
+
+
+
+
+
+    const handleSearch = (value)=>{
+
+
+        setSearch(value);
+
+
+
+        const text =
+            value
+            .toLowerCase()
+            .trim();
+
+
+
+
+        if(!text){
+
+
+            setFilteredDeclarations(
+                declarations
+            );
+
+
+            return;
+
+
+        }
+
+
+
+
+
+
+        const results =
+
+            declarations.filter(item=>{
+
+
+                return(
+
+                    item.declarationNumber
+                    ?.toLowerCase()
+                    .includes(text)
+
+
+                    ||
+
+                    item.importer?.name
+                    ?.toLowerCase()
+                    .includes(text)
+
+
+
+                    ||
+
+                    item.destination?.city
+                    ?.toLowerCase()
+                    .includes(text)
+
+
+
+                    ||
+
+                    item.transport?.truckPlate
+                    ?.toLowerCase()
+                    .includes(text)
+
+
+                    ||
+
+                    item.status
+                    ?.toLowerCase()
+                    .includes(text)
+
+                );
+
+
+            });
+
+
+
+        setFilteredDeclarations(results);
+
+
+    };
+
+
+
+
+
+
+
+
+
+    return(
+
+
+        <SafeScreen>
+
+
+            <View
+                style={{
+                    flex:1
+                }}
+            >
+
+
+
+                <ScrollView
+
+
+                    contentContainerStyle={{
+
+                        ...styles.dashboardContainer,
+
+                        paddingBottom:130
+
+                    }}
+
+
+                    showsVerticalScrollIndicator={false}
+
+
+                >
+
+
+
+
+
+                    <Text
+
+                        style={
+                            styles.dashboardGreeting
+                        }
+
+                    >
+
+                        {t.declarations}
+
+                    </Text>
+
+
+
+
+
+                    <Text
+
+                        style={
+                            styles.dashboardRole
+                        }
+
+                    >
+
+                        Customs declaration records
+
+                    </Text>
+
+
+
+
+
+
+
+
+                    <TextInput
+
+
+                        style={
+                            styles.input
+                        }
+
+
+
+                        placeholder={
+                            t.searchDeclarations ||
+                            "Search declarations"
+                        }
+
+
+
+                        placeholderTextColor={
+                            colors.muted
+                        }
+
+
+
+                        value={
+                            search
+                        }
+
+
+
+                        onChangeText={
+                            handleSearch
+                        }
+
+
+                    />
+
+
+
+
+
+
+
+
+
+                    {
+
+                        loading &&
+
+
+                        <ActivityIndicator
+
+
+                            size="large"
+
+
+                            color={
+                                colors.green
+                            }
+
+
+                        />
+
+                    }
+
+
+
+
+
+
+
+
+
+                    {
+
+
+                        !loading &&
+
+                        filteredDeclarations.length===0 &&
+
+
+                        <View
+
+                            style={
+                                styles.section
+                            }
+
+                        >
+
+
+                            <Text
+
+                                style={
+                                    styles.sectionTitle
+                                }
+
+                            >
+
+                                No Records
+
+                            </Text>
+
+
+
+                            <Text
+
+                                style={
+                                    styles.sectionText
+                                }
+
+                            >
+
+                                No declarations available
+
+                            </Text>
+
+
+
+                        </View>
+
+
+                    }
+
+
+
+
+
+
+
+
+
+                    {
+
+                        filteredDeclarations.map(
+
+                            (item,index)=>(
+
+
+                                <TouchableOpacity
+
+
+                                    key={
+                                        item._id || index
+                                    }
+
+
+                                    activeOpacity={
+                                        0.85
+                                    }
+
+
+
+                                    style={{
+
+                                        backgroundColor:
+                                        colors.surface,
+
+                                        borderRadius:14,
+
+                                        padding:18,
+
+                                        marginBottom:15,
+
+                                        elevation:3
+
+                                    }}
+
+
+
+                                    onPress={()=>{
+
+
+                                        navigation.navigate(
+
+                                            "DeclarationDetails",
+
+                                            {
+
+                                                declaration:item
+
+                                            }
+
+                                        );
+
+
+                                    }}
+
+
+                                >
+
+
+
+
+
+                                    <Text
+
+                                        style={{
+
+                                            fontSize:18,
+
+                                            fontWeight:"800",
+
+                                            color:colors.greenDark,
+
+                                            marginBottom:12
+
+                                        }}
+
+                                    >
+
+                                        {
+
+                                            item.declarationNumber
+
+                                            ||
+
+                                            "Declaration"
+
+                                        }
+
+
+                                    </Text>
+
+
+
+
+
+
+
+
+
+                                    <Text
+
+                                        style={
+                                            styles.sectionText
+                                        }
+
+                                    >
+
+                                        Importer:
+
+                                        {" "}
+
+                                        {
+
+                                            item.importer?.name
+
+                                            ||
+
+                                            "Not available"
+
+                                        }
+
+
+                                    </Text>
+
+
+
+
+
+
+
+
+
+                                    <Text
+
+                                        style={
+                                            styles.sectionText
+                                        }
+
+                                    >
+
+                                        Truck Plate:
+
+                                        {" "}
+
+                                        {
+
+                                            item.transport?.truckPlate
+
+                                            ||
+
+                                            "Not available"
+
+                                        }
+
+
+                                    </Text>
+
+
+
+
+
+
+
+
+
+                                    <Text
+
+                                        style={
+                                            styles.sectionText
+                                        }
+
+                                    >
+
+                                        Destination:
+
+                                        {" "}
+
+                                        {
+
+                                            item.destination?.city
+
+                                            ||
+
+                                            "Unknown"
+
+                                        }
+
+
+                                    </Text>
+
+
+
+
+
+
+
+
+
+                                    <Text
+
+                                        style={
+                                            styles.sectionText
+                                        }
+
+                                    >
+
+                                        Status:
+
+                                        {" "}
+
+                                        {
+
+                                            item.status
+
+                                            ||
+
+                                            "Pending"
+
+                                        }
+
+
+                                    </Text>
+
+
+
+
+
+
+
+
+                                    <View
+
+                                        style={{
+
+                                            marginTop:12,
+
+                                            backgroundColor:
+                                            colors.green,
+
+                                            paddingHorizontal:14,
+
+                                            paddingVertical:6,
+
+                                            borderRadius:20,
+
+                                            alignSelf:"flex-start"
+
+                                        }}
+
+
+                                    >
+
+
+
+                                        <Text
+
+                                            style={{
+
+                                                color:
+                                                colors.white,
+
+                                                fontWeight:"700",
+
+                                                fontSize:12
+
+                                            }}
+
+                                        >
+
+                                            View Details
+
+                                        </Text>
+
+
+                                    </View>
+
+
+
+
+
+
+                                </TouchableOpacity>
+
+
+                            )
+
+                        )
+
+
+                    }
+
+
+
+
+
+
+                </ScrollView>
+
+
+
+
+
+
+
+
+
+                <BottomNavigation
+
+                    navigation={
+                        navigation
+                    }
+
+
+                    active="Declarations"
+
+
+                />
+
+
+
+
+
+            </View>
+
+
+        </SafeScreen>
+
+
+    );
+
+
+}import {
+    ScrollView,
+    Text,
+    View,
+    TouchableOpacity
+} from "react-native";
+
+
+import SafeScreen from "../components/SafeScreen.js";
+import BottomNavigation from "../components/BottomNavigation.js";
+
+
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+
+import {
+    translations
+} from "../i18n/index.js";
+
+
+import styles from "../styles/styles.js";
+
+
+
+export default function DeclarationDetailsScreen({
+    route,
+    navigation
+}) {
+
+
+    const {
+        language
+    } = useLanguage();
+
+
+    const t =
+        translations[language];
+
+
+
+    const declaration =
+        route?.params?.declaration || {};
+
+
+
+
+    return (
+
+        <SafeScreen>
+
+
+            <View
+                style={{
+                    flex:1
+                }}
+            >
+
+
+                <ScrollView
+
+                    contentContainerStyle={
+                        styles.dashboardContainer
+                    }
+
+                >
+
+
+
+                    <Text
+                        style={
+                            styles.dashboardGreeting
+                        }
+                    >
+                        {t.declarationDetails}
+                    </Text>
+
+
+
+                    <Text
+                        style={
+                            styles.dashboardRole
+                        }
+                    >
+                        {t.cargoVerificationInformation}
+                    </Text>
+
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            {t.declarationInformation}
+                        </Text>
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.declarationNumber}:{" "}
+                            {
+                                declaration.declarationNumber ||
+                                t.notAvailable
+                            }
+                        </Text>
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.status}:{" "}
+                            {
+                                declaration.status ||
+                                t.pendingVerification
+                            }
+                        </Text>
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            {t.importerInformation}
+                        </Text>
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.company}:{" "}
+                            {
+                                declaration.importer?.name ||
+                                t.notAvailable
+                            }
+                        </Text>
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.country}:{" "}
+                            {
+                                declaration.importer?.country ||
+                                t.notAvailable
+                            }
+                        </Text>
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            {t.cargoInformation}
+                        </Text>
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.description}:{" "}
+                            {
+                                declaration.goods?.description ||
+                                t.notAvailable
+                            }
+                        </Text>
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.category}:{" "}
+                            {
+                                declaration.goods?.category ||
+                                t.notAvailable
+                            }
+                        </Text>
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.quantity}:{" "}
+                            {
+                                declaration.goods?.quantity ||
+                                t.notAvailable
+                            }
+                        </Text>
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            {t.transportInformation}
+                        </Text>
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.truckPlate}:{" "}
+                            {
+                                declaration.transport?.truckPlate ||
+                                t.notAvailable
+                            }
+                        </Text>
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.driver}:{" "}
+                            {
+                                declaration.transport?.driver ||
+                                t.notAvailable
+                            }
+                        </Text>
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            {t.destinationVerification}
+                        </Text>
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.destination}:{" "}
+                            {
+                                declaration.destination?.area ||
+                                t.notAvailable
+                            }
+                            ,
+                            {" "}
+                            {
+                                declaration.destination?.city ||
+                                t.notAvailable
+                            }
+                        </Text>
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.address}:{" "}
+                            {
+                                declaration.destination?.address ||
+                                t.notAvailable
+                            }
+                        </Text>
+
+
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+
+                            onPress={()=>{
+
+                                navigation.navigate(
+                                    "DestinationMap",
+                                    {
+                                        declaration
+                                    }
+                                );
+
+                            }}
+
+                        >
+
+                            <Text
+                                style={
+                                    styles.menuButtonText
+                                }
+                            >
+                                {t.verifyDestinationMap}
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            {t.customsStatus}
+                        </Text>
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.inspectionStatus}:{" "}
+                            {
+                                declaration.inspectionStatus ||
+                                t.awaitingInspection
+                            }
+                        </Text>
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.riskLevel}:{" "}
+                            {
+                                declaration.riskLevel ||
+                                t.notAssessed
+                            }
+                        </Text>
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            {t.officerActions}
+                        </Text>
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+
+                            onPress={()=>{
+
+                                navigation.navigate(
+                                    "AIAnalysis",
+                                    {
+                                        declaration
+                                    }
+                                );
+
+                            }}
+
+                        >
+
+                            <Text
+                                style={
+                                    styles.menuButtonText
+                                }
+                            >
+                                {t.runAIAnalysis}
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+
+                            onPress={()=>{
+
+                                navigation.navigate(
+                                    "Inspection",
+                                    {
+                                        declaration
+                                    }
+                                );
+
+                            }}
+
+                        >
+
+                            <Text
+                                style={
+                                    styles.menuButtonText
+                                }
+                            >
+                                {t.startInspection}
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+                    </View>
+
+
+
+
+
+                </ScrollView>
+
+
+
+
+
+
+
+                <BottomNavigation
+
+                    navigation={
+                        navigation
+                    }
+
+
+                    active="Declarations"
+
+                />
+
+
+
+            </View>
+
+
+
+        </SafeScreen>
+
+    );
+
+}import {
+    useEffect,
+    useRef,
+    useState
+} from "react";
+
+
+import {
+    View,
+    Text,
+    ActivityIndicator
+} from "react-native";
+
+
+import MapView, {
+    Marker,
+    Polyline
+} from "react-native-maps";
+
+
+import * as Location from "expo-location";
+
+
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+
+import {
+    translations
+} from "../i18n/index.js";
+
+
+import SafeScreen from "../components/SafeScreen.js";
+
+import BottomNavigation from "../components/BottomNavigation.js";
+
+
+import styles from "../styles/styles.js";
+
+import colors from "../styles/colors.js";
+
+
+
+
+export default function DestinationMapScreen({
+    route,
+    navigation
+}) {
+
+
+
+    const mapRef =
+        useRef(null);
+
+
+
+    const {
+        language
+    } = useLanguage();
+
+
+
+    const t =
+        translations[language];
+
+
+
+
+    const declaration =
+        route?.params?.declaration;
+
+
+
+
+    const destination =
+        declaration?.destination || {};
+
+
+
+
+
+    const destinationLatitude =
+
+        destination?.coordinates?.latitude
+
+        ||
+
+        destination?.latitude
+
+        ||
+
+        3.8792;
+
+
+
+    const destinationLongitude =
+
+        destination?.coordinates?.longitude
+
+        ||
+
+        destination?.longitude
+
+        ||
+
+        11.5119;
+
+
+
+
+
+    const [
+
+        officerLocation,
+
+        setOfficerLocation
+
+    ] = useState(null);
+
+
+
+
+
+    const [
+
+        loadingLocation,
+
+        setLoadingLocation
+
+    ] = useState(true);
+
+
+
+
+
+
+
+
+    useEffect(()=>{
+
+
+        getCurrentLocation();
+
+
+    },[]);
+
+
+
+
+
+
+
+
+
+    const getCurrentLocation = async()=>{
+
+
+        try{
+
+
+            const permission =
+
+                await Location.requestForegroundPermissionsAsync();
+
+
+
+            if(permission.status !== "granted"){
+
+
+                setLoadingLocation(false);
+
+                return;
+
+
+            }
+
+
+
+
+
+
+
+            const location =
+
+                await Location.getCurrentPositionAsync({
+
+                    accuracy:
+                    Location.Accuracy.High
+
+                });
+
+
+
+
+
+            const current = {
+
+
+                latitude:
+
+                    location.coords.latitude,
+
+
+                longitude:
+
+                    location.coords.longitude
+
+
+            };
+
+
+
+
+
+            setOfficerLocation(current);
+
+
+
+
+
+
+
+            setTimeout(()=>{
+
+
+                if(mapRef.current){
+
+
+                    mapRef.current.fitToCoordinates(
+
+
+                        [
+
+                            current,
+
+
+                            {
+
+                                latitude:
+                                destinationLatitude,
+
+
+                                longitude:
+                                destinationLongitude
+
+                            }
+
+                        ],
+
+
+                        {
+
+
+                            edgePadding:{
+
+
+                                top:120,
+
+                                right:80,
+
+                                bottom:120,
+
+                                left:80
+
+
+                            },
+
+
+                            animated:true
+
+
+                        }
+
+
+                    );
+
+
+                }
+
+
+            },500);
+
+
+
+
+
+        }
+
+
+        catch(error){
+
+
+            console.log(
+
+                "Location error:",
+
+                error.message
+
+            );
+
+
+        }
+
+
+        finally{
+
+
+            setLoadingLocation(false);
+
+
+        }
+
+
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+    return(
+
+
+        <SafeScreen>
+
+
+            <View
+
+                style={{
+
+                    flex:1
+
+                }}
+
+            >
+
+
+
+
+
+                <View
+
+                    style={{
+
+                        padding:20
+
+                    }}
+
+                >
+
+
+
+
+
+                    <Text
+
+                        style={
+                            styles.dashboardGreeting
+                        }
+
+                    >
+
+                        {t.destinationVerification}
+
+                    </Text>
+
+
+
+
+
+
+                    <Text
+
+                        style={
+                            styles.dashboardRole
+                        }
+
+                    >
+
+                        {t.destinationVerificationSubtitle}
+
+                    </Text>
+
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.destinationInformation}
+
+                        </Text>
+
+
+
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.sectionText
+                            }
+
+                        >
+
+                            {t.declaration}:{" "}
+
+                            {
+
+                                declaration?.declarationNumber
+
+                                ||
+
+                                t.notAvailable
+
+                            }
+
+
+                        </Text>
+
+
+
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.sectionText
+                            }
+
+                        >
+
+                            {t.city}:{" "}
+
+                            {
+
+                                destination.city
+
+                                ||
+
+                                t.unknown
+
+                            }
+
+
+                        </Text>
+
+
+
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.sectionText
+                            }
+
+                        >
+
+                            {t.address}:{" "}
+
+                            {
+
+                                destination.address
+
+                                ||
+
+                                t.notAvailable
+
+                            }
+
+
+                        </Text>
+
+
+
+
+
+
+                    </View>
+
+
+
+
+
+                </View>
+
+
+
+
+
+
+
+
+
+                {
+
+                    loadingLocation &&
+
+
+                    <ActivityIndicator
+
+                        size="large"
+
+                        color={colors.green}
+
+                    />
+
+                }
+
+
+
+
+
+
+
+
+
+                <MapView
+
+
+                    ref={mapRef}
+
+
+                    style={{
+
+                        flex:1
+
+                    }}
+
+
+
+                    initialRegion={{
+
+
+                        latitude:
+                        destinationLatitude,
+
+
+                        longitude:
+                        destinationLongitude,
+
+
+                        latitudeDelta:0.05,
+
+
+                        longitudeDelta:0.05
+
+
+                    }}
+
+
+
+                    showsUserLocation={true}
+
+
+                    showsMyLocationButton={true}
+
+
+
+                >
+
+
+
+
+
+
+
+                    {
+
+                        officerLocation &&
+
+
+                        <Marker
+
+
+                            coordinate={
+
+                                officerLocation
+
+                            }
+
+
+                            title="Officer Location"
+
+
+                        />
+
+
+                    }
+
+
+
+
+
+
+
+
+
+                    <Marker
+
+
+                        coordinate={{
+
+
+                            latitude:
+                            destinationLatitude,
+
+
+                            longitude:
+                            destinationLongitude
+
+
+                        }}
+
+
+
+                        title={
+
+                            declaration?.declarationNumber
+
+                            ||
+
+                            t.cargoDestination
+
+                        }
+
+
+
+                        description={
+
+                            destination.address
+
+                            ||
+
+                            t.declaredDestination
+
+                        }
+
+
+
+                    />
+
+
+
+
+
+
+
+
+
+
+                    {
+
+                        officerLocation &&
+
+
+                        <Polyline
+
+
+                            coordinates={[
+
+
+                                officerLocation,
+
+
+                                {
+
+
+                                    latitude:
+                                    destinationLatitude,
+
+
+                                    longitude:
+                                    destinationLongitude
+
+
+                                }
+
+
+                            ]}
+
+
+
+                            strokeWidth={4}
+
+
+
+                        />
+
+
+                    }
+
+
+
+
+
+
+                </MapView>
+
+
+
+
+
+
+
+
+
+                <BottomNavigation
+
+
+                    navigation={navigation}
+
+
+                    active="Map"
+
+
+                />
+
+
+
+
+
+
+
+            </View>
+
+
+
+
+
+        </SafeScreen>
+
+
+    );
+
+
+}import {
+    useEffect,
+    useState
+} from "react";
+
+import {
+    View,
+    Text,
+    ScrollView,
+    TouchableOpacity,
+    TextInput,
+    Alert
+} from "react-native";
+
+import * as ImagePicker from "expo-image-picker";
+
+import SafeScreen from "../components/SafeScreen.js";
+import BottomNavigation from "../components/BottomNavigation.js";
+
+import {
+    getInspections,
+    createInspection
+} from "../services/inspectionService.js";
+
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+import {
+    translations
+} from "../i18n/index.js";
+
+import styles from "../styles/styles.js";
+import colors from "../styles/colors.js";
+
+
+export default function InspectionScreen({
+    navigation
+}) {
+
+
+    const {
+        language
+    } = useLanguage();
+
+
+    const t =
+        translations[language];
+
+
+
+    const [
+        inspections,
+        setInspections
+    ] = useState([]);
+
+
+
+    const [
+        declarationNumber,
+        setDeclarationNumber
+    ] = useState("");
+
+
+
+    const [
+        truckPlate,
+        setTruckPlate
+    ] = useState("");
+
+
+
+    const [
+        comment,
+        setComment
+    ] = useState("");
+
+
+
+    const [
+        status,
+        setStatus
+    ] = useState("Pending");
+
+
+
+    const [
+        photos,
+        setPhotos
+    ] = useState([]);
+
+
+
+
+    useEffect(()=>{
+
+        loadInspections();
+
+    },[]);
+
+
+
+
+    const loadInspections = async()=>{
+
+        try{
+
+            const data =
+                await getInspections();
+
+
+            setInspections(
+
+                Array.isArray(data)
+
+                ?
+
+                data
+
+                :
+
+                []
+
+            );
+
+        }
+
+        catch(error){
+
+            console.log(
+                "Inspection loading error:",
+                error.message
+            );
+
+            setInspections([]);
+
+        }
+
+    };
+
+
+
+
+
+    const addPhoto = async(type)=>{
+
+
+        let result;
+
+
+
+        if(type==="camera"){
+
+
+            const permission =
+                await ImagePicker.requestCameraPermissionsAsync();
+
+
+
+            if(!permission.granted){
+
+                Alert.alert(
+                    "Permission required",
+                    "Camera permission is required."
+                );
+
+                return;
+
+            }
+
+
+
+            result =
+                await ImagePicker.launchCameraAsync({
+
+                    quality:0.7
+
+                });
+
+
+        }
+
+        else{
+
+
+            result =
+                await ImagePicker.launchImageLibraryAsync({
+
+                    quality:0.7
+
+                });
+
+
+        }
+
+
+
+
+        if(!result.canceled){
+
+
+            setPhotos([
+
+                ...photos,
+
+                result.assets[0].uri
+
+            ]);
+
+        }
+
+
+    };
+
+
+
+
+
+
+    const saveInspection = async()=>{
+
+
+        if(!declarationNumber){
+
+
+            Alert.alert(
+
+                "Missing information",
+
+                "Declaration number is required."
+
+            );
+
+
+            return;
+
+        }
+
+
+
+
+
+        const inspection = {
+
+
+            declarationNumber,
+
+
+            truckPlate,
+
+
+            comments:comment,
+
+
+            status,
+
+
+            photos,
+
+
+            location:"Customs Inspection Point"
+
+
+        };
+
+
+
+
+
+
+        try{
+
+
+            await createInspection(
+                inspection
+            );
+
+
+
+            Alert.alert(
+
+                "Success",
+
+                "Inspection report submitted successfully."
+
+            );
+
+
+
+            setDeclarationNumber("");
+
+            setTruckPlate("");
+
+            setComment("");
+
+            setPhotos([]);
+
+
+
+            loadInspections();
+
+
+        }
+
+
+        catch(error){
+
+
+            Alert.alert(
+
+                "Error",
+
+                "Inspection submission failed."
+
+            );
+
+
+        }
+
+
+    };
+
+
+
+
+
+
+    return(
+
+
+        <SafeScreen>
+
+
+            <View
+                style={{
+                    flex:1
+                }}
+            >
+
+
+
+                <ScrollView
+
+                    contentContainerStyle={
+                        styles.dashboardContainer
+                    }
+
+                >
+
+
+
+                    <Text
+
+                        style={
+                            styles.dashboardGreeting
+                        }
+
+                    >
+
+                        {t.inspectionModule}
+
+                    </Text>
+
+
+
+
+                    <Text
+
+                        style={
+                            styles.dashboardRole
+                        }
+
+                    >
+
+                        {t.inspectionSubtitle}
+
+                    </Text>
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+
+                            {t.inspectionDetails}
+
+                        </Text>
+
+
+
+
+                        <TextInput
+
+                            style={
+                                styles.input
+                            }
+
+                            placeholder={
+                                t.declarationNumber
+                            }
+
+                            placeholderTextColor={
+                                colors.muted
+                            }
+
+                            value={
+                                declarationNumber
+                            }
+
+                            onChangeText={
+                                setDeclarationNumber
+                            }
+
+                        />
+
+
+
+
+
+                        <TextInput
+
+                            style={
+                                styles.input
+                            }
+
+                            placeholder={
+                                t.truck
+                            }
+
+                            placeholderTextColor={
+                                colors.muted
+                            }
+
+                            value={
+                                truckPlate
+                            }
+
+                            onChangeText={
+                                setTruckPlate
+                            }
+
+                        />
+
+
+
+                    </View>
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.inspectionStatus}
+
+                        </Text>
+
+
+
+
+                        {
+                            [
+
+                                "Pending",
+
+                                "In Progress",
+
+                                "Completed"
+
+                            ].map(item=>(
+
+
+                                <TouchableOpacity
+
+                                    key={item}
+
+                                    style={[
+
+                                        styles.menuButton,
+
+                                        {
+
+                                            backgroundColor:
+
+                                            status===item
+
+                                            ?
+
+                                            colors.greenDark
+
+                                            :
+
+                                            colors.green
+
+                                        }
+
+                                    ]}
+
+
+                                    onPress={()=>{
+
+                                        setStatus(item);
+
+                                    }}
+
+                                >
+
+
+                                    <Text
+
+                                        style={
+                                            styles.menuButtonText
+                                        }
+
+                                    >
+
+                                        {
+                                            item==="Pending"
+
+                                            ?
+
+                                            t.pending
+
+                                            :
+
+                                            item==="In Progress"
+
+                                            ?
+
+                                            t.inProgress
+
+                                            :
+
+                                            t.completed
+                                        }
+
+                                    </Text>
+
+
+                                </TouchableOpacity>
+
+
+                            ))
+
+                        }
+
+
+                    </View>
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.officerNotes}
+
+                        </Text>
+
+
+
+
+                        <TextInput
+
+                            style={[
+
+                                styles.input,
+
+                                {
+
+                                    height:120,
+
+                                    textAlignVertical:"top"
+
+                                }
+
+                            ]}
+
+
+                            multiline
+
+
+                            placeholder={
+                                t.inspectionComments
+                            }
+
+
+                            placeholderTextColor={
+                                colors.muted
+                            }
+
+
+                            value={
+                                comment
+                            }
+
+
+                            onChangeText={
+                                setComment
+                            }
+
+
+                        />
+
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.attachments}
+
+                        </Text>
+
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+                            onPress={()=>addPhoto("camera")}
+
+                        >
+
+                            <Text
+
+                                style={
+                                    styles.menuButtonText
+                                }
+
+                            >
+
+                                {t.captureEvidencePhoto}
+
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+                            onPress={()=>addPhoto("gallery")}
+
+                        >
+
+                            <Text
+
+                                style={
+                                    styles.menuButtonText
+                                }
+
+                            >
+
+                                {t.selectPhoto}
+
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.sectionText
+                            }
+
+                        >
+
+                            {t.attachedPhotos}: {photos.length}
+
+                        </Text>
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <TouchableOpacity
+
+                        style={
+                            styles.menuButton
+                        }
+
+                        onPress={
+                            saveInspection
+                        }
+
+                    >
+
+                        <Text
+
+                            style={
+                                styles.menuButtonText
+                            }
+
+                        >
+
+                            {t.submitInspectionReport}
+
+                        </Text>
+
+
+                    </TouchableOpacity>
+
+
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.inspectionHistory}
+
+                        </Text>
+
+
+
+
+
+                        {
+
+                            inspections.length===0
+
+                            ?
+
+                            <Text
+
+                                style={
+                                    styles.sectionText
+                                }
+
+                            >
+
+                                {t.noInspectionsAvailable}
+
+                            </Text>
+
+
+                            :
+
+
+                            inspections.map(
+
+                                (item,index)=>(
+
+
+                                    <View
+
+                                        key={
+                                            item._id || index
+                                        }
+
+                                        style={
+                                            styles.listItem
+                                        }
+
+                                    >
+
+
+                                        <Text
+
+                                            style={
+                                                styles.listTitle
+                                            }
+
+                                        >
+
+                                            {
+                                                item.declarationNumber
+                                                ||
+                                                t.unknown
+                                            }
+
+                                        </Text>
+
+
+
+
+                                        <Text
+
+                                            style={
+                                                styles.listSubtitle
+                                            }
+
+                                        >
+
+                                            {t.status}: {item.status}
+
+                                        </Text>
+
+
+
+                                    </View>
+
+
+                                )
+
+                            )
+
+
+                        }
+
+
+                    </View>
+
+
+
+
+
+
+                </ScrollView>
+
+
+
+
+
+
+                <BottomNavigation
+
+                    navigation={
+                        navigation
+                    }
+
+                    active="Inspection"
+
+                />
+
+
+
+            </View>
+
+
+        </SafeScreen>
+
+
+    );
+
+
+}import {
+    useEffect,
+    useState
+} from "react";
+
+
+import {
+    View,
+    Text,
+    ScrollView,
+    TouchableOpacity
+} from "react-native";
+
+
+import SafeScreen from "../components/SafeScreen.js";
+import BottomNavigation from "../components/BottomNavigation.js";
+
+
+import {
+    getReports
+} from "../services/reportService.js";
+
+
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+
+import styles from "../styles/styles.js";
+
+
+
+export default function ReportScreen({
+    navigation
+}) {
+
+
+    const {
+        language
+    } = useLanguage();
+
+
+
+    const t =
+        language === "fr"
+        ? require("../i18n/fr.js").default
+        : require("../i18n/en.js").default;
+
+
+
+
+
+    const [
+        reports,
+        setReports
+    ] = useState([]);
+
+
+
+
+
+    useEffect(()=>{
+
+        loadReports();
+
+    },[]);
+
+
+
+
+
+
+    const loadReports = async()=>{
+
+
+        try{
+
+
+            const data =
+                await getReports();
+
+
+            setReports(
+                data || []
+            );
+
+
+        }
+
+        catch(error){
+
+
+            console.log(
+                "Reports error:",
+                error.message
+            );
+
+
+
+            setReports([
+
+                {
+
+                    declarationNumber:
+                    "CMR-2026-001",
+
+                    result:
+                    "Approved",
+
+                    officer:
+                    "Officer Mbarga",
+
+                    status:
+                    "Completed",
+
+                    comments:
+                    "Cargo verified successfully",
+
+                    aiAnalysis:
+                    "Low risk"
+
+                },
+
+                {
+
+                    declarationNumber:
+                    "CMR-2026-002",
+
+                    result:
+                    "Pending Review",
+
+                    officer:
+                    "Officer Njoya",
+
+                    status:
+                    "Pending",
+
+                    comments:
+                    "Additional verification required",
+
+                    aiAnalysis:
+                    "Medium risk"
+
+                }
+
+            ]);
+
+        }
+
+
+    };
+
+
+
+
+
+
+
+
+    return(
+
+
+        <SafeScreen>
+
+
+            <View
+                style={{
+                    flex:1
+                }}
+            >
+
+
+
+                <ScrollView
+
+                    contentContainerStyle={
+                        styles.dashboardContainer
+                    }
+
+                >
+
+
+
+
+
+                    <Text
+                        style={
+                            styles.dashboardGreeting
+                        }
+                    >
+
+                        {t.inspectionReports}
+
+                    </Text>
+
+
+
+
+
+
+                    <Text
+                        style={
+                            styles.dashboardRole
+                        }
+                    >
+
+                        {t.inspectionRecords}
+
+                    </Text>
+
+
+
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+
+                            {t.reportSummary}
+
+                        </Text>
+
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+
+                            {t.totalReports}:
+                            {" "}
+                            {
+                                reports.length
+                            }
+
+                        </Text>
+
+
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+
+                            {t.completed}:
+                            {" "}
+                            {
+                                reports.filter(
+                                    r=>r.status==="Completed"
+                                ).length
+                            }
+
+                        </Text>
+
+
+
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+
+                            {t.pending}:
+                            {" "}
+                            {
+                                reports.filter(
+                                    r=>r.status==="Pending"
+                                ).length
+                            }
+
+                        </Text>
+
+
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+                        style={
+                            styles.section
+                        }
+                    >
+
+
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+
+                            {t.exportReports}
+
+                        </Text>
+
+
+
+
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+
+                            {t.generateReports}
+
+                        </Text>
+
+
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+                        >
+
+                            <Text
+                                style={
+                                    styles.menuButtonText
+                                }
+                            >
+
+                                {t.exportPDF}
+
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+                        >
+
+                            <Text
+                                style={
+                                    styles.menuButtonText
+                                }
+                            >
+
+                                {t.exportExcel}
+
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+
+
+
+                        <TouchableOpacity
+
+                            style={
+                                styles.menuButton
+                            }
+
+                        >
+
+                            <Text
+                                style={
+                                    styles.menuButtonText
+                                }
+                            >
+
+                                {t.exportCSV}
+
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    {
+
+                        reports.length === 0 ?
+
+
+                        <View
+                            style={
+                                styles.section
+                            }
+                        >
+
+
+                            <Text
+                                style={
+                                    styles.sectionText
+                                }
+                            >
+
+                                {t.noReportsAvailable}
+
+                            </Text>
+
+
+                        </View>
+
+
+                        :
+
+
+
+                        reports.map(
+
+                            (item,index)=>(
+
+
+                                <View
+
+                                    key={index}
+
+                                    style={
+                                        styles.section
+                                    }
+
+                                >
+
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionTitle
+                                        }
+                                    >
+
+                                        {
+                                            item.declarationNumber
+                                            ||
+                                            t.declaration
+                                        }
+
+
+                                    </Text>
+
+
+
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+
+                                        {t.officer}:
+                                        {" "}
+                                        {
+                                            item.officer
+                                            ||
+                                            "N/A"
+                                        }
+
+                                    </Text>
+
+
+
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+
+                                        {t.inspectionResult}:
+                                        {" "}
+                                        {
+                                            item.result
+                                            ||
+                                            "N/A"
+                                        }
+
+                                    </Text>
+
+
+
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+
+                                        {t.status}:
+                                        {" "}
+                                        {
+                                            item.status
+                                            ||
+                                            t.unknown
+                                        }
+
+                                    </Text>
+
+
+
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+
+                                        {t.aiRisk}:
+                                        {" "}
+                                        {
+                                            item.aiAnalysis
+                                            ||
+                                            t.notAnalysed
+                                        }
+
+                                    </Text>
+
+
+
+
+
+
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+
+                                        {t.comments}:
+                                        {" "}
+                                        {
+                                            item.comments
+                                            ||
+                                            t.noComments
+                                        }
+
+                                    </Text>
+
+
+
+
+
+                                </View>
+
+
+                            )
+
+                        )
+
+                    }
+
+
+
+
+
+
+
+                </ScrollView>
+
+
+
+
+
+
+
+                <BottomNavigation
+
+                    navigation={
+                        navigation
+                    }
+
+
+                    active="More"
+
+                />
+
+
+
+
+
+            </View>
+
+
+        </SafeScreen>
+
+
+    );
+
+
+}import {
+    View,
+    Text,
+    TouchableOpacity,
+    ScrollView
+} from "react-native";
+
+
+import {
+    Ionicons
+} from "@expo/vector-icons";
+
+
+import SafeScreen from "../components/SafeScreen.js";
+import BottomNavigation from "../components/BottomNavigation.js";
+
+
+import {
+    useAuth
+} from "../context/AuthContext.js";
+
+
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+
+import {
+    translations
+} from "../i18n/index.js";
+
+
+import styles from "../styles/styles.js";
+import colors from "../styles/colors.js";
+
+
+
+export default function ProfileScreen({
+    navigation
+}){
+
+
+    const {
+        user,
+        logout
+    } = useAuth();
+
+
+
+    const {
+        language,
+        changeLanguage
+    } = useLanguage();
+
+
+
+    const t =
+        translations[language];
+
+
+
+
+    const permissions =
+
+        user?.permissions
+
+        ||
+
+        [
+
+            "users:manage",
+
+            "declarations:read",
+
+            "inspections:read",
+
+            "synchronization:read"
+
+        ];
+
+
+
+
+
+    return(
+
+
+        <SafeScreen>
+
+
+            <View
+                style={{
+                    flex:1
+                }}
+            >
+
+
+
+                <ScrollView
+
+                    contentContainerStyle={{
+
+                        ...styles.dashboardContainer,
+
+                        paddingBottom:140
+
+                    }}
+
+                >
+
+
+
+
+
+                    <Text
+
+                        style={
+                            styles.dashboardGreeting
+                        }
+
+                    >
+
+                        {t.profile}
+
+                    </Text>
+
+
+
+
+
+                    <Text
+
+                        style={
+                            styles.dashboardRole
+                        }
+
+                    >
+
+                        {t.officerAccountInformation}
+
+                    </Text>
+
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+
+
+                        <View
+
+                            style={{
+
+                                alignItems:"center",
+
+                                marginBottom:20
+
+                            }}
+
+                        >
+
+
+
+                            <Ionicons
+
+                                name="person-circle"
+
+                                size={80}
+
+                                color={colors.green}
+
+                            />
+
+
+
+
+                            <Text
+
+                                style={{
+
+                                    fontSize:22,
+
+                                    fontWeight:"700",
+
+                                    color:colors.text,
+
+                                    marginTop:10
+
+                                }}
+
+                            >
+
+                                {
+
+                                    user?.name
+
+                                    ||
+
+                                    t.customsOfficer
+
+                                }
+
+
+                            </Text>
+
+
+
+
+                            <Text
+
+                                style={
+                                    styles.mutedText
+                                }
+
+                            >
+
+                                {
+
+                                    user?.role
+
+                                    ||
+
+                                    t.officer
+
+                                }
+
+                            </Text>
+
+
+
+
+                        </View>
+
+
+
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.sectionText
+                            }
+
+                        >
+
+                            {t.email}:{" "}
+
+                            {
+
+                                user?.email
+
+                                ||
+
+                                t.notAvailable
+
+                            }
+
+
+                        </Text>
+
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.sectionText
+                            }
+
+                        >
+
+                            {t.status}:{" "}
+
+                            {t.active}
+
+
+                        </Text>
+
+
+
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.language}
+
+                        </Text>
+
+
+
+
+
+
+
+                        <View
+
+                            style={{
+
+                                flexDirection:"row",
+
+                                justifyContent:"space-between",
+
+                                marginTop:10
+
+                            }}
+
+                        >
+
+
+
+
+
+
+                            <TouchableOpacity
+
+
+                                style={[
+
+                                    styles.menuButton,
+
+                                    {
+
+                                        flex:1,
+
+                                        marginRight:8,
+
+                                        backgroundColor:
+
+                                        language==="EN"
+
+                                        ?
+
+                                        colors.greenDark
+
+                                        :
+
+                                        colors.green
+
+                                    }
+
+                                ]}
+
+
+
+                                onPress={()=>{
+
+                                    changeLanguage("EN");
+
+                                }}
+
+
+
+                            >
+
+
+
+                                <Text
+
+                                    style={
+                                        styles.menuButtonText
+                                    }
+
+                                >
+
+                                    {t.english}
+
+                                </Text>
+
+
+
+                            </TouchableOpacity>
+
+
+
+
+
+
+
+
+                            <TouchableOpacity
+
+
+                                style={[
+
+                                    styles.menuButton,
+
+                                    {
+
+                                        flex:1,
+
+                                        marginLeft:8,
+
+                                        backgroundColor:
+
+                                        language==="FR"
+
+                                        ?
+
+                                        colors.greenDark
+
+                                        :
+
+                                        colors.green
+
+                                    }
+
+                                ]}
+
+
+
+
+                                onPress={()=>{
+
+                                    changeLanguage("FR");
+
+                                }}
+
+
+
+                            >
+
+
+
+                                <Text
+
+                                    style={
+                                        styles.menuButtonText
+                                    }
+
+                                >
+
+                                    {t.french}
+
+                                </Text>
+
+
+
+                            </TouchableOpacity>
+
+
+
+
+
+                        </View>
+
+
+
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <View
+
+                        style={
+                            styles.section
+                        }
+
+                    >
+
+
+
+
+
+                        <Text
+
+                            style={
+                                styles.sectionTitle
+                            }
+
+                        >
+
+                            {t.permissions}
+
+                        </Text>
+
+
+
+
+
+
+
+                        {
+
+                            permissions.map(
+
+                                (permission,index)=>(
+
+
+
+                                    <View
+
+                                        key={index}
+
+                                        style={{
+
+                                            flexDirection:"row",
+
+                                            alignItems:"center",
+
+                                            marginBottom:10
+
+                                        }}
+
+                                    >
+
+
+
+
+
+                                        <Ionicons
+
+                                            name="checkmark-circle"
+
+                                            size={18}
+
+                                            color={colors.green}
+
+                                        />
+
+
+
+
+
+                                        <Text
+
+                                            style={{
+
+                                                marginLeft:8,
+
+                                                color:colors.text,
+
+                                                fontSize:14
+
+                                            }}
+
+                                        >
+
+                                            {permission}
+
+                                        </Text>
+
+
+
+
+
+                                    </View>
+
+
+
+                                )
+
+                            )
+
+
+                        }
+
+
+
+
+
+
+                    </View>
+
+
+
+
+
+
+
+
+
+                    <TouchableOpacity
+
+
+                        style={[
+
+                            styles.logoutButton,
+
+                            {
+
+                                marginBottom:20
+
+                            }
+
+                        ]}
+
+
+
+                        onPress={logout}
+
+
+
+                    >
+
+
+
+
+
+                        <Text
+
+                            style={{
+
+                                color:colors.green,
+
+                                fontWeight:"700",
+
+                                fontSize:16
+
+                            }}
+
+                        >
+
+                            {t.logout}
+
+                        </Text>
+
+
+
+
+
+                    </TouchableOpacity>
+
+
+
+
+
+
+
+                </ScrollView>
+
+
+
+
+
+
+
+
+
+                <BottomNavigation
+
+                    navigation={navigation}
+
+                    active="More"
+
+                />
+
+
+
+
+
+            </View>
+
+
+
+
+
+        </SafeScreen>
+
+
+    );
+
+
+}import React from "react";
+
+
+import {
+    View,
+    Text,
+    TouchableOpacity
+} from "react-native";
+
+
+import {
+    MaterialIcons
+} from "@expo/vector-icons";
+
+
+import {
+    useLanguage
+} from "../context/LanguageContext.js";
+
+
+import {
+    translations
+} from "../i18n/index.js";
+
+
+import styles from "../styles/styles.js";
+import colors from "../styles/colors.js";
+
+
+
+export default function BottomNavigation({
+
+    navigation,
+
+    active
+
+}){
+
+
+    const {
+        language
+    } = useLanguage();
+
+
+
+    const t =
+        translations[language];
+
+
+
+
+    const tabs = [
+
+        {
+
+            name:"Dashboard",
+
+            label:t.dashboard,
+
+            icon:"dashboard"
+
+        },
+
+        {
+
+            name:"Declarations",
+
+            label:t.declarations,
+
+            icon:"description"
+
+        },
+
+        {
+
+            name:"Inspection",
+
+            label:t.inspection,
+
+            icon:"fact-check"
+
+        },
+
+        {
+
+            name:"DestinationMap",
+
+            label:t.map,
+
+            icon:"place"
+
+        },
+
+        {
+
+            name:"More",
+
+            label:t.more,
+
+            icon:"menu"
+
+        }
+
+    ];
+
+
+
+
+
+    return (
+
+        <View
+
+            style={
+                styles.bottomNavigation
+            }
+
+        >
+
+
+
+            {
+
+                tabs.map((tab)=>(
+
+
+                    <TouchableOpacity
+
+
+                        key={
+                            tab.name
+                        }
+
+
+                        style={
+                            styles.bottomNavigationItem
+                        }
+
+
+                        activeOpacity={0.8}
+
+
+                        onPress={()=>{
+
+
+                            if(tab.name !== active){
+
+
+                                navigation.navigate(
+
+                                    tab.name
+
+                                );
+
+
+                            }
+
+
+                        }}
+
+
+                    >
+
+
+
+
+                        <MaterialIcons
+
+
+                            name={
+                                tab.icon
+                            }
+
+
+                            size={26}
+
+
+                            color={
+
+                                active === tab.name
+
+                                ?
+
+                                colors.green
+
+                                :
+
+                                colors.muted
+
+                            }
+
+
+                        />
+
+
+
+
+
+
+
+                        <Text
+
+
+                            style={[
+
+
+                                styles.bottomNavigationText,
+
+
+                                {
+
+
+                                    color:
+
+
+                                    active === tab.name
+
+
+                                    ?
+
+
+                                    colors.green
+
+
+                                    :
+
+
+                                    colors.muted,
+
+
+
+                                    marginTop:4
+
+
+                                }
+
+
+                            ]}
+
+
+
+                        >
+
+
+                            {
+                                tab.label
+                            }
+
+
+
+                        </Text>
+
+
+
+
+
+
+                    </TouchableOpacity>
+
+
+
+                ))
+
+            }
+
+
+
+        </View>
+
+
+    );
+
+}const en = {
+
+    // Authentication
+
+    loginTitle:
+        "Welcome back",
+
+    loginSubtitle:
+        "Sign in with your authorized DouaneNav account.",
+
+    email:
+        "Email",
+
+    password:
+        "Password",
+
+    forgotPassword:
+        "Forgot Password?",
+
+    signIn:
+        "Sign in securely",
+
+    signingIn:
+        "Signing in...",
+
+
+
+    // Navigation
+
+    dashboard:
+        "Dashboard",
+
+    declarations:
+        "Declarations",
+
+    inspection:
+        "Inspection",
+
+    reports:
+        "Reports",
+
+    profile:
+        "Profile",
+
+    more:
+        "More",
+
+
+
+    // Language
+
+    language:
+        "Language",
+
+    french:
+        "French",
+
+    english:
+        "English",
+
+
+
+
+    // Dashboard
+
+    welcome:
+        "Welcome",
+
+    customsOfficer:
+        "Customs Officer",
+
+    activeAlerts:
+        "ACTIVE ALERTS",
+
+    noActiveAlerts:
+        "No active alerts.",
+
+    todaysOperations:
+        "TODAY'S OPERATIONS",
+
+    todaysDeclarations:
+        "Today's Declarations",
+
+    pendingInspections:
+        "Pending Inspections",
+
+    completedInspections:
+        "Completed Inspections",
+
+    pendingSynchronizations:
+        "Pending Synchronizations",
+
+    recentInspections:
+        "RECENT INSPECTIONS",
+
+    noRecentInspections:
+        "No recent inspections.",
+
+    commonDestinations:
+        "COMMON DESTINATIONS",
+
+    declarationsCount:
+        "declarations",
+
+    inspectionStatistics:
+        "INSPECTION STATISTICS",
+
+    total:
+        "Total",
+
+    completed:
+        "Completed",
+
+    pending:
+        "Pending",
+
+    quickActions:
+        "QUICK ACTIONS",
+
+    searchDeclarations:
+        "Search Declarations",
+
+    moreModules:
+        "More Modules",
+
+
+
+    // General
+
+    unknown:
+        "Unknown",
+
+    notAvailable:
+        "Not available",
+
+    status:
+        "Status",
+
+    active:
+        "Active",
+
+
+
+
+    // Profile
+
+    officerAccountInformation:
+        "Officer account information",
+
+    officer:
+        "Officer",
+
+    permissions:
+        "Permissions",
+
+    logout:
+        "Logout",
+
+
+
+
+    // Destination Map
+
+    destinationVerification:
+        "Destination Verification",
+
+    destinationVerificationSubtitle:
+        "Declared cargo destination visualization",
+
+    destinationInformation:
+        "DESTINATION INFORMATION",
+
+    declaration:
+        "Declaration",
+
+    city:
+        "City",
+
+    address:
+        "Address",
+
+    cargoDestination:
+        "Cargo Destination",
+
+    declaredDestination:
+        "Declared destination",
+
+
+
+
+    // Declaration Details
+
+    declarationDetails:
+        "Declaration Details",
+
+    cargoVerificationInformation:
+        "Customs cargo verification record",
+
+    declarationNumber:
+        "Declaration Number",
+
+    importerInformation:
+        "IMPORTER INFORMATION",
+
+    name:
+        "Name",
+
+    country:
+        "Country",
+
+    cargoInformation:
+        "CARGO INFORMATION",
+
+    goods:
+        "Goods",
+
+    category:
+        "Category",
+
+    quantity:
+        "Quantity",
+
+    transportInformation:
+        "TRANSPORT INFORMATION",
+
+    truck:
+        "Truck Plate",
+
+    driver:
+        "Driver",
+
+    destination:
+        "Destination",
+
+    location:
+        "Location",
+
+    currentStatus:
+        "Current Status",
+
+    unknownStatus:
+        "Unknown Status",
+
+    viewDestinationMap:
+        "Verify Destination Map",
+
+    runAIAnalysis:
+        "Run AI Analysis",
+
+    startInspection:
+        "Start Inspection",
+
+
+
+
+    // Inspection
+
+    inspectionModule:
+        "Inspection Module",
+
+    inspectionSubtitle:
+        "Customs field inspection management",
+
+    inspectionDetails:
+        "INSPECTION DETAILS",
+
+    declarationNumberPlaceholder:
+        "Declaration number",
+
+    truckPlatePlaceholder:
+        "Truck plate number",
+
+    inspectionStatus:
+        "INSPECTION STATUS",
+
+    inProgress:
+        "In Progress",
+
+    officerNotes:
+        "OFFICER NOTES",
+
+    inspectionComments:
+        "Inspection comments",
+
+    attachments:
+        "ATTACHMENTS",
+
+    captureEvidencePhoto:
+        "Capture Evidence Photo",
+
+    selectPhoto:
+        "Select Photo",
+
+    attachedPhotos:
+        "Attached Photos",
+
+    submitInspectionReport:
+        "Submit Inspection Report",
+
+    inspectionHistory:
+        "INSPECTION HISTORY",
+
+    noInspectionsAvailable:
+        "No inspections available",
+
+
+
+    // Reports
+
+    inspectionReports:
+        "Inspection Reports",
+
+    reportsSubtitle:
+        "Customs inspection activity and verification records",
+
+    reportSummary:
+        "REPORT SUMMARY",
+
+    totalReports:
+        "Total Reports",
+
+    exportReports:
+        "EXPORT REPORTS",
+
+    generateReports:
+        "Generate official customs reports",
+
+    exportPDF:
+        "Export PDF",
+
+    exportExcel:
+        "Export Excel",
+
+    exportCSV:
+        "Export CSV",
+
+    noReportsAvailable:
+        "No inspection reports available",
+
+    officer:
+        "Officer",
+
+    inspectionResult:
+        "Inspection Result",
+
+    aiRisk:
+        "AI Risk",
+
+    comments:
+        "Comments",
+
+    notAnalysed:
+        "Not analysed",
+
+
+
+
+    // AI Analysis
+
+    aiAnalysis:
+        "AI Analysis",
+
+    aiSubtitle:
+        "Intelligent customs risk assistance",
+
+    declarationInformation:
+        "DECLARATION INFORMATION",
+
+    analysisType:
+        "Analysis Type",
+
+    customsRiskAssessment:
+        "Customs Risk Assessment",
+
+    aiModuleStatus:
+        "AI MODULE STATUS",
+
+    cargoRiskScore:
+        "CARGO RISK SCORE",
+
+    riskLevel:
+        "Risk Level",
+
+    riskScore:
+        "Risk Score",
+
+    inspectionPriority:
+        "INSPECTION PRIORITY",
+
+    recommendedPriority:
+        "Recommended Priority",
+
+    normalInspection:
+        "Normal Inspection",
+
+    riskIndicators:
+        "RISK INDICATORS",
+
+    aiRecommendation:
+        "AI RECOMMENDATION",
+
+    futureAIDevelopment:
+        "FUTURE AI DEVELOPMENT",
+
+    plannedAICapabilities:
+        "Planned AI capabilities:",
+
+    documentOCR:
+        "Document OCR extraction",
+
+    invoiceVerification:
+        "Invoice verification",
+
+    machineLearning:
+        "Machine learning risk prediction",
+    map:
+        "Map",
+        more: "More",
+
+additionalModules: "Additional system modules",
+
+inspectionReports: "Inspection Reports",
+inspectionReportsDescription: "View and manage inspection reports",
+
+aiAnalysis: "AI Analysis",
+aiAnalysisDescription: "Future intelligence and risk analysis",
+
+syncStatus: "Synchronization Status",
+syncStatusDescription: "Monitor CAMCIS data synchronization",
+
+profileDescription: "Officer account information",
+
+};
+
+
+export default en;const fr = {
+
+
+    // Authentication
+
+    loginTitle:
+        "Bienvenue",
+
+    loginSubtitle:
+        "Connectez-vous avec votre compte DouaneNav autorisé.",
+
+    email:
+        "Email",
+
+    password:
+        "Mot de passe",
+
+    forgotPassword:
+        "Mot de passe oublié ?",
+
+    signIn:
+        "Se connecter",
+
+    signingIn:
+        "Connexion...",
+
+
+
+
+    // Navigation
+
+    dashboard:
+        "Tableau de bord",
+
+    declarations:
+        "Déclarations",
+
+    inspection:
+        "Inspection",
+
+    reports:
+        "Rapports",
+
+    profile:
+        "Profil",
+
+    more:
+        "Plus",
+
+
+
+
+    // Language
+
+    language:
+        "Langue",
+
+    french:
+        "Français",
+
+    english:
+        "Anglais",
+
+
+
+
+    // Dashboard
+
+    welcome:
+        "Bienvenue",
+
+    customsOfficer:
+        "Agent des douanes",
+
+    activeAlerts:
+        "ALERTES ACTIVES",
+
+    noActiveAlerts:
+        "Aucune alerte active.",
+
+    todaysOperations:
+        "OPÉRATIONS DU JOUR",
+
+    todaysDeclarations:
+        "Déclarations du jour",
+
+    pendingInspections:
+        "Inspections en attente",
+
+    completedInspections:
+        "Inspections terminées",
+
+    pendingSynchronizations:
+        "Synchronisations en attente",
+
+    recentInspections:
+        "INSPECTIONS RÉCENTES",
+
+    noRecentInspections:
+        "Aucune inspection récente.",
+
+    commonDestinations:
+        "DESTINATIONS COURANTES",
+
+    declarationsCount:
+        "déclarations",
+
+    inspectionStatistics:
+        "STATISTIQUES D'INSPECTION",
+
+    total:
+        "Total",
+
+    completed:
+        "Terminées",
+
+    pending:
+        "En attente",
+
+    quickActions:
+        "ACTIONS RAPIDES",
+
+    searchDeclarations:
+        "Rechercher des déclarations",
+
+    moreModules:
+        "Plus de modules",
+
+
+
+
+    // General
+
+    unknown:
+        "Inconnu",
+
+    notAvailable:
+        "Non disponible",
+
+    status:
+        "Statut",
+
+    active:
+        "Actif",
+
+
+
+
+    // Profile
+
+    officerAccountInformation:
+        "Informations du compte agent",
+
+    officer:
+        "Agent",
+
+    permissions:
+        "Permissions",
+
+    logout:
+        "Déconnexion",
+
+
+
+
+    // Destination Map
+
+    destinationVerification:
+        "Vérification de la destination",
+
+    destinationVerificationSubtitle:
+        "Visualisation de la destination déclarée de la cargaison",
+
+    destinationInformation:
+        "INFORMATIONS SUR LA DESTINATION",
+
+    declaration:
+        "Déclaration",
+
+    city:
+        "Ville",
+
+    address:
+        "Adresse",
+
+    cargoDestination:
+        "Destination de la cargaison",
+
+    declaredDestination:
+        "Destination déclarée",
+
+
+
+
+    // Declaration Details
+
+    declarationDetails:
+        "Détails de la déclaration",
+
+    cargoVerificationInformation:
+        "Informations de vérification de la cargaison",
+
+    declarationNumber:
+        "Numéro de déclaration",
+
+    importerInformation:
+        "INFORMATIONS SUR L'IMPORTATEUR",
+
+    name:
+        "Nom",
+
+    country:
+        "Pays",
+
+    cargoInformation:
+        "INFORMATIONS SUR LA CARGAISON",
+
+    goods:
+        "Marchandises",
+
+    category:
+        "Catégorie",
+
+    quantity:
+        "Quantité",
+
+    transportInformation:
+        "INFORMATIONS SUR LE TRANSPORT",
+
+    truck:
+        "Plaque du camion",
+
+    driver:
+        "Chauffeur",
+
+    destination:
+        "Destination",
+
+    location:
+        "Localisation",
+
+    currentStatus:
+        "Statut actuel",
+
+    unknownStatus:
+        "Statut inconnu",
+
+    viewDestinationMap:
+        "Vérifier la destination sur la carte",
+
+    runAIAnalysis:
+        "Lancer l'analyse IA",
+
+    startInspection:
+        "Commencer l'inspection",
+
+
+
+
+    // Inspection
+
+    inspectionModule:
+        "Module d'inspection",
+
+    inspectionSubtitle:
+        "Gestion des inspections douanières terrain",
+
+    inspectionDetails:
+        "DÉTAILS DE L'INSPECTION",
+
+    declarationNumberPlaceholder:
+        "Numéro de déclaration",
+
+    truckPlatePlaceholder:
+        "Numéro de plaque du camion",
+
+    inspectionStatus:
+        "STATUT DE L'INSPECTION",
+
+    inProgress:
+        "En cours",
+
+    officerNotes:
+        "NOTES DE L'AGENT",
+
+    inspectionComments:
+        "Commentaires d'inspection",
+
+    attachments:
+        "PIÈCES JOINTES",
+
+    captureEvidencePhoto:
+        "Capturer une photo de preuve",
+
+    selectPhoto:
+        "Sélectionner une photo",
+
+    attachedPhotos:
+        "Photos jointes",
+
+    submitInspectionReport:
+        "Soumettre le rapport d'inspection",
+
+    inspectionHistory:
+        "HISTORIQUE DES INSPECTIONS",
+
+    noInspectionsAvailable:
+        "Aucune inspection disponible",
+
+
+
+
+    // Reports
+
+    inspectionReports:
+        "Rapports d'inspection",
+
+    reportsSubtitle:
+        "Activités d'inspection et dossiers de vérification douanière",
+
+    reportSummary:
+        "RÉSUMÉ DES RAPPORTS",
+
+    totalReports:
+        "Total des rapports",
+
+    exportReports:
+        "EXPORTER LES RAPPORTS",
+
+    generateReports:
+        "Générer des rapports douaniers officiels",
+
+    exportPDF:
+        "Exporter PDF",
+
+    exportExcel:
+        "Exporter Excel",
+
+    exportCSV:
+        "Exporter CSV",
+
+    noReportsAvailable:
+        "Aucun rapport disponible",
+
+    inspectionResult:
+        "Résultat d'inspection",
+
+    aiRisk:
+        "Risque IA",
+
+    comments:
+        "Commentaires",
+
+    notAnalysed:
+        "Non analysé",
+
+
+
+
+    // AI Analysis
+
+    aiAnalysis:
+        "Analyse IA",
+
+    aiSubtitle:
+        "Assistance intelligente pour l'évaluation des risques douaniers",
+
+    declarationInformation:
+        "INFORMATIONS DE LA DÉCLARATION",
+
+    analysisType:
+        "Type d'analyse",
+
+    customsRiskAssessment:
+        "Évaluation des risques douaniers",
+
+    aiModuleStatus:
+        "STATUT DU MODULE IA",
+
+    cargoRiskScore:
+        "SCORE DE RISQUE DE LA CARGAISON",
+
+    riskLevel:
+        "Niveau de risque",
+
+    riskScore:
+        "Score de risque",
+
+    inspectionPriority:
+        "PRIORITÉ D'INSPECTION",
+
+    recommendedPriority:
+        "Priorité recommandée",
+
+    normalInspection:
+        "Inspection normale",
+
+    riskIndicators:
+        "INDICATEURS DE RISQUE",
+
+    aiRecommendation:
+        "RECOMMANDATION IA",
+
+    futureAIDevelopment:
+        "DÉVELOPPEMENT FUTUR DE L'IA",
+
+    plannedAICapabilities:
+        "Capacités IA prévues :",
+
+
+    documentOCR:
+        "Extraction OCR des documents",
+
+    invoiceVerification:
+        "Vérification des factures",
+
+    machineLearning:
+        "Prédiction des risques par apprentissage automatique",
+
+    map:
+        "Carte",
+        more: "Plus",
+
+additionalModules: "Modules supplémentaires",
+
+inspectionReports: "Rapports d'inspection",
+inspectionReportsDescription: "Consulter et gérer les rapports d'inspection",
+
+aiAnalysis: "Analyse IA",
+aiAnalysisDescription: "Intelligence future et analyse des risques",
+
+syncStatus: "État de synchronisation",
+syncStatusDescription: "Surveiller la synchronisation des données CAMCIS",
+
+profileDescription: "Informations du compte de l'agent",
+
+};
+
+
+export default fr;

@@ -1,0 +1,2807 @@
+import { createContext, useContext, useEffect, useState } from 'react';
+
+import {
+  loginUser,
+  getCurrentUser,
+  logoutUser
+} from '../api/authApi';
+
+
+const AuthContext = createContext();
+
+
+
+export const AuthProvider = ({ children }) => {
+
+  const [user, setUser] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+
+
+
+  useEffect(() => {
+
+    const restoreSession = async () => {
+
+      const token = localStorage.getItem('douanenav.token');
+
+
+      if (!token) {
+
+        setLoading(false);
+        return;
+
+      }
+
+
+      try {
+
+        const currentUser = await getCurrentUser(token);
+
+        setUser(currentUser);
+
+      } catch {
+
+        localStorage.removeItem('douanenav.token');
+
+      }
+
+
+      setLoading(false);
+
+    };
+
+
+    restoreSession();
+
+  }, []);
+
+
+
+
+  const login = async (email, password) => {
+
+    const data = await loginUser(email, password);
+
+
+    localStorage.setItem(
+      'douanenav.token',
+      data.token
+    );
+
+
+    setUser(data.user);
+
+
+    return data;
+
+  };
+
+
+
+
+  const logout = async () => {
+
+    const token = localStorage.getItem(
+      'douanenav.token'
+    );
+
+
+    if (token) {
+
+      await logoutUser(token);
+
+    }
+
+
+    localStorage.removeItem(
+      'douanenav.token'
+    );
+
+
+    setUser(null);
+
+  };
+
+
+
+  return (
+
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        logout
+      }}
+    >
+
+      {children}
+
+    </AuthContext.Provider>
+
+  );
+
+};
+
+
+
+export const useAuth = () => useContext(AuthContext);const API_URL =
+    "http://localhost:5000/api/auth";
+
+
+export const loginUser = async (
+    email,
+    password
+)=>{
+
+    const response =
+        await fetch(
+            `${API_URL}/login`,
+            {
+                method:"POST",
+
+                headers:{
+                    "Content-Type":
+                    "application/json"
+                },
+
+                body:JSON.stringify({
+                    email,
+                    password
+                })
+            }
+        );
+
+
+    const data =
+        await response.json();
+
+
+    if(!response.ok){
+
+        throw new Error(
+            data.error ||
+            "Login failed"
+        );
+
+    }
+
+
+    return data;
+
+};
+
+
+
+
+
+export const getCurrentUser = async(
+    token
+)=>{
+
+
+    const response =
+        await fetch(
+            `${API_URL}/me`,
+            {
+
+                headers:{
+                    Authorization:
+                    `Bearer ${token}`
+                }
+
+            }
+        );
+
+
+
+    const data =
+        await response.json();
+
+
+
+    if(!response.ok){
+
+        throw new Error(
+            data.error ||
+            "Session expired"
+        );
+
+    }
+
+
+
+    return data.user;
+
+
+};
+
+
+
+
+
+export const logoutUser = async(
+    token
+)=>{
+
+
+    await fetch(
+
+        `${API_URL}/logout`,
+
+        {
+
+            method:"POST",
+
+            headers:{
+                Authorization:
+                `Bearer ${token}`
+            }
+
+        }
+
+    );
+
+
+};const API_URL =
+    import.meta.env.VITE_API_URL;
+
+
+export const getDashboard = async()=>{
+
+
+    const token =
+        localStorage.getItem(
+            "douanenav.token"
+        );
+
+
+
+    const response =
+        await fetch(
+
+            `${API_URL}/dashboard`,
+
+            {
+
+                method:"GET",
+
+                headers:{
+
+                    Authorization:
+                    `Bearer ${token}`,
+
+                    "Content-Type":
+                    "application/json"
+
+                }
+
+            }
+
+        );
+
+
+
+    const data =
+        await response.json();
+
+
+
+    if(!response.ok){
+
+        throw new Error(
+
+            data.error ||
+            "Failed to fetch dashboard."
+
+        );
+
+    }
+
+
+
+    return data;
+
+};const API_URL = "https://douanenav-backend.onrender.com/api";
+
+
+export const getDeclarations = async () => {
+
+  const token =
+    localStorage.getItem("douanenav.token");
+
+
+  const response =
+    await fetch(
+      `${API_URL}/declarations`,
+      {
+        method: "GET",
+
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      "Failed to fetch declarations."
+    );
+
+  }
+
+
+  return await response.json();
+
+};
+
+
+
+
+export const searchDeclarations = async (query) => {
+
+  const token =
+    localStorage.getItem("douanenav.token");
+
+
+  const response =
+    await fetch(
+      `${API_URL}/declarations/search?q=${query}`,
+      {
+        method:"GET",
+
+        headers:{
+          "Authorization":`Bearer ${token}`,
+          "Content-Type":"application/json"
+        }
+      }
+    );
+
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      "Failed to search declarations."
+    );
+
+  }
+
+
+  return await response.json();
+
+};import {
+  Routes,
+  Route,
+  Navigate,
+  Outlet
+} from "react-router-dom";
+
+
+import { useAuth } from "./context/AuthContext.jsx";
+
+import SettingsPage from "./pages/SettingsPage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+
+import DashboardPage from "./pages/DashboardPage.jsx";
+import DeclarationsPage from "./pages/DeclarationsPage.jsx";
+import ReportsPage from "./pages/ReportsPage.jsx";
+import AuditLogsPage from "./pages/AuditLogsPage.jsx";
+import StatisticsPage from "./pages/StatisticsPage.jsx";
+import InspectionHistoryPage from "./pages/InspectionHistoryPage.jsx";
+import SynchronizationPage from "./pages/SynchronizationPage.jsx";
+import UsersPage from "./pages/UsersPage.jsx";
+import ConfigurationPage from "./pages/ConfigurationPage.jsx";
+
+
+import DashboardLayout from "./components/DashboardLayout.jsx";
+
+
+
+const ProtectedRoute = ({ children }) => {
+
+  const { user, loading } = useAuth();
+
+
+  if (loading) {
+
+    return (
+
+      <div>
+        Loading CustomsTrack AI...
+      </div>
+
+    );
+
+  }
+
+
+  if (!user) {
+
+    return <Navigate to="/login" />;
+
+  }
+
+
+  return children;
+
+};
+
+
+
+const ProtectedLayout = () => {
+
+  return (
+
+    <ProtectedRoute>
+
+      <DashboardLayout>
+
+        <Outlet />
+
+      </DashboardLayout>
+
+    </ProtectedRoute>
+
+  );
+
+};
+
+
+
+export default function App(){
+
+
+  return (
+
+      <Routes>
+
+
+        <Route
+
+          path="/login"
+
+          element={<LoginPage />}
+
+        />
+
+
+
+        <Route
+
+          element={<ProtectedLayout />}
+
+        >
+
+
+          <Route
+
+            path="/dashboard"
+
+            element={<DashboardPage />}
+
+          />
+
+
+
+          <Route
+
+            path="/declarations"
+
+            element={<DeclarationsPage />}
+
+          />
+
+
+
+          <Route
+
+            path="/reports"
+
+            element={<ReportsPage />}
+
+          />
+
+
+
+          <Route
+
+            path="/audit-logs"
+
+            element={<AuditLogsPage />}
+
+          />
+
+
+
+          <Route
+
+            path="/statistics"
+
+            element={<StatisticsPage />}
+
+          />
+
+
+
+          <Route
+
+            path="/inspections"
+
+            element={<InspectionHistoryPage />}
+
+          />
+
+
+
+          <Route
+
+            path="/synchronization"
+
+            element={<SynchronizationPage />}
+
+          />
+
+
+
+          <Route
+
+            path="/users"
+
+            element={<UsersPage />}
+
+          />
+
+
+
+          <Route
+
+            path="/configuration"
+
+            element={<ConfigurationPage />}
+
+          />
+
+        <Route
+
+            path="/settings"
+
+            element={<SettingsPage />}
+
+        />
+
+
+        </Route>
+
+
+
+        <Route
+
+          path="*"
+
+          element={<Navigate to="/dashboard" />}
+
+        />
+
+
+      </Routes>
+
+  );
+
+}import {
+    useEffect,
+    useState
+} from "react";
+
+
+import StatCard from "../components/StatCard.jsx";
+import InspectionTable from "../components/InspectionTable.jsx";
+import AlertCard from "../components/AlertCard.jsx";
+import SyncStatusCard from "../components/SyncStatusCard.jsx";
+
+
+import {
+    getDashboard
+} from "../api/dashboardApi.js";
+
+
+
+
+const DashboardPage = ()=>{
+
+
+    const [
+        dashboard,
+        setDashboard
+    ] = useState(null);
+
+
+
+    const [
+        loading,
+        setLoading
+    ] = useState(true);
+
+
+
+    const [
+        error,
+        setError
+    ] = useState("");
+
+
+
+
+
+    useEffect(()=>{
+
+
+        loadDashboard();
+
+
+    },[]);
+
+
+
+
+
+
+    const loadDashboard = async()=>{
+
+
+        try{
+
+
+            setLoading(true);
+
+
+            const data =
+                await getDashboard();
+
+
+
+            setDashboard(
+                data
+            );
+
+
+        }
+
+
+        catch(error){
+
+
+            console.log(
+                "Dashboard error:",
+                error.message
+            );
+
+
+            setError(
+                error.message
+            );
+
+
+        }
+
+
+        finally{
+
+
+            setLoading(false);
+
+
+        }
+
+
+    };
+
+
+
+
+
+
+
+    if(loading){
+
+
+        return (
+
+            <div className="card">
+
+                <p>
+                    Loading CustomsTrack AI dashboard...
+                </p>
+
+            </div>
+
+        );
+
+    }
+
+
+
+
+
+
+    if(error){
+
+
+        return (
+
+            <div className="card">
+
+                <h3>
+                    Dashboard unavailable
+                </h3>
+
+
+                <p className="muted">
+
+                    {error}
+
+                </p>
+
+
+            </div>
+
+        );
+
+    }
+
+
+
+
+
+
+
+
+    return (
+
+
+        <>
+
+
+
+            <section className="stats-grid">
+
+
+
+                <StatCard
+
+                    title="Today's Declarations"
+
+                    value={
+                        dashboard?.counts?.todayDeclarations
+                        ??
+                        0
+                    }
+
+                />
+
+
+
+
+
+                <StatCard
+
+                    title="Pending Inspections"
+
+                    value={
+                        dashboard?.counts?.pendingInspections
+                        ??
+                        0
+                    }
+
+                />
+
+
+
+
+
+                <StatCard
+
+                    title="Completed Inspections"
+
+                    value={
+                        dashboard?.counts?.completedInspections
+                        ??
+                        0
+                    }
+
+                />
+
+
+
+
+
+                <StatCard
+
+                    title="Pending Synchronizations"
+
+                    value={
+                        dashboard?.counts?.pendingSynchronizations
+                        ??
+                        0
+                    }
+
+                />
+
+
+
+            </section>
+
+
+
+
+
+
+
+
+
+            <section className="dashboard-row">
+
+
+
+                <div className="dashboard-left">
+
+
+
+                    <InspectionTable
+
+                        inspections={
+
+                            dashboard?.recentInspections
+                            ??
+                            []
+
+                        }
+
+                    />
+
+
+
+                </div>
+
+
+
+
+
+
+
+                <div className="dashboard-right">
+
+
+
+                    <AlertCard
+
+                        alerts={
+
+                            dashboard?.alerts
+                            ??
+                            []
+
+                        }
+
+                    />
+
+
+
+                </div>
+
+
+
+            </section>
+
+
+
+
+
+
+
+
+
+            <section className="dashboard-row">
+
+
+
+                <div className="dashboard-left">
+
+
+
+                    <SyncStatusCard
+
+
+                        synchronization={
+
+                            dashboard?.synchronization
+                            ??
+                            {}
+
+                        }
+
+
+                    />
+
+
+
+                </div>
+
+
+
+
+                <div className="dashboard-right">
+
+
+                    <div className="card">
+
+
+                        <h3>
+                            Declaration Statistics
+                        </h3>
+
+
+
+
+                        {
+
+                            dashboard?.declarationStatus?.map(
+
+                                (item,index)=>(
+
+
+                                    <div
+
+                                        key={index}
+
+                                        className="progress-row"
+
+                                    >
+
+
+
+                                        <span>
+
+                                            {
+                                                item.status
+                                            }
+
+                                        </span>
+
+
+
+
+
+                                        <div
+
+                                            className="progress-bar"
+
+                                        >
+
+                                            <span
+
+                                                style={{
+
+                                                    width:
+                                                    `${item.value}%`
+
+                                                }}
+
+                                            />
+
+                                        </div>
+
+
+
+                                    </div>
+
+
+                                )
+
+                            )
+
+                        }
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+            </section>
+
+
+
+
+
+
+        </>
+
+
+    );
+
+
+};
+
+
+
+
+export default DashboardPage;import { useEffect, useState } from "react";
+import { getDeclarations, searchDeclarations } from "../api/declarationApi";
+
+
+const DeclarationsPage = () => {
+
+
+  const [declarations, setDeclarations] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+
+  const [search, setSearch] = useState("");
+
+  const loadDeclarations = async () => {
+
+    try {
+
+      const data =
+        await getDeclarations();
+
+
+      setDeclarations(data);
+
+    }
+
+    catch(error) {
+
+      console.error(
+        error.message
+      );
+
+    }
+
+    finally {
+
+      setLoading(false);
+
+    }
+
+  };
+
+  useEffect(() => {
+
+    loadDeclarations();
+
+  }, []);
+
+  const handleSearch = async () => {
+
+    if (!search.trim()) {
+
+      loadDeclarations();
+
+      return;
+
+    }
+
+    try {
+
+      const data =
+        await searchDeclarations(search);
+
+      setDeclarations(data);
+
+    }
+
+    catch(error) {
+
+      console.error(
+        error.message
+      );
+
+    }
+
+
+  };
+
+  return (
+
+    <div>
+
+      <div className="card">
+
+        <div className="search-bar">
+
+          <input
+
+            value={search}
+
+            onChange={(e)=>
+              setSearch(e.target.value)
+            }
+
+            placeholder="
+              Search declaration, importer, destination...
+            "
+
+          />
+
+          <button
+
+            onClick={handleSearch}
+
+          >
+
+            Search
+
+          </button>
+
+
+        </div>
+
+
+      </div>
+
+
+      <div className="card">
+
+
+        {
+          loading ?
+
+          <p>
+            Loading declarations...
+          </p>
+
+          :
+
+          <table className="inspection-table">
+
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Declaration
+                </th>
+
+
+                <th>
+                  Importer
+                </th>
+
+
+                <th>
+                  Destination
+                </th>
+
+
+                <th>
+                  Status
+                </th>
+
+
+                <th>
+                  Truck
+                </th>
+
+
+              </tr>
+
+
+            </thead>
+
+            <tbody>
+
+
+            {
+              declarations.map(
+                (declaration)=>(
+
+
+                  <tr key={declaration._id}>
+
+
+                    <td>
+                      {declaration.declarationNumber}
+                    </td>
+
+
+                    <td>
+                      {declaration.importer.name}
+                    </td>
+
+
+                    <td>
+                      {
+                        declaration.destination.city
+                      }
+                    </td>
+
+
+                    <td>
+
+                      <span className="status pending">
+
+                        {
+                          declaration.status
+                        }
+
+                      </span>
+
+                    </td>
+
+
+                    <td>
+
+                      {
+                        declaration.transport.truckPlate
+                      }
+
+                    </td>
+
+
+                  </tr>
+
+
+                )
+
+              )
+            }
+
+
+            </tbody>
+
+
+
+          </table>
+
+        }
+
+
+      </div>
+
+
+    </div>
+
+  );
+
+};
+
+
+export default DeclarationsPage;import {
+    useEffect,
+    useState
+} from "react";
+
+
+const API_URL =
+    "https://douanenav-backend.onrender.com/api";
+
+
+const ReportsPage = ()=>{
+
+
+    const [
+        reports,
+        setReports
+    ] = useState(null);
+
+
+
+    const [
+        loading,
+        setLoading
+    ] = useState(true);
+
+
+
+    const token =
+        localStorage.getItem(
+            "douanenav.token"
+        );
+
+
+
+
+
+
+    useEffect(()=>{
+
+        loadReports();
+
+    },[]);
+
+
+
+
+
+
+
+    const loadReports = async()=>{
+
+
+        try{
+
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/reports`,
+
+                    {
+
+                        headers:{
+
+                            Authorization:
+                            `Bearer ${token}`,
+
+                            "Content-Type":
+                            "application/json"
+
+                        }
+
+                    }
+
+                );
+
+
+
+            const data =
+                await response.json();
+
+
+
+            if(!response.ok){
+
+                throw new Error(
+                    data.error ||
+                    "Failed to load reports"
+                );
+
+            }
+
+
+
+            setReports(data);
+
+
+
+        }
+
+        catch(error){
+
+
+            console.log(
+                "Reports error:",
+                error.message
+            );
+
+
+        }
+
+        finally{
+
+
+            setLoading(false);
+
+
+        }
+
+
+    };
+
+
+
+
+
+
+    if(loading){
+
+        return (
+
+            <p>
+                Loading reports...
+            </p>
+
+        );
+
+    }
+
+
+
+
+
+
+
+    return (
+
+        <div>
+
+
+
+            <section className="stats-grid">
+
+
+
+
+
+                <div className="card stat-card">
+
+
+                    <p className="card-label">
+
+                        Completed Inspections
+
+                    </p>
+
+
+
+                    <h2>
+
+                        {
+                            reports?.completedInspections
+                            ??
+                            0
+                        }
+
+                    </h2>
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+                <div className="card stat-card">
+
+
+                    <p className="card-label">
+
+                        Most Common Destination
+
+                    </p>
+
+
+
+                    <h2>
+
+                        {
+                            reports?.topDestination
+                            ??
+                            "N/A"
+                        }
+
+                    </h2>
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+                <div className="card stat-card">
+
+
+                    <p className="card-label">
+
+                        Monthly Reports
+
+                    </p>
+
+
+
+                    <h2>
+
+                        {
+                            reports?.monthlyReports
+                            ??
+                            0
+                        }
+
+                    </h2>
+
+
+
+                </div>
+
+
+
+
+            </section>
+
+
+
+
+
+
+
+
+            <section className="card">
+
+
+                <h3>
+                    Operational Reports
+                </h3>
+
+
+
+                <p className="muted">
+
+                    CustomsTrack AI reporting module.
+
+                </p>
+
+
+
+
+
+
+                {
+                    reports?.summary && (
+
+
+                        <p>
+
+                            {
+                                reports.summary
+                            }
+
+                        </p>
+
+
+                    )
+                }
+
+
+
+
+            </section>
+
+
+
+
+
+        </div>
+
+    );
+
+
+};
+
+
+
+export default ReportsPage;import {
+    useEffect,
+    useState
+} from "react";
+
+
+const API_URL =
+     "https://douanenav-backend.onrender.com/api";
+
+
+
+const UsersPage = ()=>{
+
+
+    const [
+        users,
+        setUsers
+    ] = useState([]);
+
+
+
+    const [
+        loading,
+        setLoading
+    ] = useState(true);
+
+
+
+    const token =
+        localStorage.getItem(
+            "douanenav.token"
+        );
+
+
+
+
+
+
+    useEffect(()=>{
+
+        loadUsers();
+
+    },[]);
+
+
+
+
+
+
+
+
+    const loadUsers = async()=>{
+
+
+        try{
+
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/users`,
+
+                    {
+
+                        headers:{
+
+                            Authorization:
+                            `Bearer ${token}`,
+
+                            "Content-Type":
+                            "application/json"
+
+                        }
+
+                    }
+
+                );
+
+
+
+            const data =
+                await response.json();
+
+
+
+            if(!response.ok){
+
+                throw new Error(
+                    data.error ||
+                    "Failed to load users"
+                );
+
+            }
+
+
+
+            setUsers(data);
+
+
+
+        }
+
+        catch(error){
+
+
+            console.log(
+                "Users error:",
+                error.message
+            );
+
+
+        }
+
+        finally{
+
+
+            setLoading(false);
+
+
+        }
+
+
+    };
+
+
+
+
+
+
+
+
+    if(loading){
+
+        return (
+
+            <div className="card">
+
+                <p>
+                    Loading users...
+                </p>
+
+            </div>
+
+        );
+
+    }
+
+
+
+
+
+
+
+
+
+    return (
+
+        <div>
+
+
+            <div className="card">
+
+
+                <h2>
+                    User Management
+                </h2>
+
+
+
+                <p className="muted">
+
+                    CustomsTrack AI authorized users.
+
+                </p>
+
+
+
+            </div>
+
+
+
+
+
+
+
+            <div className="card">
+
+
+                <table className="inspection-table">
+
+
+                    <thead>
+
+
+                        <tr>
+
+
+                            <th>
+                                Name
+                            </th>
+
+
+                            <th>
+                                Email
+                            </th>
+
+
+                            <th>
+                                Role
+                            </th>
+
+
+                            <th>
+                                Status
+                            </th>
+
+
+                        </tr>
+
+
+                    </thead>
+
+
+
+
+
+                    <tbody>
+
+
+
+                        {
+                            users.map(
+
+                                (user,index)=>(
+
+
+                                    <tr
+
+                                        key={
+                                            user._id ||
+                                            index
+                                        }
+
+                                    >
+
+
+
+                                        <td>
+
+                                            {
+                                                user.name
+                                            }
+
+                                        </td>
+
+
+
+
+                                        <td>
+
+                                            {
+                                                user.email
+                                            }
+
+                                        </td>
+
+
+
+
+                                        <td>
+
+                                            {
+                                                user.role
+                                            }
+
+                                        </td>
+
+
+
+
+                                        <td>
+
+
+                                            <span className="status pending">
+
+                                                {
+                                                    user.status ||
+                                                    "Active"
+                                                }
+
+                                            </span>
+
+
+                                        </td>
+
+
+
+
+                                    </tr>
+
+
+                                )
+
+                            )
+                        }
+
+
+
+                    </tbody>
+
+
+
+                </table>
+
+
+
+            </div>
+
+
+
+        </div>
+
+    );
+
+};
+
+
+
+export default UsersPage;import {
+    useEffect,
+    useState
+} from "react";
+
+
+
+const API_URL =
+     "https://douanenav-backend.onrender.com/api";
+
+
+
+const InspectionHistoryPage = ()=>{
+
+
+    const [
+        inspections,
+        setInspections
+    ] = useState([]);
+
+
+
+    const [
+        loading,
+        setLoading
+    ] = useState(true);
+
+
+
+    const token =
+        localStorage.getItem(
+            "douanenav.token"
+        );
+
+
+
+
+
+
+    useEffect(()=>{
+
+        loadInspections();
+
+    },[]);
+
+
+
+
+
+
+
+    const loadInspections = async()=>{
+
+
+        try{
+
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/inspections`,
+
+                    {
+
+                        headers:{
+
+                            Authorization:
+                            `Bearer ${token}`
+
+                        }
+
+                    }
+
+                );
+
+
+
+            const data =
+                await response.json();
+
+
+
+            setInspections(
+                data
+            );
+
+
+        }
+
+        catch(error){
+
+
+            console.log(
+                "Inspection history error:",
+                error.message
+            );
+
+
+            setInspections([]);
+
+
+        }
+
+        finally{
+
+
+            setLoading(false);
+
+
+        }
+
+
+    };
+
+
+
+
+
+
+
+    return (
+
+
+        <div>
+
+
+            <div className="card">
+
+
+                <h2>
+                    Inspection History
+                </h2>
+
+
+                <p className="muted">
+                    Inspection reports and history.
+                </p>
+
+
+
+            </div>
+
+
+
+
+
+
+
+            <div className="card">
+
+
+                {
+                    loading ?
+
+
+                    <p>
+                        Loading inspections...
+                    </p>
+
+
+                    :
+
+
+                    <table className="inspection-table">
+
+
+                        <thead>
+
+
+                            <tr>
+
+
+                                <th>
+                                    Declaration
+                                </th>
+
+
+                                <th>
+                                    Officer
+                                </th>
+
+
+                                <th>
+                                    Status
+                                </th>
+
+
+                                <th>
+                                    Location
+                                </th>
+
+
+                                <th>
+                                    Comments
+                                </th>
+
+
+                            </tr>
+
+
+                        </thead>
+
+
+
+
+                        <tbody>
+
+
+                            {
+                                inspections.map(
+
+                                    (item,index)=>(
+
+
+                                        <tr
+
+                                            key={
+                                                item._id ||
+                                                index
+                                            }
+
+                                        >
+
+
+                                            <td>
+
+                                                {
+                                                    item.declarationNumber
+                                                }
+
+                                            </td>
+
+
+
+                                            <td>
+
+                                                {
+                                                    item.officer ||
+                                                    "Not assigned"
+                                                }
+
+                                            </td>
+
+
+
+                                            <td>
+
+                                                <span className="status pending">
+
+                                                    {
+                                                        item.status
+                                                    }
+
+                                                </span>
+
+                                            </td>
+
+
+
+
+                                            <td>
+
+                                                {
+                                                    item.location ||
+                                                    "Unknown"
+                                                }
+
+                                            </td>
+
+
+
+
+                                            <td>
+
+                                                {
+                                                    item.comments ||
+                                                    "None"
+                                                }
+
+                                            </td>
+
+
+
+                                        </tr>
+
+
+                                    )
+
+                                )
+                            }
+
+
+
+                        </tbody>
+
+
+
+                    </table>
+
+
+                }
+
+
+            </div>
+
+
+        </div>
+
+
+    );
+
+
+};
+
+
+
+export default InspectionHistoryPage;import {
+    useEffect,
+    useState
+} from "react";
+
+
+import {
+    getDashboard
+} from "../api/dashboardApi";
+
+
+
+const StatisticsPage = () => {
+
+
+    const [
+        statistics,
+        setStatistics
+    ] = useState(null);
+
+
+
+    const [
+        loading,
+        setLoading
+    ] = useState(true);
+
+
+
+
+
+    useEffect(()=>{
+
+        loadStatistics();
+
+    },[]);
+
+
+
+
+
+
+
+    const loadStatistics = async()=>{
+
+
+        try{
+
+
+            const data =
+                await getDashboard();
+
+
+
+            setStatistics(data);
+
+
+
+        }
+
+        catch(error){
+
+
+            console.log(
+                "Statistics error:",
+                error.message
+            );
+
+
+        }
+
+        finally{
+
+
+            setLoading(false);
+
+
+        }
+
+
+    };
+
+
+
+
+
+
+
+    if(loading){
+
+        return (
+
+            <div className="card">
+
+                <p>
+                    Loading statistics...
+                </p>
+
+            </div>
+
+        );
+
+    }
+
+
+
+
+
+
+
+
+    return (
+
+        <div>
+
+
+
+
+
+
+            <section className="stats-grid">
+
+
+
+
+
+
+                <div className="card stat-card">
+
+
+                    <p className="card-label">
+
+                        Today's Declarations
+
+                    </p>
+
+
+
+                    <h2>
+
+                        {
+                            statistics?.counts?.todayDeclarations
+                            ??
+                            0
+                        }
+
+                    </h2>
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+                <div className="card stat-card">
+
+
+                    <p className="card-label">
+
+                        Total Inspections
+
+                    </p>
+
+
+
+                    <h2>
+
+                        {
+                            statistics?.inspectionStatistics?.total
+                            ??
+                            0
+                        }
+
+                    </h2>
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+                <div className="card stat-card">
+
+
+                    <p className="card-label">
+
+                        Completed Inspections
+
+                    </p>
+
+
+
+                    <h2>
+
+                        {
+                            statistics?.inspectionStatistics?.completed
+                            ??
+                            0
+                        }
+
+                    </h2>
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+                <div className="card stat-card">
+
+
+                    <p className="card-label">
+
+                        Pending Synchronizations
+
+                    </p>
+
+
+
+                    <h2>
+
+                        {
+                            statistics?.counts?.pendingSynchronizations
+                            ??
+                            0
+                        }
+
+                    </h2>
+
+
+                </div>
+
+
+
+
+
+            </section>
+
+
+
+
+
+
+
+
+
+            <section className="card">
+
+
+                <h3>
+                    Destination Statistics
+                </h3>
+
+
+
+
+
+                {
+                    statistics?.destinationStats?.map(
+
+                        (item,index)=>(
+
+
+                            <div
+
+                                key={index}
+
+                                className="progress-row"
+
+                            >
+
+
+
+                                <span>
+
+                                    {item.city}
+
+                                </span>
+
+
+
+
+
+                                <div className="progress-bar">
+
+
+                                    <span
+
+                                        style={{
+
+                                            width:
+                                            `${item.total}%`
+
+                                        }}
+
+                                    />
+
+                                </div>
+
+
+
+
+
+                                <span>
+
+                                    {item.total}
+
+                                </span>
+
+
+
+
+                            </div>
+
+
+                        )
+
+                    )
+                }
+
+
+
+
+
+            </section>
+
+
+
+
+
+
+
+
+
+            <section className="card">
+
+
+                <h3>
+                    Inspection Statistics
+                </h3>
+
+
+
+
+                <p>
+
+                    Total:
+                    {" "}
+                    {
+                        statistics?.inspectionStatistics?.total
+                        ??
+                        0
+                    }
+
+                </p>
+
+
+
+
+                <p>
+
+                    Completed:
+                    {" "}
+                    {
+                        statistics?.inspectionStatistics?.completed
+                        ??
+                        0
+                    }
+
+                </p>
+
+
+
+
+                <p>
+
+                    Pending:
+                    {" "}
+                    {
+                        statistics?.inspectionStatistics?.pending
+                        ??
+                        0
+                    }
+
+                </p>
+
+
+
+
+            </section>
+
+
+
+
+
+        </div>
+
+    );
+
+};
+
+
+
+export default StatisticsPage;import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
+
+const Sidebar = () => {
+
+  const { logout } = useAuth();
+
+  const navigate = useNavigate();
+
+  const menus = [
+
+    {
+      name: "Dashboard",
+      path: "/dashboard"
+    },
+
+    {
+      name: "Declarations",
+      path: "/declarations"
+    },
+
+    {
+      name: "Reports",
+      path: "/reports"
+    },
+
+    {
+      name: "Inspection Monitoring",
+      path: "/inspections"
+    },
+
+    {
+      name: "Synchronization",
+      path: "/synchronization"
+    },
+
+    {
+      name: "Users",
+      path: "/users"
+    },
+
+    {
+      name: "Configuration",
+      path: "/configuration"
+    },
+
+    {
+      name: "Audit Logs",
+      path: "/audit-logs"
+    }
+
+  ];
+
+  const handleLogout = async () => {
+
+    await logout();
+
+    navigate("/login");
+
+  };
+
+  return (
+
+    <aside className="sidebar">
+
+      <h2 className="sidebar-title">
+        DouaneNav
+      </h2>
+
+      <div className="language-toggle">
+
+        <button>
+          FR
+        </button>
+
+        <button>
+          EN
+        </button>
+
+      </div>
+
+      <nav>
+
+        {
+          menus.map((menu) => (
+
+            <NavLink
+
+              key={menu.path}
+
+              to={menu.path}
+
+              className={({ isActive }) =>
+
+                isActive
+
+                  ?
+
+                  "sidebar-link active"
+
+                  :
+
+                  "sidebar-link"
+
+              }
+
+            >
+
+              {menu.name}
+
+            </NavLink>
+
+          ))
+        }
+
+      </nav>
+
+      <div className="sidebar-bottom">
+
+        <button
+
+          className="settings-link"
+
+          onClick={() => navigate("/settings")}
+
+        >
+
+          <i className="fa-solid fa-gear"></i>
+
+        </button>
+
+        <button
+
+          className="logout-button"
+
+          onClick={handleLogout}
+
+        >
+
+          Logout
+
+        </button>
+
+      </div>
+
+    </aside>
+
+  );
+
+};
+
+export default Sidebar;
