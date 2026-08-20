@@ -125,7 +125,7 @@ export default function LoginPage() {
           <p className="muted">
 
             Sign in with your authorized
-            CustomsTrack AI account.
+            DouaneNav account.
 
           </p>
 

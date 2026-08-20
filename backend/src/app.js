@@ -26,9 +26,11 @@ import { createSynchronizationService } from './application/synchronization/sync
 import { createSynchronizationController } from './interfaces/http/synchronizationController.js';
 
 import { getMongoDatabase } from './infrastructure/database/mongo.js';
-import { UserRepository } from "./infrastructure/persistence/userRepository.js";
-import { createUserService } from "./application/user/userService.js";
-import { createUserController } from "./interfaces/http/userController.js";
+
+import { UserRepository } from './infrastructure/persistence/userRepository.js';
+import { createUserService } from './application/user/userService.js';
+import { createUserController } from './interfaces/http/userController.js';
+
 
 const json = (
     res,
@@ -49,6 +51,8 @@ const json = (
     );
 
 };
+
+
 const readBody = async (req) => {
 
     let value = "";
@@ -64,58 +68,20 @@ const readBody = async (req) => {
 
     }
 
-
     console.log(
         "RAW BODY:",
         value
     );
 
-
-    if(!value){
+    if (!value) {
 
         return {};
 
     }
 
-
     return JSON.parse(value);
 
 };
-
-// const readBody = async (
-//     req
-// ) => {
-
-//     let value = "";
-
-//     for await(
-//         const chunk of req
-//     ){
-
-//         value += chunk;
-
-//         if(
-//             value.length > 100000
-//         ){
-
-//             throw new Error(
-//                 "Request body is too large."
-//             );
-
-//         }
-
-//     }
-
-//     if(!value){
-
-//         return {};
-
-//     }
-
-//     return JSON.parse(value);
-
-// };
-
 
 
 export const createApp = async () => {
@@ -124,10 +90,15 @@ export const createApp = async () => {
         getMongoDatabase();
 
 
+    /*
+     * AUTH
+     */
+
     const authRepository =
         new MongoAuthRepository(
             database
         );
+
 
     await authRepository.initialize();
 
@@ -144,21 +115,33 @@ export const createApp = async () => {
             authService
         );
 
+
+    /*
+     * USERS
+     */
+
     const userRepository =
-    new UserRepository(
-        database
-    );
+        new UserRepository(
+            database
+        );
+
 
     const userService =
         createUserService(
             userRepository
         );
 
+
     const user =
         createUserController(
             authService,
             userService
         );
+
+
+    /*
+     * DASHBOARD
+     */
 
     const dashboardRepository =
         new DashboardRepository();
@@ -177,6 +160,10 @@ export const createApp = async () => {
         );
 
 
+    /*
+     * DECLARATIONS
+     */
+
     const declarationRepository =
         new DeclarationRepository();
 
@@ -193,6 +180,10 @@ export const createApp = async () => {
             declarationService
         );
 
+
+    /*
+     * INSPECTIONS
+     */
 
     const inspectionRepository =
         new InspectionRepository();
@@ -211,6 +202,10 @@ export const createApp = async () => {
         );
 
 
+    /*
+     * REPORTS
+     */
+
     const reportService =
         createReportService();
 
@@ -221,6 +216,10 @@ export const createApp = async () => {
             reportService
         );
 
+
+    /*
+     * AI ANALYSIS
+     */
 
     const aiAnalysisRepository =
         new AIAnalysisRepository();
@@ -239,6 +238,10 @@ export const createApp = async () => {
         );
 
 
+    /*
+     * SYNCHRONIZATION
+     */
+
     const synchronizationRepository =
         new SynchronizationRepository();
 
@@ -256,6 +259,10 @@ export const createApp = async () => {
         );
 
 
+    /*
+     * HTTP APP
+     */
+
     return async (
         req,
         res
@@ -266,10 +273,12 @@ export const createApp = async () => {
             process.env.CORS_ORIGIN || "*"
         );
 
+
         res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Authorization, Content-Type, X-Client-Platform"
-);
+            "Access-Control-Allow-Headers",
+            "Authorization, Content-Type, X-Client-Platform"
+        );
+
 
         res.setHeader(
             "Access-Control-Allow-Methods",
@@ -277,9 +286,9 @@ export const createApp = async () => {
         );
 
 
-        if(
+        if (
             req.method === "OPTIONS"
-        ){
+        ) {
 
             return res
                 .writeHead(204)
@@ -290,27 +299,35 @@ export const createApp = async () => {
 
         try {
 
-            if(
+            /*
+             * HEALTH
+             */
+
+            if (
                 req.method === "GET" &&
                 req.url === "/api/health"
-            ){
+            ) {
 
                 return json(
                     res,
                     200,
                     {
-                        status:"ok",
-                        database:"mongodb"
+                        status: "ok",
+                        database: "mongodb"
                     }
                 );
 
             }
 
 
-            if(
+            /*
+             * AUTH
+             */
+
+            if (
                 req.method === "POST" &&
                 req.url === "/api/auth/login"
-            ){
+            ) {
 
                 return auth.login(
                     req,
@@ -321,10 +338,10 @@ export const createApp = async () => {
             }
 
 
-            if(
+            if (
                 req.method === "POST" &&
                 req.url === "/api/auth/logout"
-            ){
+            ) {
 
                 return auth.logout(
                     req,
@@ -334,10 +351,10 @@ export const createApp = async () => {
             }
 
 
-            if(
+            if (
                 req.method === "GET" &&
                 req.url === "/api/auth/me"
-            ){
+            ) {
 
                 return auth.me(
                     req,
@@ -347,10 +364,14 @@ export const createApp = async () => {
             }
 
 
-            if(
+            /*
+             * DASHBOARD
+             */
+
+            if (
                 req.method === "GET" &&
                 req.url === "/api/dashboard"
-            ){
+            ) {
 
                 return dashboard.get(
                     req,
@@ -360,10 +381,14 @@ export const createApp = async () => {
             }
 
 
-            if(
+            /*
+             * DECLARATIONS
+             */
+
+            if (
                 req.method === "GET" &&
                 req.url === "/api/declarations"
-            ){
+            ) {
 
                 return declaration.getAll(
                     req,
@@ -373,10 +398,12 @@ export const createApp = async () => {
             }
 
 
-            if(
+            if (
                 req.method === "GET" &&
-                req.url.startsWith("/api/declarations/search")
-            ){
+                req.url.startsWith(
+                    "/api/declarations/search"
+                )
+            ) {
 
                 const url =
                     new URL(
@@ -394,10 +421,12 @@ export const createApp = async () => {
             }
 
 
-            if(
+            if (
                 req.method === "GET" &&
-                req.url.startsWith("/api/declarations/")
-            ){
+                req.url.startsWith(
+                    "/api/declarations/"
+                )
+            ) {
 
                 const id =
                     req.url.split("/")[3];
@@ -412,10 +441,14 @@ export const createApp = async () => {
             }
 
 
-            if(
+            /*
+             * INSPECTIONS
+             */
+
+            if (
                 req.method === "GET" &&
                 req.url === "/api/inspections"
-            ){
+            ) {
 
                 return inspection.getAll(
                     req,
@@ -425,10 +458,12 @@ export const createApp = async () => {
             }
 
 
-            if(
+            if (
                 req.method === "GET" &&
-                req.url.startsWith("/api/inspections/")
-            ){
+                req.url.startsWith(
+                    "/api/inspections/"
+                )
+            ) {
 
                 const id =
                     req.url.split("/")[3];
@@ -443,10 +478,10 @@ export const createApp = async () => {
             }
 
 
-            if(
+            if (
                 req.method === "POST" &&
                 req.url === "/api/inspections"
-            ){
+            ) {
 
                 return inspection.create(
                     req,
@@ -457,10 +492,12 @@ export const createApp = async () => {
             }
 
 
-            if(
+            if (
                 req.method === "PUT" &&
-                req.url.startsWith("/api/inspections/")
-            ){
+                req.url.startsWith(
+                    "/api/inspections/"
+                )
+            ) {
 
                 const id =
                     req.url.split("/")[3];
@@ -476,10 +513,14 @@ export const createApp = async () => {
             }
 
 
-            if(
+            /*
+             * REPORTS
+             */
+
+            if (
                 req.method === "GET" &&
                 req.url === "/api/reports"
-            ){
+            ) {
 
                 return report.getAll(
                     req,
@@ -489,10 +530,12 @@ export const createApp = async () => {
             }
 
 
-            if(
+            if (
                 req.method === "GET" &&
-                req.url.startsWith("/api/reports/")
-            ){
+                req.url.startsWith(
+                    "/api/reports/"
+                )
+            ) {
 
                 const id =
                     req.url.split("/")[3];
@@ -507,10 +550,10 @@ export const createApp = async () => {
             }
 
 
-            if(
+            if (
                 req.method === "POST" &&
                 req.url === "/api/reports"
-            ){
+            ) {
 
                 return report.create(
                     req,
@@ -521,10 +564,16 @@ export const createApp = async () => {
             }
 
 
-            if(
+            /*
+             * AI ANALYSIS
+             */
+
+            if (
                 req.method === "GET" &&
-                req.url.startsWith("/api/ai-analysis/")
-            ){
+                req.url.startsWith(
+                    "/api/ai-analysis/"
+                )
+            ) {
 
                 const id =
                     req.url.split("/")[3];
@@ -539,10 +588,10 @@ export const createApp = async () => {
             }
 
 
-            if(
+            if (
                 req.method === "POST" &&
                 req.url === "/api/ai-analysis"
-            ){
+            ) {
 
                 return aiAnalysis.create(
                     req,
@@ -553,10 +602,14 @@ export const createApp = async () => {
             }
 
 
-            if(
+            /*
+             * SYNCHRONIZATION
+             */
+
+            if (
                 req.method === "GET" &&
                 req.url === "/api/synchronization/status"
-            ){
+            ) {
 
                 return synchronization.getStatus(
                     req,
@@ -566,10 +619,10 @@ export const createApp = async () => {
             }
 
 
-            if(
+            if (
                 req.method === "POST" &&
                 req.url === "/api/synchronization"
-            ){
+            ) {
 
                 return synchronization.synchronize(
                     req,
@@ -578,10 +631,15 @@ export const createApp = async () => {
 
             }
 
-            if(
+
+            /*
+             * USERS
+             */
+
+            if (
                 req.method === "GET" &&
                 req.url === "/api/users"
-            ){
+            ) {
 
                 return user.getAll(
                     req,
@@ -589,16 +647,37 @@ export const createApp = async () => {
                 );
 
             }
+
+
+            if (
+                req.method === "POST" &&
+                req.url === "/api/users/officers"
+            ) {
+
+                return user.createOfficer(
+                    req,
+                    res,
+                    await readBody(req)
+                );
+
+            }
+
+
+            /*
+             * UNKNOWN ROUTE
+             */
+
             return json(
                 res,
                 404,
                 {
-                    error:"Route not found."
+                    error: "Route not found."
                 }
             );
 
 
-        } catch(error){
+        }
+        catch (error) {
 
             return json(
                 res,

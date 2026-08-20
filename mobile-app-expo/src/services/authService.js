@@ -6,13 +6,24 @@ export const login = async (
     password
 ) => {
 
- console.log("LOGIN REQUEST:", email, password);
+    console.log(
+        "LOGIN REQUEST:",
+        email
+    );
+
+
     const response =
         await api.post(
             "/auth/login",
             {
                 email,
                 password
+            },
+            {
+                headers: {
+                    "X-Client-Platform":
+                        "mobile"
+                }
             }
         );
 
@@ -22,10 +33,7 @@ export const login = async (
 };
 
 
-
-
 export const getCurrentUser = async () => {
-
 
     const response =
         await api.get(
@@ -38,10 +46,7 @@ export const getCurrentUser = async () => {
 };
 
 
-
-
 export const logout = async () => {
-
 
     const response =
         await api.post(
