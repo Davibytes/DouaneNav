@@ -12,7 +12,6 @@ const reply = (
         }
     );
 
-
     res.end(
         JSON.stringify(payload)
     );
@@ -20,33 +19,25 @@ const reply = (
 };
 
 
-
 export const createInspectionController = (
     authService,
     inspectionService
 ) => ({
-
-
 
     async getAll(
         req,
         res
     ){
 
-
         const { user } =
             await authService.authenticate(
                 req.headers.authorization
             );
 
-
-
         const inspections =
             await inspectionService.getInspections(
                 user
             );
-
-
 
         return reply(
             res,
@@ -57,32 +48,22 @@ export const createInspectionController = (
     },
 
 
-
-
-
-
-
     async getById(
         req,
         res,
         id
     ){
 
-
         const { user } =
             await authService.authenticate(
                 req.headers.authorization
             );
-
-
 
         const inspection =
             await inspectionService.getInspectionById(
                 user,
                 id
             );
-
-
 
         return reply(
             res,
@@ -93,37 +74,28 @@ export const createInspectionController = (
     },
 
 
-
-
-
-
-
-
-
     async create(
         req,
         res,
         body
     ){
 
-
         const { user } =
             await authService.authenticate(
                 req.headers.authorization
             );
 
-
-
         const inspectionData = {
 
             ...body,
+
+            officerId:
+                user.id,
 
             officer:
                 user.name
 
         };
-
-
 
         const inspection =
             await inspectionService.createInspection(
@@ -131,23 +103,13 @@ export const createInspectionController = (
                 inspectionData
             );
 
-
-
         return reply(
             res,
             201,
             inspection
         );
 
-
     },
-
-
-
-
-
-
-
 
 
     async updateStatus(
@@ -157,13 +119,10 @@ export const createInspectionController = (
         body
     ){
 
-
         const { user } =
             await authService.authenticate(
                 req.headers.authorization
             );
-
-
 
         const result =
             await inspectionService.updateStatus(
@@ -172,17 +131,12 @@ export const createInspectionController = (
                 body.status
             );
 
-
-
         return reply(
             res,
             200,
             result
         );
 
-
     }
-
-
 
 });
