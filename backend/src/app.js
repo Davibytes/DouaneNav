@@ -268,10 +268,18 @@ export const createApp = async () => {
         res
     ) => {
 
-        res.setHeader(
-            "Access-Control-Allow-Origin",
-            process.env.CORS_ORIGIN || "*"
-        );
+        const origin =
+            req.headers.origin;
+
+
+        if (origin) {
+
+            res.setHeader(
+                "Access-Control-Allow-Origin",
+                origin
+            );
+
+        }
 
 
         res.setHeader(
@@ -283,6 +291,12 @@ export const createApp = async () => {
         res.setHeader(
             "Access-Control-Allow-Methods",
             "GET, POST, PUT, OPTIONS"
+        );
+
+
+        res.setHeader(
+            "Vary",
+            "Origin"
         );
 
 
@@ -671,10 +685,10 @@ export const createApp = async () => {
                 res,
                 404,
                 {
-                    error: "Route not found."
+                    error:
+                        "Route not found."
                 }
             );
-
 
         }
         catch (error) {
