@@ -100,14 +100,6 @@ function AppNavigator(){
 
         >
 
-
-        <Stack.Screen
-            name="ForgotPassword"
-
-            component={ForgotPasswordScreen}
-        />
-
-
         {
             user ? (
 
@@ -219,14 +211,19 @@ function AppNavigator(){
 
             ) : (
 
+                <>
+                    <Stack.Screen
+                        name="Login"
 
-                <Stack.Screen
+                        component={LoginScreen}
+                    />
 
-                    name="Login"
+                    <Stack.Screen
+                        name="ForgotPassword"
 
-                    component={LoginScreen}
-
-                />
+                        component={ForgotPasswordScreen}
+                    />
+                </>
 
 
             )

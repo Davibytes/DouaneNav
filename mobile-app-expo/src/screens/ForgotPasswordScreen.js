@@ -83,7 +83,7 @@ export default function ForgotPasswordScreen({
                     }
 
                     onPress={() =>
-                        navigation.goBack()
+                        navigation.navigate("Login")
                     }
 
                 >
