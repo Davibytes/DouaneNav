@@ -58,6 +58,8 @@ const fr = {
         "Inspections terminées",
     pendingSynchronizations:
         "Synchronisations en attente",
+    failed: "Échec",
+    lastSynchronization: "Dernière synchronisation",
     recentInspections:
         "Inspections récentes",
     activeAlerts:
@@ -145,6 +147,8 @@ const fr = {
         "Création...",
     officerCreated:
         "Compte agent créé avec succès.",
+    officerCreationFailed:
+        "Échec de la création de l'agent.",
     usersUnavailable:
         "Utilisateurs indisponibles",
 
@@ -204,8 +208,6 @@ const fr = {
     pending:
         "En attente",
     totalInspections: "Total des inspections",
-    destinationStatistics: "Statistiques des destinations",
-    inspectionStatistics: "Statistiques des inspections",
 
     // Commun
     customsOfficer:

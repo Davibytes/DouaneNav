@@ -55,6 +55,8 @@ const en = {
     completedInspections: "Completed Inspections",
     pendingSynchronizations:
         "Pending Synchronizations",
+    failed: "Failed",
+    lastSynchronization: "Last synchronization",
     recentInspections: "Recent Inspections",
     activeAlerts: "Active Alerts",
     declarationStatistics:
@@ -139,6 +141,8 @@ const en = {
         "Creating...",
     officerCreated:
         "Officer account created successfully.",
+    officerCreationFailed:
+        "Failed to create officer.",
     usersUnavailable:
         "Users unavailable",
 
@@ -198,8 +202,6 @@ const en = {
     pending:
         "Pending",
     totalInspections: "Total Inspections",
-    destinationStatistics: "Destination Statistics",
-    inspectionStatistics: "Inspection Statistics",
 
     // Common
     customsOfficer:

@@ -68,8 +68,8 @@ export default function ChangePasswordScreen({
             ) {
 
                 Alert.alert(
-                    "Missing information",
-                    "Please enter and confirm your new password."
+                    t.missingInformation,
+                    t.newPasswordRequired
                 );
 
                 return;
@@ -82,8 +82,8 @@ export default function ChangePasswordScreen({
             ) {
 
                 Alert.alert(
-                    "Invalid password",
-                    "Password must contain at least 8 characters."
+                    t.invalidPassword,
+                    t.passwordMinimumLength
                 );
 
                 return;
@@ -97,8 +97,8 @@ export default function ChangePasswordScreen({
             ) {
 
                 Alert.alert(
-                    "Passwords do not match",
-                    "Please make sure both passwords are identical."
+                    t.passwordsDoNotMatch,
+                    t.passwordsMustMatch
                 );
 
                 return;
@@ -114,12 +114,12 @@ export default function ChangePasswordScreen({
 
 
                 Alert.alert(
-                    "Success",
-                    "Your password has been changed successfully.",
+                    t.success,
+                    t.passwordChanged,
                     [
                         {
                             text:
-                                "Continue",
+                                t.continue,
 
                             onPress:
                                 () =>
@@ -134,10 +134,10 @@ export default function ChangePasswordScreen({
             catch (error) {
 
                 Alert.alert(
-                    "Error",
+                    t.error,
                     error.response?.data?.error ||
                     error.message ||
-                    "Unable to change password."
+                    t.unableToChangePassword
                 );
 
             }
@@ -182,7 +182,7 @@ export default function ChangePasswordScreen({
                         styles.loginTitle
                     }
                 >
-                    Change Password
+                    {t.changePasswordTitle}
                 </Text>
 
 
@@ -191,7 +191,7 @@ export default function ChangePasswordScreen({
                         styles.subtitle
                     }
                 >
-                    Please create a new password before continuing.
+                    {t.changePasswordSubtitle}
                 </Text>
 
 
@@ -200,7 +200,7 @@ export default function ChangePasswordScreen({
                         styles.input
                     }
                     placeholder={
-                        "New password"
+                        t.newPassword
                     }
                     placeholderTextColor={
                         colors.muted
@@ -220,7 +220,7 @@ export default function ChangePasswordScreen({
                         styles.input
                     }
                     placeholder={
-                        "Confirm new password"
+                        t.confirmNewPassword
                     }
                     placeholderTextColor={
                         colors.muted
@@ -258,8 +258,8 @@ export default function ChangePasswordScreen({
                     >
                         {
                             loading
-                                ? "Saving..."
-                                : "Change Password"
+                                ? t.saving
+                                : t.changePasswordTitle
                         }
                     </Text>
 

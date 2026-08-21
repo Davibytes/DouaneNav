@@ -1,22 +1,30 @@
+import { useLanguage } from "../context/LanguageContext.jsx";
+import en from "../i18n/en.js";
+import fr from "../i18n/fr.js";
+
+
 const InspectionTable = ({ inspections = [] }) => {
+
+  const { language } = useLanguage();
+  const t = language === "FR" ? fr : en;
 
   return (
     <div className="card">
 
       <div className="panel-title-row">
-        <h3>Recent Inspections</h3>
+        <h3>{t.recentInspections}</h3>
       </div>
 
       <table className="inspection-table">
 
         <thead>
           <tr>
-            <th>Declaration</th>
-            <th>Officer</th>
-            <th>Destination</th>
-            <th>Result</th>
-            <th>Status</th>
-            <th>Date</th>
+            <th>{t.declaration}</th>
+            <th>{t.officer}</th>
+            <th>{t.destination}</th>
+            <th>{t.result}</th>
+            <th>{t.status}</th>
+            <th>{t.date}</th>
           </tr>
         </thead>
 
@@ -29,7 +37,7 @@ const InspectionTable = ({ inspections = [] }) => {
                 colSpan="6"
                 style={{ textAlign: "center" }}
               >
-                No recent inspections.
+                {t.noRecentInspections}
               </td>
             </tr>
 
@@ -46,21 +54,21 @@ const InspectionTable = ({ inspections = [] }) => {
               >
 
                 <td>
-                  {inspection.declarationNumber || "N/A"}
+                  {inspection.declarationNumber || t.notAvailable}
                 </td>
 
                 <td>
-                  {inspection.officer || "N/A"}
+                  {inspection.officer || t.notAvailable}
                 </td>
 
                 <td>
-                  {inspection.location || "N/A"}
+                  {inspection.location || t.notAvailable}
                 </td>
 
                 <td>
                   {inspection.result ||
                     inspection.comments ||
-                    "N/A"}
+                    t.notAvailable}
                 </td>
 
                 <td>
@@ -73,7 +81,7 @@ const InspectionTable = ({ inspections = [] }) => {
                         : "status pending"
                     }
                   >
-                    {inspection.status || "Unknown"}
+                    {inspection.status || t.unknown}
                   </span>
 
                 </td>
@@ -83,7 +91,7 @@ const InspectionTable = ({ inspections = [] }) => {
                     ? new Date(
                         inspection.createdAt
                       ).toLocaleDateString()
-                    : "N/A"}
+                    : t.notAvailable}
                 </td>
 
               </tr>

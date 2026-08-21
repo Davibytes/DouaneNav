@@ -578,6 +578,57 @@ const en = {
     inspectionReportsUploaded:
         "Inspection reports uploaded",
 
+    loginFailed:
+        "Login failed",
+
+    emailPasswordRequired:
+        "Please enter your email and password.",
+
+    loginSuccessful:
+        "Login successful.",
+
+    unableToLogin:
+        "Unable to log in.",
+
+    changePasswordTitle:
+        "Change Password",
+
+    changePasswordSubtitle:
+        "Please create a new password before continuing.",
+
+    newPassword:
+        "New password",
+
+    confirmNewPassword:
+        "Confirm new password",
+
+    newPasswordRequired:
+        "Please enter and confirm your new password.",
+
+    invalidPassword:
+        "Invalid password",
+
+    passwordMinimumLength:
+        "Password must contain at least 8 characters.",
+
+    passwordsDoNotMatch:
+        "Passwords do not match",
+
+    passwordsMustMatch:
+        "Please make sure both passwords are identical.",
+
+    passwordChanged:
+        "Your password has been changed successfully.",
+
+    unableToChangePassword:
+        "Unable to change password.",
+
+    continue:
+        "Continue",
+
+    saving:
+        "Saving...",
+
     synchronizeNow:
         "Synchronize Now"
 

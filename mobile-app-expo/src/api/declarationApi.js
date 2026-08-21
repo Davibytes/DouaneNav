@@ -1,35 +1,11 @@
-import axios from "axios";
-
-
-const API_URL = "https://douanenav-backend.onrender.com/api";
-
-
-const getToken = async () => {
-
-    // temporary placeholder
-    // later we connect AsyncStorage
-
-    return null;
-
-};
+import api from "./axios.js";
 
 
 
 export const getDeclarations = async () => {
 
-    const token = await getToken();
-
-
-    const response = await axios.get(
-
-        `${API_URL}/declarations`,
-
-        {
-            headers:{
-                Authorization:`Bearer ${token}`
-            }
-        }
-
+    const response = await api.get(
+        "/declarations"
     );
 
 
@@ -43,20 +19,8 @@ export const getDeclarations = async () => {
 export const getDeclarationById = async (id) => {
 
 
-    const token = await getToken();
-
-
-
-    const response = await axios.get(
-
-        `${API_URL}/declarations/${id}`,
-
-        {
-            headers:{
-                Authorization:`Bearer ${token}`
-            }
-        }
-
+    const response = await api.get(
+        `/declarations/${id}`
     );
 
 
@@ -71,20 +35,13 @@ export const getDeclarationById = async (id) => {
 export const searchDeclarations = async (query) => {
 
 
-    const token = await getToken();
-
-
-
-    const response = await axios.get(
-
-        `${API_URL}/declarations/search?q=${query}`,
-
+    const response = await api.get(
+        "/declarations/search",
         {
-            headers:{
-                Authorization:`Bearer ${token}`
+            params: {
+                q: query
             }
         }
-
     );
 
 

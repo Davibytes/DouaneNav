@@ -68,8 +68,8 @@ export default function LoginScreen({
         ) {
 
             Alert.alert(
-                "Missing information",
-                "Please enter your email and password."
+                t.missingInformation,
+                t.emailPasswordRequired
             );
 
             return;
@@ -100,8 +100,8 @@ export default function LoginScreen({
 
 
             Alert.alert(
-                "Success",
-                "Login successful"
+                t.success,
+                t.loginSuccessful
             );
 
         }
@@ -109,13 +109,13 @@ export default function LoginScreen({
         catch (error) {
 
             Alert.alert(
-                "Login failed",
+                t.loginFailed,
 
                 error.response?.data?.error
                 ||
                 error.message
                 ||
-                "Unable to login."
+                t.unableToLogin
             );
 
         }

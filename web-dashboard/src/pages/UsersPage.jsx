@@ -218,7 +218,7 @@ const UsersPage = () => {
 
                     throw new Error(
                         data.error ||
-                        "Failed to create officer."
+                        t.officerCreationFailed
                     );
 
                 }

@@ -578,6 +578,57 @@ const fr = {
     inspectionReportsUploaded:
         "Rapports d'inspection téléchargés",
 
+    loginFailed:
+        "Échec de la connexion",
+
+    emailPasswordRequired:
+        "Veuillez saisir votre e-mail et votre mot de passe.",
+
+    loginSuccessful:
+        "Connexion réussie.",
+
+    unableToLogin:
+        "Impossible de se connecter.",
+
+    changePasswordTitle:
+        "Changer le mot de passe",
+
+    changePasswordSubtitle:
+        "Veuillez créer un nouveau mot de passe avant de continuer.",
+
+    newPassword:
+        "Nouveau mot de passe",
+
+    confirmNewPassword:
+        "Confirmer le nouveau mot de passe",
+
+    newPasswordRequired:
+        "Veuillez saisir et confirmer votre nouveau mot de passe.",
+
+    invalidPassword:
+        "Mot de passe invalide",
+
+    passwordMinimumLength:
+        "Le mot de passe doit contenir au moins 8 caractères.",
+
+    passwordsDoNotMatch:
+        "Les mots de passe ne correspondent pas",
+
+    passwordsMustMatch:
+        "Veuillez vous assurer que les deux mots de passe sont identiques.",
+
+    passwordChanged:
+        "Votre mot de passe a été modifié avec succès.",
+
+    unableToChangePassword:
+        "Impossible de modifier le mot de passe.",
+
+    continue:
+        "Continuer",
+
+    saving:
+        "Enregistrement...",
+
     synchronizeNow:
         "Synchroniser maintenant"
 

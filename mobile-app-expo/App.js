@@ -26,6 +26,7 @@ import AIAnalysisScreen from "./src/screens/AIAnalysisScreen.js";
 import SyncStatusScreen from "./src/screens/SyncStatusScreen.js";
 import ProfileScreen from "./src/screens/ProfileScreen.js";
 import ForgotPasswordScreen from "./src/screens/ForgotPasswordScreen.js";
+import ChangePasswordScreen from "./src/screens/ChangePasswordScreen.js";
 import {
     AuthProvider,
     useAuth
@@ -100,8 +101,25 @@ function AppNavigator(){
         >
 
 
+        <Stack.Screen
+            name="ForgotPassword"
+
+            component={ForgotPasswordScreen}
+        />
+
+
         {
             user ? (
+
+                user.mustChangePassword ? (
+
+                    <Stack.Screen
+                        name="ChangePassword"
+
+                        component={ChangePasswordScreen}
+                    />
+
+                ) : (
 
                 <>
 
@@ -194,13 +212,9 @@ function AppNavigator(){
 
                 />
 
-                <Stack.Screen
-                    name="ForgotPassword"
-
-                    component={ForgotPasswordScreen}
-                />
-
                 </>
+
+                )
 
 
             ) : (

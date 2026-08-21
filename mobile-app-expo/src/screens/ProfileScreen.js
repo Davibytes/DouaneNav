@@ -200,7 +200,7 @@ export default function ProfileScreen({
                             letterSpacing: 0.7
                         }}
                     >
-                        ACCOUNT
+                        {t.account.toUpperCase()}
                     </Text>
 
 
@@ -245,7 +245,7 @@ export default function ProfileScreen({
                                         fontWeight: "600"
                                     }}
                                 >
-                                    Personal information
+                                    {t.personalInformation}
                                 </Text>
 
                             </View>
@@ -298,7 +298,7 @@ export default function ProfileScreen({
                                         fontWeight: "600"
                                     }}
                                 >
-                                    Change password
+                                    {t.changePassword}
                                 </Text>
 
                             </View>
@@ -511,7 +511,7 @@ export default function ProfileScreen({
                             letterSpacing: 0.7
                         }}
                     >
-                        APPLICATION
+                        {t.application.toUpperCase()}
                     </Text>
 
 
@@ -556,7 +556,7 @@ export default function ProfileScreen({
                                         fontWeight: "600"
                                     }}
                                 >
-                                    About DouaneNav
+                                    {t.aboutDouaneNav}
                                 </Text>
 
                             </View>
@@ -568,7 +568,7 @@ export default function ProfileScreen({
                                     color: colors.muted
                                 }}
                             >
-                                Version 1.0.0
+                                {t.version}
                             </Text>
 
                         </TouchableOpacity>

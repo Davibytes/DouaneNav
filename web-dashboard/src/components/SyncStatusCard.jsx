@@ -1,10 +1,18 @@
+import { useLanguage } from "../context/LanguageContext.jsx";
+import en from "../i18n/en.js";
+import fr from "../i18n/fr.js";
+
+
 const SyncStatusCard = ({ synchronization }) => {
+  const { language } = useLanguage();
+  const t = language === "FR" ? fr : en;
+
   return (
     <div className="card">
 
       <div className="panel-title-row">
 
-        <h3>Synchronization Status</h3>
+        <h3>{t.synchronizationStatus}</h3>
 
       </div>
 
@@ -12,7 +20,7 @@ const SyncStatusCard = ({ synchronization }) => {
 
         <div>
 
-          <strong>Successful</strong>
+          <strong>{t.completed}</strong>
 
           <h2>{synchronization.success}%</h2>
 
@@ -20,7 +28,7 @@ const SyncStatusCard = ({ synchronization }) => {
 
         <div>
 
-          <strong>Pending</strong>
+          <strong>{t.pending}</strong>
 
           <h2>{synchronization.pending}</h2>
 
@@ -28,7 +36,7 @@ const SyncStatusCard = ({ synchronization }) => {
 
         <div>
 
-          <strong>Failed</strong>
+          <strong>{t.failed}</strong>
 
           <h2>{synchronization.failed}</h2>
 
@@ -38,7 +46,7 @@ const SyncStatusCard = ({ synchronization }) => {
 
       <p className="muted">
 
-        Last synchronization
+        {t.lastSynchronization}
 
       </p>
 
