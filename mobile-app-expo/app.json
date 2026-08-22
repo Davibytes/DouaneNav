@@ -11,7 +11,7 @@
       "backgroundColor": "#FFFFFF"
     },
     "android": {
-      "package": "cm.douanenav.douanenav"
+      "package": "cm.douanenav.customstrack"
     },
     "plugins": [
       "@react-native-community/datetimepicker",

@@ -47,6 +47,24 @@ const en = {
     profile:
         "Profile",
 
+    account:
+        "Account",
+
+    personalInformation:
+        "Personal Information",
+
+    changePassword:
+        "Change Password",
+
+    application:
+        "Application",
+
+    aboutDouaneNav:
+        "About DouaneNav",
+
+    version:
+        "Version 1.0.0",
+
     more:
         "More",
 
@@ -286,6 +304,9 @@ const en = {
 
     viewDestinationMap:
         "Verify Destination Map",
+
+    mapUnavailable:
+        "The destination map could not be loaded. Check your internet connection and try again.",
 
     customsStatus:
         "CUSTOMS STATUS",

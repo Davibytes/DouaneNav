@@ -47,6 +47,24 @@ const fr = {
     profile:
         "Profil",
 
+    account:
+        "Compte",
+
+    personalInformation:
+        "Informations personnelles",
+
+    changePassword:
+        "Modifier le mot de passe",
+
+    application:
+        "Application",
+
+    aboutDouaneNav:
+        "À propos de DouaneNav",
+
+    version:
+        "Version 1.0.0",
+
     more:
         "Plus",
 
@@ -286,6 +304,9 @@ const fr = {
 
     viewDestinationMap:
         "Vérifier la destination sur la carte",
+
+    mapUnavailable:
+        "La carte de destination n'a pas pu être chargée. Vérifiez votre connexion Internet et réessayez.",
 
     customsStatus:
         "STATUT DOUANIER",
