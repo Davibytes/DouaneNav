@@ -110,6 +110,29 @@ export class ReportRepository {
     }
 
 
+    async findOrCreateForInspection(data){
+
+        const database = await connectMongo();
+        const inspectionId = String(data.inspectionId);
+        const report = {
+            ...data,
+            inspectionId,
+            createdAt:new Date()
+        };
+
+        const result = await database
+            .collection("inspection_reports")
+            .findOneAndUpdate(
+                { inspectionId },
+                { $setOnInsert:report },
+                { upsert:true, returnDocument:"after" }
+            );
+
+        return result.value || result;
+
+    }
+
+
 
 
     async findByDeclaration(

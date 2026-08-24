@@ -78,18 +78,7 @@ export default function DeclarationsScreen({
     ] = useState(true);
 
 
-    useFocusEffect(
-
-        useCallback(() => {
-
-            loadDeclarations();
-
-        }, [])
-
-    );
-
-
-    const loadDeclarations =
+    const loadDeclarations = useCallback(
         async () => {
 
             try {
@@ -137,7 +126,15 @@ export default function DeclarationsScreen({
 
             }
 
-        };
+        }, []
+    );
+
+
+    useFocusEffect(
+        useCallback(() => {
+            void loadDeclarations();
+        }, [loadDeclarations])
+    );
 
 
     const handleSearch =

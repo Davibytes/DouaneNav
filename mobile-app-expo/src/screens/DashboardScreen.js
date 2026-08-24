@@ -59,18 +59,7 @@ export default function DashboardScreen({
     ] = useState(null);
 
 
-    useFocusEffect(
-
-        useCallback(() => {
-
-            loadDashboard();
-
-        }, [])
-
-    );
-
-
-    const loadDashboard =
+    const loadDashboard = useCallback(
         async () => {
 
             try {
@@ -127,7 +116,15 @@ export default function DashboardScreen({
 
             }
 
-        };
+        }, []
+    );
+
+
+    useFocusEffect(
+        useCallback(() => {
+            void loadDashboard();
+        }, [loadDashboard])
+    );
 
 
     return (

@@ -8,52 +8,27 @@ export class DashboardRepository {
             await connectMongo();
 
 
-        const declarations =
-            await database
-                .collection("declarations")
-                .find({})
-                .toArray();
-
-
-        const inspections =
-            await database
-                .collection("inspections")
-                .find({})
-                .toArray();
-
-
-        const alerts =
-            await database
-                .collection("alerts")
-                .find({})
-                .toArray();
-
-
-        const synchronizationLogs =
-            await database
-                .collection("synchronization_logs")
-                .find({})
-                .toArray();
-
-
-
-        let activeUserCount = 0;
-
-
-        if(
-            database
-                .listCollections()
-        ){
-
-
-            activeUserCount =
-                await database
-                    .collection("users")
-                    .countDocuments({
-                        active:true
-                    });
-
-        }
+        const [
+            declarations,
+            inspections,
+            alerts,
+            synchronizationLogs,
+            activeUserCount
+        ] = await Promise.all([
+            database.collection("declarations").find({}).toArray(),
+            database.collection("inspections").find(
+                {},
+                {
+                    projection:{
+                        photos:0,
+                        declaration:0
+                    }
+                }
+            ).toArray(),
+            database.collection("alerts").find({}).toArray(),
+            database.collection("synchronization_logs").find({}).toArray(),
+            database.collection("users").countDocuments({ active:true })
+        ]);
 
 
 

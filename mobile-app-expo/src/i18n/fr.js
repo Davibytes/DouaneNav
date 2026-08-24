@@ -350,6 +350,9 @@ const fr = {
     startInspection:
         "Commencer l'inspection",
 
+    resumeInspection:
+        "Reprendre l'inspection",
+
 
     // INSPECTION
 
@@ -669,7 +672,19 @@ const fr = {
         "Enregistrement...",
 
     synchronizeNow:
-        "Synchroniser maintenant"
+        "Synchroniser maintenant",
+
+    reportsLoadFailed:
+        "Impossible de charger les rapports. Veuillez r\u00e9essayer.",
+
+    accountNotAuthorized:
+        "Ce compte n\u2019est pas autoris\u00e9 \u00e0 utiliser cette application.",
+
+    maximumPhotos:
+        "Maximum de 3 photos autoris\u00e9es par inspection.",
+
+    photoTooLarge:
+        "Cette photo est trop volumineuse. Veuillez utiliser une image plus petite."
 
 };
 

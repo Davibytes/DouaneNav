@@ -2,8 +2,7 @@ import {
     ScrollView,
     Text,
     View,
-    TouchableOpacity,
-    Alert
+    TouchableOpacity
 } from "react-native";
 
 import {
@@ -508,17 +507,6 @@ export default function DeclarationDetailsScreen({
 
                             onPress={() => {
 
-                                if (inspectionInProgress) {
-
-                                    Alert.alert(
-                                        t.inspectionInProgressTitle,
-                                        t.inspectionInProgressMessage
-                                    );
-
-                                    return;
-
-                                }
-
                                 navigation.navigate(
                                     "Inspection",
                                     {
@@ -538,7 +526,9 @@ export default function DeclarationDetailsScreen({
                                 }
                             >
                                 {
-                                    hasBeenInspected
+                                    inspectionInProgress
+                                        ? t.resumeInspection
+                                        : hasBeenInspected
                                         ? t.reinspectDeclaration
                                         : t.startInspection
                                 }

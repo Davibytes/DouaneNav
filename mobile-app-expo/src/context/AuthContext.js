@@ -18,6 +18,19 @@ import {
     setAuthToken
 } from "../api/axios.js";
 
+import {
+    clearDashboardCache
+} from "../services/dashboardService.js";
+
+import {
+    clearReportsCache
+} from "../services/reportService.js";
+
+const clearOperationalCaches = () => {
+    clearDashboardCache();
+    clearReportsCache();
+};
+
 
 const AuthContext =
     createContext();
@@ -89,6 +102,8 @@ export const AuthProvider = ({
 
                 setAuthToken(null);
 
+                clearOperationalCaches();
+
                 setUser(null);
 
             }
@@ -129,6 +144,8 @@ export const AuthProvider = ({
             setAuthToken(
                 data.token
             );
+
+            clearOperationalCaches();
 
 
             setUser(
@@ -207,6 +224,8 @@ export const AuthProvider = ({
 
 
         setAuthToken(null);
+
+        clearOperationalCaches();
 
         setUser(null);
 

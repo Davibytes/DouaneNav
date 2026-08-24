@@ -35,10 +35,14 @@ export const loginUser = async (
 
     if (!response.ok) {
 
-        throw new Error(
+        const error = new Error(
             data.error ||
             "Login failed"
         );
+
+        error.status = response.status;
+
+        throw error;
 
     }
 

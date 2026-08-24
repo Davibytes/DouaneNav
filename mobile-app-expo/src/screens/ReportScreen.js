@@ -48,21 +48,18 @@ export default function ReportScreen({
     ] = useState([]);
 
 
-    useFocusEffect(
-
-        useCallback(() => {
-
-            loadReports();
-
-        }, [])
-
-    );
+    const [
+        loadError,
+        setLoadError
+    ] = useState("");
 
 
-    const loadReports =
+    const loadReports = useCallback(
         async () => {
 
             try {
+
+                setLoadError("");
 
                 const data =
                     await getReports();
@@ -86,24 +83,37 @@ export default function ReportScreen({
 
                 setReports([]);
 
+                setLoadError(
+                    t.reportsLoadFailed
+                );
+
             }
 
-        };
+        }, [t.reportsLoadFailed]
+    );
+
+
+    useFocusEffect(
+        useCallback(() => {
+            void loadReports();
+        }, [loadReports])
+    );
 
 
     const completedCount =
         reports.filter(
             report =>
-                report.status ===
-                    "Completed"
+                String(report.status || "")
+                    .toLowerCase() === "completed"
         ).length;
 
 
     const pendingCount =
         reports.filter(
             report =>
-                report.status ===
-                    "Pending"
+                ["pending", "in progress"].includes(
+                    String(report.status || "").toLowerCase()
+                )
         ).length;
 
 
@@ -141,6 +151,16 @@ export default function ReportScreen({
                     >
                         {t.reportsSubtitle}
                     </Text>
+
+                    {
+                        loadError &&
+
+                        <View style={styles.section}>
+                            <Text style={styles.sectionText}>
+                                {loadError}
+                            </Text>
+                        </View>
+                    }
 
 
                     <View

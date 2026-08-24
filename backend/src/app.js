@@ -55,13 +55,30 @@ const json = (
 
 const readBody = async (req) => {
 
-    let value = "";
+    const chunks = [];
+    let size = 0;
+
+    const maxBodySize =
+        5 * 1024 * 1024;
 
     for await (const chunk of req) {
 
-        value += chunk.toString();
+        size += chunk.length;
+
+        if (size > maxBodySize) {
+
+            throw Object.assign(
+                new Error("Inspection evidence is too large. Use up to 3 compressed photos."),
+                { statusCode:413 }
+            );
+
+        }
+
+        chunks.push(chunk);
 
     }
+
+    const value = Buffer.concat(chunks).toString("utf8");
 
     if (!value) {
 

@@ -27,6 +27,8 @@ const en = {
     loginSubtitle:
         "Sign in with your authorized DouaneNav account.",
     loginFailed: "Login failed",
+    accountNotAuthorized:
+        "This account is not authorized to use this application.",
     invalidCredentials:
         "Invalid email or password.",
     forgotPassword: "Forgot Password",

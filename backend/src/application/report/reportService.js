@@ -92,22 +92,19 @@ export const createReportService = () => ({
         inspection
     ){
 
-        const existing =
-            await reportRepository.findByInspectionId(
-                inspection._id || inspection.id
-            );
+        const existing = await reportRepository.findByInspectionId(
+            inspection._id || inspection.id
+        );
 
-        if (existing) {
+        if (existing) return existing;
 
-            return existing;
-
-        }
-
-        return await this.createReport(
-            user,
+        return await reportRepository.findOrCreateForInspection(
             {
+                officerId:user.id,
+                officerName:user.name,
+                officer:user.name,
                 inspectionId:
-                    inspection._id || inspection.id,
+                    String(inspection._id || inspection.id),
 
                 declarationNumber:
                     inspection.declarationNumber,
@@ -136,10 +133,7 @@ export const createReportService = () => ({
                         ? "reinspection"
                         : "initial",
 
-                isReinspection:
-                    Boolean(
-                        inspection.isReinspection
-                    )
+                isReinspection:Boolean(inspection.isReinspection)
             }
         );
 

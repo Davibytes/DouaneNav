@@ -2,6 +2,23 @@ export const createInspectionService = (
     inspectionRepository
 ) => ({
 
+    validatePhotos(photos){
+
+        if (!Array.isArray(photos)) {
+            return;
+        }
+
+        if (photos.length > 3) {
+
+            throw Object.assign(
+                new Error("A maximum of 3 photos is allowed per inspection."),
+                { statusCode:422 }
+            );
+
+        }
+
+    },
+
     async getInspections(user){
 
         return await inspectionRepository.findAll(
@@ -42,6 +59,8 @@ export const createInspectionService = (
         data
     ){
 
+        this.validatePhotos(data.photos);
+
         const activeInspection =
             await inspectionRepository.findActiveByDeclaration(
                 data.declarationNumber
@@ -69,12 +88,14 @@ export const createInspectionService = (
     async updateStatus(
         user,
         id,
-        status
+        data
     ){
 
-        return await inspectionRepository.updateStatus(
+        this.validatePhotos(data.photos);
+
+        return await inspectionRepository.updateInspection(
             id,
-            status,
+            data,
             user
         );
 

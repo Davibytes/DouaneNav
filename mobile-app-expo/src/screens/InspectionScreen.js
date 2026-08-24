@@ -25,8 +25,18 @@ import BottomNavigation from "../components/BottomNavigation.js";
 
 import {
     getInspections,
-    createInspection
+    createInspection,
+    getInspectionById,
+    updateInspection
 } from "../services/inspectionService.js";
+
+import {
+    refreshDashboard
+} from "../services/dashboardService.js";
+
+import {
+    refreshReports
+} from "../services/reportService.js";
 
 import {
     useLanguage
@@ -108,6 +118,12 @@ export default function InspectionScreen({
     ] = useState(false);
 
 
+    const [
+        activeInspection,
+        setActiveInspection
+    ] = useState(null);
+
+
     useEffect(() => {
 
         setDeclarationNumber(
@@ -124,18 +140,7 @@ export default function InspectionScreen({
     ]);
 
 
-    useFocusEffect(
-
-        useCallback(() => {
-
-            loadInspections();
-
-        }, [])
-
-    );
-
-
-    const loadInspections = async () => {
+    const loadInspections = useCallback(async () => {
 
         try {
 
@@ -148,6 +153,38 @@ export default function InspectionScreen({
                     ? data
                     : data?.inspections || []
             );
+
+            const list =
+                Array.isArray(data)
+                    ? data
+                    : data?.inspections || [];
+
+            const inProgress = list.find(
+                item =>
+                    item.declarationNumber === declarationNumber &&
+                    String(item.status).toLowerCase() === "in progress"
+            );
+
+            if (inProgress) {
+
+                // The list omits photos for speed. This detail request must
+                // not delay rendering the inspection history.
+                void getInspectionById(inProgress._id || inProgress.id)
+                    .then((existing) => {
+                        setActiveInspection(existing);
+                        setTruckPlate(existing.truckPlate || "");
+                        setComment(existing.comments || "");
+                        setPhotos(Array.isArray(existing.photos) ? existing.photos : []);
+                        setStatus(existing.status || "In Progress");
+                    })
+                    .catch((error) => {
+                        console.log("Inspection detail loading error:", error.message);
+                    });
+
+            }
+            else {
+                setActiveInspection(null);
+            }
 
         }
 
@@ -162,10 +199,28 @@ export default function InspectionScreen({
 
         }
 
-    };
+    }, [declarationNumber]);
+
+
+    useFocusEffect(
+        useCallback(() => {
+            void loadInspections();
+        }, [loadInspections])
+    );
 
 
     const addPhoto = async (type) => {
+
+        if (photos.length >= 3) {
+
+            Alert.alert(
+                t.missingInformation,
+                t.maximumPhotos
+            );
+
+            return;
+
+        }
 
         let result;
 
@@ -192,7 +247,7 @@ export default function InspectionScreen({
             result =
                 await ImagePicker.launchCameraAsync({
 
-                    quality: 0.5,
+                    quality: 0.35,
 
                     base64: true
 
@@ -204,7 +259,7 @@ export default function InspectionScreen({
             result =
                 await ImagePicker.launchImageLibraryAsync({
 
-                    quality: 0.5,
+                    quality: 0.35,
 
                     base64: true
 
@@ -223,6 +278,17 @@ export default function InspectionScreen({
                 asset.base64
                     ? `data:image/jpeg;base64,${asset.base64}`
                     : asset.uri;
+
+            if (photo.length > 1500000) {
+
+                Alert.alert(
+                    t.missingInformation,
+                    t.photoTooLarge
+                );
+
+                return;
+
+            }
 
 
             setPhotos(
@@ -281,17 +347,14 @@ export default function InspectionScreen({
             setIsSubmitting(true);
 
             const savedInspection =
-                await createInspection(
-                    inspection
-                );
-
-
-            setInspections(
-                currentInspections => [
-                    savedInspection,
-                    ...currentInspections
-                ]
-            );
+                activeInspection
+                    ? await updateInspection(
+                        activeInspection._id || activeInspection.id,
+                        inspection
+                    )
+                    : await createInspection(
+                        inspection
+                    );
 
 
             Alert.alert(
@@ -305,32 +368,36 @@ export default function InspectionScreen({
             );
 
 
-            setDeclarationNumber(
-                declaration?.declarationNumber
-                ||
-                ""
-            );
+            if (status === "Completed") {
 
+                await Promise.all([
+                    refreshDashboard(),
+                    refreshReports()
+                ]).catch((error) => {
+                    // Submission already succeeded. A later refresh failure
+                    // must not turn that result into a false error message.
+                    console.log("Post-submission refresh error:", error.message);
+                });
 
-            setTruckPlate(
-                declaration?.transport?.truckPlate
-                ||
-                ""
-            );
+                setActiveInspection(null);
+                setComment("");
+                setPhotos([]);
+                setStatus("Pending");
+                clearDeclaration();
 
+                navigation.navigate("Dashboard");
 
-            setComment("");
+            }
+            else {
 
-            setPhotos([]);
+                setActiveInspection({
+                    id:savedInspection.inspectionId,
+                    ...inspection
+                });
 
-            setStatus(
-                "Pending"
-            );
+                await loadInspections();
 
-            clearDeclaration();
-
-
-            await loadInspections();
+            }
 
         }
 

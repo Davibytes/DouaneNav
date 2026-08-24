@@ -19,6 +19,16 @@ const reply = (
 };
 
 
+const submissionResponse = (inspection, report) => ({
+    success:true,
+    inspectionId:String(inspection._id || inspection.id),
+    reportId:report
+        ? String(report._id || report.id)
+        : null,
+    status:inspection.status
+});
+
+
 export const createInspectionController = (
     authService,
     inspectionService,
@@ -128,46 +138,9 @@ export const createInspectionController = (
         ) {
 
             report =
-                await reportService.createReport(
+                await reportService.createReportForCompletedInspection(
                     user,
-                    {
-                        inspectionId:
-                            inspection.id,
-
-                        declarationNumber:
-                            inspection.declarationNumber,
-
-                        truckPlate:
-                            inspection.truckPlate,
-
-                        result:
-                            "Completed",
-
-                        status:
-                            "Completed",
-
-                        comments:
-                            inspection.comments,
-
-                        photos:
-                            inspection.photos || [],
-
-                        location:
-                            inspection.location,
-
-                        declaration:
-                            body.declaration || null,
-
-                        inspectionType:
-                            inspection.isReinspection
-                                ? "reinspection"
-                                : "initial",
-
-                        isReinspection:
-                            Boolean(
-                                inspection.isReinspection
-                            )
-                    }
+                    inspection
                 );
 
         }
@@ -175,10 +148,7 @@ export const createInspectionController = (
         return reply(
             res,
             201,
-            {
-                ...inspection,
-                report
-            }
+            submissionResponse(inspection, report)
         );
 
     },
@@ -200,7 +170,7 @@ export const createInspectionController = (
             await inspectionService.updateStatus(
                 user,
                 id,
-                body.status
+                body
             );
 
 
@@ -238,10 +208,7 @@ export const createInspectionController = (
         return reply(
             res,
             200,
-            {
-                ...result,
-                report
-            }
+            submissionResponse(result, report)
         );
 
     }

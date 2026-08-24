@@ -350,6 +350,9 @@ const en = {
     startInspection:
         "Start Inspection",
 
+    resumeInspection:
+        "Resume Inspection",
+
 
     // INSPECTION
 
@@ -669,7 +672,19 @@ const en = {
         "Saving...",
 
     synchronizeNow:
-        "Synchronize Now"
+        "Synchronize Now",
+
+    reportsLoadFailed:
+        "Unable to load reports. Please try again.",
+
+    accountNotAuthorized:
+        "This account is not authorized to use this application.",
+
+    maximumPhotos:
+        "Maximum 3 photos allowed per inspection.",
+
+    photoTooLarge:
+        "This photo is too large. Please use a smaller image."
 
 };
 

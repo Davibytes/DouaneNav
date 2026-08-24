@@ -105,8 +105,10 @@ export default function LoginPage() {
             catch (error) {
 
                 setError(
-                    error.message ||
-                    t.loginFailed
+                    error.status === 403
+                        ? t.accountNotAuthorized
+                        : error.message ||
+                            t.loginFailed
                 );
 
             }

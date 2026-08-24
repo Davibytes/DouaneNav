@@ -27,6 +27,8 @@ const fr = {
     loginSubtitle:
         "Connectez-vous avec votre compte DouaneNav autorisé.",
     loginFailed: "Échec de la connexion",
+    accountNotAuthorized:
+        "Ce compte n’est pas autorisé à utiliser cette application.",
     invalidCredentials:
         "Email ou mot de passe incorrect.",
     forgotPassword: "Mot de passe oublié",

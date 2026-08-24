@@ -167,11 +167,7 @@ export const createAuthService = (
 
             throw createError(
 
-                platform === "mobile"
-
-                    ? "This account is not authorized to use the mobile application."
-
-                    : "This account is not authorized to use the web dashboard.",
+                "This account is not authorized to use this application.",
 
                 403
 

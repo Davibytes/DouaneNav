@@ -13,7 +13,15 @@ export class InspectionRepository {
 
         return await database
             .collection("inspections")
-            .find(query)
+            .find(
+                query,
+                {
+                    projection:{
+                        photos:0,
+                        declaration:0
+                    }
+                }
+            )
             .sort({ createdAt:-1 })
             .toArray();
 
@@ -77,7 +85,7 @@ export class InspectionRepository {
     }
 
 
-    async updateStatus(id,status,user){
+    async updateInspection(id,data,user){
 
         const database = await connectMongo();
         const query = { _id:new ObjectId(id) };
@@ -87,17 +95,36 @@ export class InspectionRepository {
         }
 
         const now = new Date();
+        const status = data.status;
+        const updates = {
+            updatedAt:now
+        };
+
+        for (const field of [
+            "truckPlate",
+            "comments",
+            "photos",
+            "location",
+            "status"
+        ]) {
+
+            if (data[field] !== undefined) {
+                updates[field] = data[field];
+            }
+
+        }
+
+        if (status === "Completed") {
+            updates.completedAt = now;
+        }
+
         const result = await database
             .collection("inspections")
             .findOneAndUpdate(
                 query,
                 {
                     $set:{
-                        status,
-                        updatedAt:now,
-                        completedAt:status === "Completed"
-                            ? now
-                            : null
+                        ...updates
                     }
                 },
                 { returnDocument:"after" }

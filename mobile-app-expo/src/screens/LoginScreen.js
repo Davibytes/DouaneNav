@@ -108,14 +108,15 @@ export default function LoginScreen({
 
         catch (error) {
 
+            const message =
+                error.response?.status === 403
+                    ? t.accountNotAuthorized
+                    : t.unableToLogin;
+
             Alert.alert(
                 t.loginFailed,
 
-                error.response?.data?.error
-                ||
-                error.message
-                ||
-                t.unableToLogin
+                message
             );
 
         }
