@@ -1,7 +1,11 @@
 import {
-    useEffect,
+    useCallback,
     useState
 } from "react";
+
+import {
+    useFocusEffect
+} from "@react-navigation/native";
 
 
 import {
@@ -74,11 +78,15 @@ export default function DeclarationsScreen({
     ] = useState(true);
 
 
-    useEffect(() => {
+    useFocusEffect(
 
-        loadDeclarations();
+        useCallback(() => {
 
-    }, []);
+            loadDeclarations();
+
+        }, [])
+
+    );
 
 
     const loadDeclarations =
@@ -395,6 +403,19 @@ export default function DeclarationsScreen({
                                             item.importer?.name
                                             ||
                                             t.notAvailable
+                                        }
+                                    </Text>
+
+                                    <Text
+                                        style={
+                                            styles.sectionText
+                                        }
+                                    >
+                                        {t.inspectionStatus}: {" "}
+                                        {
+                                            item.inspectionStatus
+                                            ||
+                                            t.awaitingInspection
                                         }
                                     </Text>
 

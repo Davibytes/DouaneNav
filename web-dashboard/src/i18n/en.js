@@ -119,6 +119,28 @@ const en = {
         "No inspection reports available.",
     reportsDescription:
         "Customs inspection reports submitted from the mobile application.",
+    searchReports:
+        "Search declaration, officer, destination or status...",
+    noMatchingReports:
+        "No reports match the current search.",
+    inspectionType:
+        "Inspection Type",
+    initialInspection:
+        "Initial Inspection",
+    reinspection:
+        "Reinspection",
+    inspectionId:
+        "Inspection ID",
+    reportId:
+        "Report ID",
+    findings:
+        "Findings",
+    reportDetails:
+        "Report Details",
+    inspectionCount:
+        "Inspection Count",
+    close:
+        "Close",
 
     // Users
     userManagement:

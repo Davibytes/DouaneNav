@@ -308,11 +308,29 @@ const fr = {
     mapUnavailable:
         "La carte de destination n'a pas pu être chargée. Vérifiez votre connexion Internet et réessayez.",
 
+    routeUnavailable:
+        "Itinéraire indisponible. La destination et votre position actuelle restent affichées.",
+
     customsStatus:
         "STATUT DOUANIER",
 
     inspectionStatus:
         "STATUT DE L'INSPECTION",
+
+    lastInspectedBy:
+        "Dernière inspection par",
+
+    inspectionCount:
+        "Nombre d'inspections",
+
+    reinspectDeclaration:
+        "Réinspecter / Contre-vérifier",
+
+    inspectionInProgressTitle:
+        "Inspection en cours",
+
+    inspectionInProgressMessage:
+        "Cette déclaration est actuellement en cours d'inspection. Attendez la fin avant de démarrer une contre-vérification.",
 
     awaitingInspection:
         "En attente d'inspection",

@@ -26,6 +26,9 @@ export const getDashboard = async()=>{
                     Authorization:
                     `Bearer ${token}`,
 
+                    "X-Client-Platform":
+                    "web",
+
                     "Content-Type":
                     "application/json"
 

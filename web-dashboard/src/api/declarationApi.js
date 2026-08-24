@@ -15,6 +15,7 @@ export const getDeclarations = async () => {
 
                 headers: {
                     "Authorization": `Bearer ${token}`,
+                    "X-Client-Platform": "web",
                     "Content-Type": "application/json"
                 }
             }
@@ -54,6 +55,7 @@ export const searchDeclarations = async (query) => {
 
                 headers: {
                     "Authorization": `Bearer ${token}`,
+                    "X-Client-Platform": "web",
                     "Content-Type": "application/json"
                 }
             }

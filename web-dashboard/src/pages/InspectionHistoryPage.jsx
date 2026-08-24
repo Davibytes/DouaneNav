@@ -69,7 +69,10 @@ const InspectionHistoryPage = () => {
                         headers: {
 
                             Authorization:
-                                `Bearer ${token}`
+                                `Bearer ${token}`,
+
+                            "X-Client-Platform":
+                                "web"
 
                         }
 

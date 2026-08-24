@@ -1,4 +1,5 @@
 import { connectMongo } from "../database/mongo.js";
+import { ObjectId } from "mongodb";
 
 
 export class ReportRepository {
@@ -21,6 +22,22 @@ export class ReportRepository {
     }
 
 
+    async findByOfficerId(officerId){
+
+        const database =
+            await connectMongo();
+
+        return await database
+            .collection("inspection_reports")
+            .find({ officerId })
+            .sort({
+                createdAt:-1
+            })
+            .toArray();
+
+    }
+
+
 
     async findById(id){
 
@@ -31,7 +48,26 @@ export class ReportRepository {
         return await database
             .collection("inspection_reports")
             .findOne({
-                _id:id
+                _id:new ObjectId(id)
+            });
+
+    }
+
+
+    async findByInspectionId(inspectionId){
+
+        const database =
+            await connectMongo();
+
+        return await database
+            .collection("inspection_reports")
+            .findOne({
+                inspectionId:{
+                    $in:[
+                        inspectionId,
+                        String(inspectionId)
+                    ]
+                }
             });
 
     }

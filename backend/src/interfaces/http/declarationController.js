@@ -43,22 +43,14 @@ export const createDeclarationController = (
         try {
 
 
-            /*
-                TEMPORARY DEMO MODE
-
-                Authentication removed
-                to allow screenshots.
-
-                Production:
-                restore authService.authenticate()
-            */
-
+            const { user } =
+                await authService.authenticate(
+                    req.headers.authorization
+                );
 
             const declarations =
                 await declarationService.getDeclarations(
-                    {
-                        role:"Administrator"
-                    }
+                    user
                 );
 
 
@@ -128,13 +120,16 @@ export const createDeclarationController = (
 
 
 
+            const { user } =
+                await authService.authenticate(
+                    req.headers.authorization
+                );
+
             const declaration =
 
                 await declarationService.getDeclarationById(
 
-                    {
-                        role:"Administrator"
-                    },
+                    user,
 
                     id
 
@@ -204,13 +199,16 @@ export const createDeclarationController = (
 
 
 
+            const { user } =
+                await authService.authenticate(
+                    req.headers.authorization
+                );
+
             const declarations =
 
                 await declarationService.searchDeclarations(
 
-                    {
-                        role:"Administrator"
-                    },
+                    user,
 
                     query
 

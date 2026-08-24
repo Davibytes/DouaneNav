@@ -34,7 +34,34 @@ export const createDashboardService = (repository) => ({
 
 
         const allInspections =
-            data.inspections || [];
+            user.role === "Customs Officer"
+                ? (data.inspections || []).filter(
+                    item => item.officerId === user.id
+                )
+                : data.inspections || [];
+
+
+        const completedToday =
+            allInspections.filter(
+                (item) => {
+
+                    const completedAt =
+                        item.completedAt ||
+                        item.updatedAt ||
+                        item.createdAt;
+
+                    return (
+                        (item.status === "Completed" ||
+                        item.status === "submitted" ||
+                        item.status === "synced") &&
+                        completedAt &&
+                        new Date(completedAt)
+                            .toISOString()
+                            .startsWith(today)
+                    );
+
+                }
+            );
 
 
         const visibleRecent =
@@ -68,12 +95,7 @@ export const createDashboardService = (repository) => ({
 
 
             completedInspections:
-                allInspections.filter(
-                    (item) =>
-                        item.status === "Completed" ||
-                        item.status === "submitted" ||
-                        item.status === "synced"
-                ).length,
+                completedToday.length,
 
 
             pendingSynchronizations:
@@ -91,6 +113,57 @@ export const createDashboardService = (repository) => ({
                 ).length
 
         };
+
+
+        const inspectionStatistics = {
+
+            total:
+                allInspections.length,
+
+            completed:
+                counts.completedInspections,
+
+            pending:
+                counts.pendingInspections
+
+        };
+
+
+        const destinations =
+            new Map();
+
+
+        for (
+            const declaration of data.declarations || []
+        ) {
+
+            const city =
+                declaration.destination?.city;
+
+
+            if (city) {
+
+                destinations.set(
+                    city,
+                    (destinations.get(city) || 0) + 1
+                );
+
+            }
+
+        }
+
+
+        const destinationStats =
+            [...destinations.entries()]
+                .map(
+                    ([city, total]) => ({
+                        city,
+                        total
+                    })
+                )
+                .sort(
+                    (a, b) => b.total - a.total
+                );
 
 
         if (user.role === "Administrator") {
@@ -125,6 +198,12 @@ export const createDashboardService = (repository) => ({
 
             recentInspections:
                 visibleRecent,
+
+
+            destinationStats,
+
+
+            inspectionStatistics,
 
 
             synchronization:

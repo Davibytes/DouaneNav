@@ -14,6 +14,9 @@ import {
 import {
     LanguageProvider
 } from "./src/context/LanguageContext.js";
+import {
+    DeclarationWorkflowProvider
+} from "./src/context/DeclarationWorkflowContext.js";
 import LoginScreen from "./src/screens/LoginScreen.js";
 import DashboardScreen from "./src/screens/DashboardScreen.js";
 import DeclarationsScreen from "./src/screens/DeclarationsScreen.js";
@@ -252,6 +255,8 @@ export default function App(){
 
     <LanguageProvider>
 
+    <DeclarationWorkflowProvider>
+
 
         <NavigationContainer>
 
@@ -261,6 +266,8 @@ export default function App(){
 
         </NavigationContainer>
 
+
+    </DeclarationWorkflowProvider>
 
     </LanguageProvider>
 

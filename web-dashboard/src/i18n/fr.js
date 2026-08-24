@@ -126,6 +126,29 @@ const fr = {
     reportsDescription:
         "Rapports d'inspection douanière soumis depuis l'application mobile.",
 
+    searchReports:
+        "Rechercher une déclaration, un agent, une destination ou un statut...",
+    noMatchingReports:
+        "Aucun rapport ne correspond à la recherche.",
+    inspectionType:
+        "Type d'inspection",
+    initialInspection:
+        "Inspection initiale",
+    reinspection:
+        "Réinspection",
+    inspectionId:
+        "ID de l'inspection",
+    reportId:
+        "ID du rapport",
+    findings:
+        "Constats",
+    reportDetails:
+        "Détails du rapport",
+    inspectionCount:
+        "Nombre d'inspections",
+    close:
+        "Fermer",
+
     // Utilisateurs
     userManagement:
         "Gestion des utilisateurs",

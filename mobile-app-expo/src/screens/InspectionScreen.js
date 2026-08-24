@@ -1,4 +1,5 @@
 import {
+    useCallback,
     useEffect,
     useState
 } from "react";
@@ -9,8 +10,13 @@ import {
     ScrollView,
     TouchableOpacity,
     TextInput,
-    Alert
+    Alert,
+    ActivityIndicator
 } from "react-native";
+
+import {
+    useFocusEffect
+} from "@react-navigation/native";
 
 import * as ImagePicker from "expo-image-picker";
 
@@ -23,12 +29,12 @@ import {
 } from "../services/inspectionService.js";
 
 import {
-    createReport
-} from "../services/reportService.js";
-
-import {
     useLanguage
 } from "../context/LanguageContext.js";
+
+import {
+    useDeclarationWorkflow
+} from "../context/DeclarationWorkflowContext.js";
 
 import styles from "../styles/styles.js";
 import colors from "../styles/colors.js";
@@ -43,9 +49,17 @@ export default function InspectionScreen({
         t
     } = useLanguage();
 
+    const {
+        declaration:workflowDeclaration,
+        clearDeclaration
+    } = useDeclarationWorkflow();
+
 
     const declaration =
-        route?.params?.declaration || {};
+        route?.params?.declaration || workflowDeclaration || {};
+
+    const isReinspection =
+        Boolean(route?.params?.isReinspection);
 
 
     const [
@@ -88,11 +102,37 @@ export default function InspectionScreen({
     ] = useState([]);
 
 
+    const [
+        isSubmitting,
+        setIsSubmitting
+    ] = useState(false);
+
+
     useEffect(() => {
 
-        loadInspections();
+        setDeclarationNumber(
+            declaration?.declarationNumber || ""
+        );
 
-    }, []);
+        setTruckPlate(
+            declaration?.transport?.truckPlate || ""
+        );
+
+    }, [
+        declaration?.declarationNumber,
+        declaration?.transport?.truckPlate
+    ]);
+
+
+    useFocusEffect(
+
+        useCallback(() => {
+
+            loadInspections();
+
+        }, [])
+
+    );
 
 
     const loadInspections = async () => {
@@ -106,7 +146,7 @@ export default function InspectionScreen({
             setInspections(
                 Array.isArray(data)
                     ? data
-                    : []
+                    : data?.inspections || []
             );
 
         }
@@ -152,7 +192,7 @@ export default function InspectionScreen({
             result =
                 await ImagePicker.launchCameraAsync({
 
-                    quality: 0.7,
+                    quality: 0.5,
 
                     base64: true
 
@@ -164,7 +204,7 @@ export default function InspectionScreen({
             result =
                 await ImagePicker.launchImageLibraryAsync({
 
-                    quality: 0.7,
+                    quality: 0.5,
 
                     base64: true
 
@@ -227,12 +267,18 @@ export default function InspectionScreen({
             location:
                 declaration?.destination?.address
                 ||
-                t.customsInspectionPoint
+                t.customsInspectionPoint,
+
+            declaration,
+
+            isReinspection
 
         };
 
 
         try {
+
+            setIsSubmitting(true);
 
             const savedInspection =
                 await createInspection(
@@ -240,51 +286,12 @@ export default function InspectionScreen({
                 );
 
 
-            if (
-                status === "Completed"
-            ) {
-
-                await createReport({
-
-                    inspectionId:
-                        savedInspection?.id
-                        ||
-                        savedInspection?._id
-                        ||
-                        null,
-
-                    declarationNumber,
-
-                    truckPlate,
-
-                    officer:
-                        savedInspection?.officer
-                        ||
-                        t.unknown,
-
-                    result:
-                        t.completed,
-
-                    status:
-                        "Completed",
-
-                    comments:
-                        comment,
-
-                    photos,
-
-                    location:
-                        declaration
-                            ?.destination
-                            ?.address
-                        ||
-                        t.customsInspectionPoint,
-
-                    declaration
-
-                });
-
-            }
+            setInspections(
+                currentInspections => [
+                    savedInspection,
+                    ...currentInspections
+                ]
+            );
 
 
             Alert.alert(
@@ -320,6 +327,8 @@ export default function InspectionScreen({
                 "Pending"
             );
 
+            clearDeclaration();
+
 
             await loadInspections();
 
@@ -327,16 +336,24 @@ export default function InspectionScreen({
 
         catch (error) {
 
-            console.log(
-                "Inspection submission error:",
-                error.message
-            );
+            const message =
+                error.response?.data?.error ||
+                error.message ||
+                t.inspectionSubmissionFailed;
+
+            console.log("Inspection submission error:", message);
 
 
             Alert.alert(
                 t.error,
-                t.inspectionSubmissionFailed
+                message
             );
+
+        }
+
+        finally {
+
+            setIsSubmitting(false);
 
         }
 
@@ -641,21 +658,45 @@ export default function InspectionScreen({
 
 
                     <TouchableOpacity
-                        style={
-                            styles.menuButton
-                        }
+                        style={[
+                            styles.menuButton,
+                            {
+                                opacity:
+                                    isSubmitting
+                                        ? 0.65
+                                        : 1
+                            }
+                        ]}
                         onPress={
                             saveInspection
                         }
+
+                        disabled={
+                            isSubmitting
+                        }
                     >
 
-                        <Text
-                            style={
-                                styles.menuButtonText
-                            }
-                        >
-                            {t.submitInspectionReport}
-                        </Text>
+                        {
+                            isSubmitting
+
+                            ?
+
+                            <ActivityIndicator
+                                color={
+                                    colors.white
+                                }
+                            />
+
+                            :
+
+                            <Text
+                                style={
+                                    styles.menuButtonText
+                                }
+                            >
+                                {t.submitInspectionReport}
+                            </Text>
+                        }
 
                     </TouchableOpacity>
 

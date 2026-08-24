@@ -2,8 +2,13 @@ import {
     ScrollView,
     Text,
     View,
-    TouchableOpacity
+    TouchableOpacity,
+    Alert
 } from "react-native";
+
+import {
+    useEffect
+} from "react";
 
 
 import SafeScreen from "../components/SafeScreen.js";
@@ -18,6 +23,10 @@ import {
 import {
     translations
 } from "../i18n/index.js";
+
+import {
+    useDeclarationWorkflow
+} from "../context/DeclarationWorkflowContext.js";
 
 
 import styles from "../styles/styles.js";
@@ -36,9 +45,32 @@ export default function DeclarationDetailsScreen({
     const t =
         translations[language];
 
+    const {
+        selectDeclaration
+    } = useDeclarationWorkflow();
+
 
     const declaration =
         route?.params?.declaration || {};
+
+    const inspectionInProgress =
+        declaration.inspectionStatus === "in_progress";
+
+    const hasBeenInspected =
+        declaration.inspectionStatus === "inspected";
+
+
+    useEffect(
+        () => {
+
+            selectDeclaration(declaration);
+
+        },
+        [
+            declaration,
+            selectDeclaration
+        ]
+    );
 
 
     return (
@@ -102,6 +134,32 @@ export default function DeclarationDetailsScreen({
                                 declaration.declarationNumber
                                 ||
                                 t.notAvailable
+                            }
+                        </Text>
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.lastInspectedBy}:{" "}
+                            {
+                                declaration.lastInspectedBy
+                                ||
+                                t.notAvailable
+                            }
+                        </Text>
+
+                        <Text
+                            style={
+                                styles.sectionText
+                            }
+                        >
+                            {t.inspectionCount}:{" "}
+                            {
+                                declaration.inspectionCount
+                                ||
+                                0
                             }
                         </Text>
 
@@ -450,10 +508,23 @@ export default function DeclarationDetailsScreen({
 
                             onPress={() => {
 
+                                if (inspectionInProgress) {
+
+                                    Alert.alert(
+                                        t.inspectionInProgressTitle,
+                                        t.inspectionInProgressMessage
+                                    );
+
+                                    return;
+
+                                }
+
                                 navigation.navigate(
                                     "Inspection",
                                     {
-                                        declaration
+                                        declaration,
+                                        isReinspection:
+                                            hasBeenInspected
                                     }
                                 );
 
@@ -466,7 +537,11 @@ export default function DeclarationDetailsScreen({
                                     styles.menuButtonText
                                 }
                             >
-                                {t.startInspection}
+                                {
+                                    hasBeenInspected
+                                        ? t.reinspectDeclaration
+                                        : t.startInspection
+                                }
                             </Text>
 
                         </TouchableOpacity>

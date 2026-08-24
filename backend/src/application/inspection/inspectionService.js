@@ -4,7 +4,9 @@ export const createInspectionService = (
 
     async getInspections(user){
 
-        return await inspectionRepository.findAll();
+        return await inspectionRepository.findAll(
+            user
+        );
 
     },
 
@@ -14,7 +16,23 @@ export const createInspectionService = (
         id
     ){
 
-        return await inspectionRepository.findById(id);
+        const inspection =
+            await inspectionRepository.findById(id);
+
+        if (
+            inspection &&
+            user.role === "Customs Officer" &&
+            inspection.officerId !== user.id
+        ) {
+
+            throw Object.assign(
+                new Error("Inspection not found."),
+                { statusCode:404 }
+            );
+
+        }
+
+        return inspection;
 
     },
 
@@ -24,9 +42,26 @@ export const createInspectionService = (
         data
     ){
 
-        return await inspectionRepository.create(
-            data
-        );
+        const activeInspection =
+            await inspectionRepository.findActiveByDeclaration(
+                data.declarationNumber
+            );
+
+
+        if (activeInspection) {
+
+            const error = new Error(
+                "This declaration is currently being inspected. Complete that work before starting a cross-check."
+            );
+
+            error.statusCode = 409;
+
+            throw error;
+
+        }
+
+
+        return await inspectionRepository.create(data);
 
     },
 
@@ -39,7 +74,8 @@ export const createInspectionService = (
 
         return await inspectionRepository.updateStatus(
             id,
-            status
+            status,
+            user
         );
 
     }

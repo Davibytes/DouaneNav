@@ -7,9 +7,23 @@ const REPORT_STORAGE_KEY =
     "douanenav_reports";
 
 
+const getStorageKey = async () => {
+
+    const token =
+        await AsyncStorage.getItem("token");
+
+    // A shared device must not show one officer another officer's cached
+    // reports. The authenticated backend response remains authoritative.
+    return `${REPORT_STORAGE_KEY}:${token || "anonymous"}`;
+
+};
+
+
 
 
 export const getReports = async () => {
+
+    const storageKey = await getStorageKey();
 
 
     try{
@@ -27,7 +41,7 @@ export const getReports = async () => {
 
         await AsyncStorage.setItem(
 
-            REPORT_STORAGE_KEY,
+            storageKey,
 
             JSON.stringify(
                 reports
@@ -48,7 +62,7 @@ export const getReports = async () => {
 
         const savedReports =
             await AsyncStorage.getItem(
-                REPORT_STORAGE_KEY
+                storageKey
             );
 
 
@@ -83,6 +97,8 @@ export const createReport = async (
 ) => {
 
 
+    const storageKey = await getStorageKey();
+
     try{
 
 
@@ -96,7 +112,7 @@ export const createReport = async (
 
         const savedReports =
             await AsyncStorage.getItem(
-                REPORT_STORAGE_KEY
+            storageKey
             );
 
 
@@ -118,7 +134,7 @@ export const createReport = async (
 
         await AsyncStorage.setItem(
 
-            REPORT_STORAGE_KEY,
+            storageKey,
 
             JSON.stringify(
                 reports
@@ -153,7 +169,7 @@ export const createReport = async (
 
         const savedReports =
             await AsyncStorage.getItem(
-                REPORT_STORAGE_KEY
+                storageKey
             );
 
 
@@ -175,7 +191,7 @@ export const createReport = async (
 
         await AsyncStorage.setItem(
 
-            REPORT_STORAGE_KEY,
+            storageKey,
 
             JSON.stringify(
                 reports

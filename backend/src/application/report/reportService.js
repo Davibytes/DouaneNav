@@ -13,7 +13,11 @@ export const createReportService = () => ({
     async getReports(user){
 
 
-        return await reportRepository.findAll();
+        return user.role === "Customs Officer"
+            ? await reportRepository.findByOfficerId(
+                user.id
+            )
+            : await reportRepository.findAll();
 
 
     },
@@ -27,10 +31,22 @@ export const createReportService = () => ({
         id
     ){
 
+        const report = await reportRepository.findById(id);
 
-        return await reportRepository.findById(
-            id
-        );
+        if (
+            report &&
+            user.role === "Customs Officer" &&
+            report.officerId !== user.id
+        ) {
+
+            throw Object.assign(
+                new Error("Report not found."),
+                { statusCode:404 }
+            );
+
+        }
+
+        return report;
 
 
     },
@@ -50,6 +66,12 @@ export const createReportService = () => ({
 
             ...data,
 
+            officerId:
+                user.id,
+
+            officerName:
+                user.name,
+
             officer:
                 user.name
 
@@ -61,6 +83,65 @@ export const createReportService = () => ({
             report
         );
 
+
+    },
+
+
+    async createReportForCompletedInspection(
+        user,
+        inspection
+    ){
+
+        const existing =
+            await reportRepository.findByInspectionId(
+                inspection._id || inspection.id
+            );
+
+        if (existing) {
+
+            return existing;
+
+        }
+
+        return await this.createReport(
+            user,
+            {
+                inspectionId:
+                    inspection._id || inspection.id,
+
+                declarationNumber:
+                    inspection.declarationNumber,
+
+                truckPlate:
+                    inspection.truckPlate,
+
+                result:"Completed",
+
+                status:"Completed",
+
+                comments:
+                    inspection.comments,
+
+                photos:
+                    inspection.photos || [],
+
+                location:
+                    inspection.location,
+
+                declaration:
+                    inspection.declaration || null,
+
+                inspectionType:
+                    inspection.isReinspection
+                        ? "reinspection"
+                        : "initial",
+
+                isReinspection:
+                    Boolean(
+                        inspection.isReinspection
+                    )
+            }
+        );
 
     },
 

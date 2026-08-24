@@ -102,6 +102,24 @@ export const createDeclarationService = (repository) => ({
 
     return await repository.search(query);
 
+  },
+
+
+  async recordInspection(inspection) {
+
+    return await repository.recordInspection(
+      inspection
+    );
+
+  },
+
+
+  async recordInspectionStatus(inspection) {
+
+    return await repository.recordInspectionStatus(
+      inspection
+    );
+
   }
 
 

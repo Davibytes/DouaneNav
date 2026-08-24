@@ -308,11 +308,29 @@ const en = {
     mapUnavailable:
         "The destination map could not be loaded. Check your internet connection and try again.",
 
+    routeUnavailable:
+        "Route unavailable. The destination and your current location are still shown.",
+
     customsStatus:
         "CUSTOMS STATUS",
 
     inspectionStatus:
         "INSPECTION STATUS",
+
+    lastInspectedBy:
+        "Last inspected by",
+
+    inspectionCount:
+        "Inspection count",
+
+    reinspectDeclaration:
+        "Reinspect / Cross-check",
+
+    inspectionInProgressTitle:
+        "Inspection in progress",
+
+    inspectionInProgressMessage:
+        "This declaration is currently being inspected. Wait for it to be completed before starting a cross-check.",
 
     awaitingInspection:
         "Awaiting Inspection",

@@ -17,6 +17,10 @@ import {
     useLanguage
 } from "../context/LanguageContext.js";
 
+import {
+    useRoute
+} from "@react-navigation/native";
+
 
 import styles from "../styles/styles.js";
 import colors from "../styles/colors.js";
@@ -33,6 +37,9 @@ export default function BottomNavigation({
     const {
         t
     } = useLanguage();
+
+    const route =
+        useRoute();
 
 
     const tabs = [
@@ -136,6 +143,23 @@ export default function BottomNavigation({
                                 if (
                                     tab.name !== active
                                 ) {
+
+                                    if (
+                                        tab.name === "DestinationMap" &&
+                                        route.params?.declaration
+                                    ) {
+
+                                        navigation.navigate(
+                                            "DestinationMap",
+                                            {
+                                                declaration:
+                                                    route.params.declaration
+                                            }
+                                        );
+
+                                        return;
+
+                                    }
 
                                     navigation.navigate(
                                         tab.name

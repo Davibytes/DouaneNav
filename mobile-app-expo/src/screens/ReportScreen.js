@@ -1,5 +1,5 @@
 import {
-    useEffect,
+    useCallback,
     useState
 } from "react";
 
@@ -10,6 +10,10 @@ import {
     ScrollView,
     TouchableOpacity
 } from "react-native";
+
+import {
+    useFocusEffect
+} from "@react-navigation/native";
 
 
 import SafeScreen from "../components/SafeScreen.js";
@@ -44,11 +48,15 @@ export default function ReportScreen({
     ] = useState([]);
 
 
-    useEffect(() => {
+    useFocusEffect(
 
-        loadReports();
+        useCallback(() => {
 
-    }, []);
+            loadReports();
+
+        }, [])
+
+    );
 
 
     const loadReports =

@@ -79,12 +79,6 @@ api.interceptors.request.use(
         );
 
 
-        console.log(
-            "BODY:",
-            config.data
-        );
-
-
         return config;
 
     },

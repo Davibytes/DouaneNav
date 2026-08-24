@@ -59,19 +59,9 @@ const readBody = async (req) => {
 
     for await (const chunk of req) {
 
-        console.log(
-            "RAW CHUNK:",
-            chunk.toString()
-        );
-
         value += chunk.toString();
 
     }
-
-    console.log(
-        "RAW BODY:",
-        value
-    );
 
     if (!value) {
 
@@ -182,6 +172,21 @@ export const createApp = async () => {
 
 
     /*
+     * REPORTS
+     */
+
+    const reportService =
+        createReportService();
+
+
+    const report =
+        createReportController(
+            authService,
+            reportService
+        );
+
+
+    /*
      * INSPECTIONS
      */
 
@@ -198,22 +203,9 @@ export const createApp = async () => {
     const inspection =
         createInspectionController(
             authService,
-            inspectionService
-        );
-
-
-    /*
-     * REPORTS
-     */
-
-    const reportService =
-        createReportService();
-
-
-    const report =
-        createReportController(
-            authService,
-            reportService
+            inspectionService,
+            reportService,
+            declarationService
         );
 
 
