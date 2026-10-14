@@ -311,6 +311,81 @@ const en = {
     routeUnavailable:
         "Route unavailable. The destination and your current location are still shown.",
 
+    navigation:
+        "Navigation",
+
+    startNavigation:
+        "Start Navigation",
+
+    stopNavigation:
+        "Stop Navigation",
+
+    currentLocation:
+        "Current location",
+
+    nextManeuver:
+        "NEXT MANEUVER",
+
+    distance:
+        "Distance",
+
+    estimatedTime:
+        "Estimated time (no live traffic)",
+
+    turnLeft:
+        "Turn left",
+
+    turnRight:
+        "Turn right",
+
+    continueStraight:
+        "Continue straight",
+
+    keepLeft:
+        "Keep left",
+
+    keepRight:
+        "Keep right",
+
+    uTurn:
+        "Make a U-turn",
+
+    enterRoundabout:
+        "Enter roundabout",
+
+    exitRoundabout:
+        "Exit roundabout",
+
+    recalculatingRoute:
+        "Recalculating route...",
+
+    calculatingRoute:
+        "Calculating route...",
+
+    destinationReached:
+        "Destination reached",
+
+    destinationCoordinatesUnavailable:
+        "Destination coordinates are unavailable.",
+
+    locationPermissionRequired:
+        "Location permission is required for navigation.",
+
+    locationUnavailable:
+        "Current location is unavailable. Check GPS and try again.",
+
+    routeRecalculationFailed:
+        "Route could not be recalculated. Continuing with the last route.",
+
+    networkError:
+        "Network error.",
+
+    unableToDetermineRoute:
+        "Unable to determine route. Check your network connection and try again.",
+
+    exactRouteUnavailable:
+        "Exact route unavailable. Follow the route to the nearest mapped road.",
+
     customsStatus:
         "CUSTOMS STATUS",
 

@@ -1,6 +1,9 @@
 import '../config/environment.js';
 import { connectMongo, closeMongo } from './mongo.js';
 
+// Seed coordinates identify the named neighborhood/landmark, not a verified
+// cargo drop-off point. Production declarations should store the exact pin.
+
 const seedDeclarations = async () => {
 
     try {
@@ -21,13 +24,7 @@ const seedDeclarations = async () => {
             database.collection("synchronization_logs");
 
 
-        await declarations.deleteMany({});
-        await inspections.deleteMany({});
-        await alerts.deleteMany({});
-        await synchronizationLogs.deleteMany({});
-
-
-        await declarations.insertMany([
+        const declarationSeeds = [
 
             {
                 declarationNumber:"CM2026-0001",
@@ -49,8 +46,8 @@ const seedDeclarations = async () => {
                     address:"Bonanjo, Douala, Cameroon",
                     country:"Cameroon",
                     coordinates:{
-                        latitude:4.0511,
-                        longitude:9.7679
+                        latitude:4.0430,
+                        longitude:9.6865
                     }
                 },
 
@@ -91,8 +88,8 @@ const seedDeclarations = async () => {
                     address:"Tsinga, Yaounde, Cameroon",
                     country:"Cameroon",
                     coordinates:{
-                        latitude:3.8792,
-                        longitude:11.5119
+                        latitude:3.8847,
+                        longitude:11.5034
                     }
                 },
 
@@ -133,8 +130,8 @@ const seedDeclarations = async () => {
                     address:"Akwa, Douala, Cameroon",
                     country:"Cameroon",
                     coordinates:{
-                        latitude:4.0511,
-                        longitude:9.7043
+                        latitude:4.0525,
+                        longitude:9.6967
                     }
                 },
 
@@ -174,8 +171,8 @@ const seedDeclarations = async () => {
                     address:"Bafoussam, Cameroon",
                     country:"Cameroon",
                     coordinates:{
-                        latitude:5.4781,
-                        longitude:10.4172
+                        latitude:5.4715,
+                        longitude:10.4197
                     }
                 },
 
@@ -216,8 +213,8 @@ const seedDeclarations = async () => {
                     address:"Limbe, Cameroon",
                     country:"Cameroon",
                     coordinates:{
-                        latitude:4.0249,
-                        longitude:9.2032
+                        latitude:4.0189,
+                        longitude:9.2718
                     }
                 },
 
@@ -257,8 +254,8 @@ const seedDeclarations = async () => {
                     address:"Mvan, Yaounde, Cameroon",
                     country:"Cameroon",
                     coordinates:{
-                        latitude:3.8480,
-                        longitude:11.5237
+                        latitude:3.8257,
+                        longitude:11.5169
                     }
                 },
 
@@ -337,12 +334,12 @@ const seedDeclarations = async () => {
 
                 destination:{
                     city:"Kribi",
-                    area:"Port Area",
-                    address:"Kribi, Cameroon",
+                    area:"Deep-Sea Port, Mboro",
+                    address:"Kribi Deep-Sea Port, Mboro, Cameroon",
                     country:"Cameroon",
                     coordinates:{
-                        latitude:2.9406,
-                        longitude:9.9100
+                        latitude:2.7204,
+                        longitude:9.8613
                     }
                 },
 
@@ -382,8 +379,8 @@ const seedDeclarations = async () => {
                     address:"Garoua, Cameroon",
                     country:"Cameroon",
                     coordinates:{
-                        latitude:9.3014,
-                        longitude:13.3977
+                        latitude:9.2985,
+                        longitude:13.4003
                     }
                 },
 
@@ -425,8 +422,8 @@ const seedDeclarations = async () => {
                     address:"Bonamoussadi, Douala, Cameroon",
                     country:"Cameroon",
                     coordinates:{
-                        latitude:4.0847,
-                        longitude:9.7350
+                        latitude:4.0944,
+                        longitude:9.7394
                     }
                 },
 
@@ -445,45 +442,73 @@ const seedDeclarations = async () => {
 
             }
 
-        ]);
+        ];
 
+        for (const declaration of declarationSeeds) {
+            const existing = await declarations.findOne({
+                declarationNumber: declaration.declarationNumber
+            });
 
-        await inspections.insertMany([
-
-            {
-                declarationNumber:"CM2026-0002",
-                officerId:"user-2",
-                officer:"Jean Mbarga",
-                status:"Pending",
-                location:"Tsinga, Yaounde, Cameroon",
-                createdAt:new Date()
+            if (!existing) {
+                await declarations.insertOne(declaration);
+            } else if (
+                existing.importer?.name === declaration.importer.name
+                && existing.goods?.description === declaration.goods.description
+                && existing.transport?.truckPlate === declaration.transport.truckPlate
+            ) {
+                // Refresh only the seeded destination so updated map pins apply;
+                // leave status, inspections, and other live declaration fields intact.
+                await declarations.updateOne(
+                    { _id: existing._id },
+                    { $set: { destination: declaration.destination } }
+                );
+            } else {
+                console.warn(
+                    `Skipped ${declaration.declarationNumber}: an existing declaration uses that number.`
+                );
             }
+        }
 
-        ]);
-
-
-        await alerts.insertMany([
-
+        await inspections.updateOne(
+            { declarationNumber: "CM2026-0002", officerId: "user-2" },
             {
-                type:"Delay",
-                message:"Truck CM2026-0001 delayed on route.",
-                severity:"medium",
-                status:"active",
-                createdAt:new Date()
-            }
+                $setOnInsert: {
+                    declarationNumber: "CM2026-0002",
+                    officerId: "user-2",
+                    officer: "Jean Mbarga",
+                    status: "Pending",
+                    location: "Tsinga, Yaounde, Cameroon",
+                    createdAt: new Date()
+                }
+            },
+            { upsert: true }
+        );
 
-        ]);
-
-
-        await synchronizationLogs.insertMany([
-
+        await alerts.updateOne(
+            { type: "Delay", message: "Truck CM2026-0001 delayed on route." },
             {
-                action:"Initial synchronization",
-                status:"success",
-                createdAt:new Date()
-            }
+                $setOnInsert: {
+                    type: "Delay",
+                    message: "Truck CM2026-0001 delayed on route.",
+                    severity: "medium",
+                    status: "active",
+                    createdAt: new Date()
+                }
+            },
+            { upsert: true }
+        );
 
-        ]);
+        await synchronizationLogs.updateOne(
+            { action: "Initial synchronization", status: "success" },
+            {
+                $setOnInsert: {
+                    action: "Initial synchronization",
+                    status: "success",
+                    createdAt: new Date()
+                }
+            },
+            { upsert: true }
+        );
 
 
         console.log(

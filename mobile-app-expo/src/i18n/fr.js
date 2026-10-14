@@ -311,6 +311,81 @@ const fr = {
     routeUnavailable:
         "Itinéraire indisponible. La destination et votre position actuelle restent affichées.",
 
+    navigation:
+        "Navigation",
+
+    startNavigation:
+        "Démarrer la navigation",
+
+    stopNavigation:
+        "Arrêter la navigation",
+
+    currentLocation:
+        "Position actuelle",
+
+    nextManeuver:
+        "PROCHAINE MANŒUVRE",
+
+    distance:
+        "Distance",
+
+    estimatedTime:
+        "Temps estimé (hors trafic)",
+
+    turnLeft:
+        "Tournez à gauche",
+
+    turnRight:
+        "Tournez à droite",
+
+    continueStraight:
+        "Continuez tout droit",
+
+    keepLeft:
+        "Restez à gauche",
+
+    keepRight:
+        "Restez à droite",
+
+    uTurn:
+        "Faites demi-tour",
+
+    enterRoundabout:
+        "Entrez dans le rond-point",
+
+    exitRoundabout:
+        "Sortez du rond-point",
+
+    recalculatingRoute:
+        "Recalcul de l'itinéraire...",
+
+    calculatingRoute:
+        "Calcul de l'itinéraire...",
+
+    destinationReached:
+        "Destination atteinte",
+
+    destinationCoordinatesUnavailable:
+        "Les coordonnées de destination ne sont pas disponibles.",
+
+    locationPermissionRequired:
+        "L'autorisation de localisation est requise pour la navigation.",
+
+    locationUnavailable:
+        "La position actuelle est indisponible. Vérifiez le GPS et réessayez.",
+
+    routeRecalculationFailed:
+        "L'itinéraire n'a pas pu être recalculé. Le dernier itinéraire est conservé.",
+
+    networkError:
+        "Erreur réseau.",
+
+    unableToDetermineRoute:
+        "Impossible de déterminer l'itinéraire. Vérifiez votre connexion réseau et réessayez.",
+
+    exactRouteUnavailable:
+        "Itinéraire exact indisponible. Suivez l'itinéraire jusqu'à la route cartographiée la plus proche.",
+
     customsStatus:
         "STATUT DOUANIER",
 
